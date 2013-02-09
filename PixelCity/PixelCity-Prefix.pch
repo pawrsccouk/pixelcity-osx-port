@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'PixelCity' target in the 'PixelCity' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
