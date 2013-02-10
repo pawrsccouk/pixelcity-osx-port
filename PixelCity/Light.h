@@ -1,3 +1,5 @@
+#import "glRGBA.h"
+
 class CLight
 {
   GLvector        _position;

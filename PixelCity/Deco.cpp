@@ -31,102 +31,69 @@
 #include "visible.h"
 #include "win.h"
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 CDeco::~CDeco ()
 {
-
   delete _mesh;
-
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 CDeco::CDeco ()
 {
-
   _mesh = new CMesh ();
   _use_alpha = false;
-
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CDeco::Render ()
 {
-
-  glColor3fv (&_color.red);
-  _mesh->Render ();
-
+    float rgb[3] = {};
+    _color.copyRGB(rgb);
+    glColor3fv(rgb);
+    _mesh->Render ();
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CDeco::RenderFlat (bool colored)
 {
-
-
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 bool CDeco::Alpha ()
-{ 
-  
+{  
   return _use_alpha; 
-
 }
 
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 unsigned long CDeco::PolyCount ()
 {
-
   return _mesh->PolyCount ();
-
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLuint CDeco::Texture ()
 {
   return _texture;
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CDeco::CreateRadioTower (GLvector pos, float height)
 {
-
-  CLight*   l;
-  float     offset;
-  GLvertex  v;
-  fan       f;
-
-  for(int i=0; i<6; i++)
-    f.index_list.push_back(i);
-
-  offset = height / 15.0f;
+  float offset = height / 15.0f;
   _center = pos;
   _use_alpha = true;
-  //Radio tower
+  
+        //Radio tower
+  GLvertex  v;
   v.position = glVector (_center.x, _center.y + height, _center.z);  v.uv = glVector (0,1);
   _mesh->VertexAdd (v);
   v.position = glVector (_center.x - offset, _center.y, _center.z - offset);  v.uv = glVector (1,0);
@@ -139,50 +106,40 @@ void CDeco::CreateRadioTower (GLvector pos, float height)
   _mesh->VertexAdd (v);
   v.position = glVector (_center.x - offset, _center.y, _center.z - offset);  v.uv = glVector (1,0);
   _mesh->VertexAdd (v);
-  _mesh->FanAdd (f);
-  l = new CLight (glVector (_center.x, _center.y + height + 1.0f, _center.z), glRgba (255,192,160), 1);
-  l->Blink ();
-  _texture = TextureId (TEXTURE_LATTICE);
 
+  fan f;
+  for(int i=0; i < 6; i++)
+    f.index_list.push_back(i);
+  _mesh->FanAdd (f);
+  
+  CLight *l = new CLight (glVector (_center.x, _center.y + height + 1.0f, _center.z), glRgba (255,192,160), 1);
+  l->Blink();
+  
+  _texture = TextureId (TEXTURE_LATTICE);
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CDeco::CreateLogo (GLvector2 start, GLvector2 end, float bottom, int seed, GLrgba color)
 {
 
-  GLvertex   p;
-  quad_strip qs;
-  float      u1, u2, v1, v2;
-  float      top;
-  float      height, length;
-  GLvector2  center2d;
-  GLvector   to;
-  GLvector   out;
-  int        logo_index;
-
-  qs.index_list.push_back(0);
-  qs.index_list.push_back(1);
-  qs.index_list.push_back(3);
-  qs.index_list.push_back(2);
-
   _use_alpha = true;
   _color = color;
-  logo_index = seed % LOGO_ROWS;
-  to = glVector (start.x, 0.0f, start.y) - glVector (end.x, 0.0f, end.y);
+  int logo_index = seed % LOGO_ROWS;
+  GLvector to = glVector (start.x, 0.0f, start.y) - glVector (end.x, 0.0f, end.y);
   to = glVectorNormalize (to);
-  out = glVectorCrossProduct (glVector (0.0f, 1.0f, 0.0f), to) * LOGO_OFFSET;
-  center2d = (start + end) / 2;
+  GLvector out = glVectorCrossProduct (glVector (0.0f, 1.0f, 0.0f), to) * LOGO_OFFSET;
+  GLvector2 center2d = (start + end) / 2;
   _center = glVector (center2d.x, bottom, center2d.y);
-  length = glVectorLength (start - end);
-  height = (length / 8.0f) * 1.5f;
-  top = bottom + height;
-  u1 = 0.0f;
-  u2 = 0.5f;//We actually only use the left half of the texture
-  v1 = (float)logo_index / LOGO_ROWS;
-  v2 = v1 + (1.0f / LOGO_ROWS);
+  float length = glVectorLength (start - end);
+  float height = (length / 8.0f) * 1.5f;
+  float top = bottom + height;
+  float u1 = 0.0f;
+  float u2 = 0.5f;//We actually only use the left half of the texture
+  float v1 = (float)logo_index / LOGO_ROWS;
+  float v2 = v1 + (1.0f / LOGO_ROWS);
+
+  GLvertex   p;
   p.position = glVector (start.x, bottom, start.y) + out;  p.uv = glVector (u1,v1);
   _mesh->VertexAdd (p);
   p.position = glVector (end.x, bottom, end.y) + out;  p.uv = glVector (u2, v1);
@@ -191,7 +148,14 @@ void CDeco::CreateLogo (GLvector2 start, GLvector2 end, float bottom, int seed, 
   _mesh->VertexAdd (p);
   p.position = glVector (start.x, top, start.y) + out;  p.uv = glVector (u1, v2);
   _mesh->VertexAdd (p);
+  
+  quad_strip qs;
+  qs.index_list.push_back(0);
+  qs.index_list.push_back(1);
+  qs.index_list.push_back(3);
+  qs.index_list.push_back(2);
   _mesh->QuadStripAdd (qs);
+  
   _texture = TextureId (TEXTURE_LOGOS);
 
 }
@@ -206,9 +170,7 @@ void CDeco::CreateLightStrip (float x, float z, float width, float depth, float 
   GLvertex   p;
   quad_strip qs1;
   float      u, v;
-  
-	glReportError("CDeco::CreateLightStrip BEGIN");
-	
+
   qs1.index_list.push_back(0);
   qs1.index_list.push_back(1);
   qs1.index_list.push_back(3);
@@ -234,8 +196,6 @@ void CDeco::CreateLightStrip (float x, float z, float width, float depth, float 
   _mesh->VertexAdd (p);
   _mesh->QuadStripAdd (qs1);
   _mesh->Compile ();
-
-	glReportError("CDeco::CreateLightStrip END");
 }
 
 /*-----------------------------------------------------------------------------

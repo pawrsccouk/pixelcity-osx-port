@@ -39,6 +39,7 @@
 #include "visible.h"
 #include "win.h"
 #include "world.h"
+#include "PWGL.h"
 
 using namespace std;
 
@@ -168,7 +169,7 @@ static void build_road (int x1, int y1, int width, int depth)
 	} else
 		divider = 0;
 	//no more than 10 traffic lanes, give the rest to sidewalks
-	int sidewalk = MAX (2, (lanes - 10));
+	int sidewalk = std::max(2, (lanes - 10));
 	lanes -= sidewalk;
 	sidewalk /= 2;
 	//take the remaining space and give half to each direction
@@ -342,8 +343,8 @@ static int build_light_strip (int x1, int z1, int direction)
 		glReportError("build_light_strip END early.");
 		return length;
 	}
-	width = MAX (abs(x2 - x1), 1);
-	depth = MAX (abs(z2 - z1), 1);
+	width = std::max(abs(x2 - x1), 1);
+	depth = std::max(abs(z2 - z1), 1);
 	d = new CDeco;
 	if (direction == EAST)
 		d->CreateLightStrip ((float)x1, (float)z1 - size_adjust, (float)width, (float)depth + size_adjust, 2, color);
@@ -490,16 +491,16 @@ static void do_reset (void)
 				continue;
 			width = 12 + RandomInt(20);
 			depth = 12 + RandomInt(20);
-			height = MIN (width, depth);
+			height = std::min(width, depth);
 			if (x < 30 || y < 30 || x > WORLD_SIZE - 30 || y > WORLD_SIZE - 30)
 				height = RandomInt(15) + 20;
 			else if (x < WORLD_HALF / 2)
 				height /= 2;
 			while (width > 8 && depth > 8) {
 				if (!claimed (x, y, width, depth)) {
-					claim (x, y, width, depth,CLAIM_BUILDING);
+					claim(x, y, width, depth, CLAIM_BUILDING);
 					building_color = WorldLightColor (RandomInt());
-					//if we're out of the hot zone, use simple buildings
+                        //if we're out of the hot zone, use simple buildings
 					if (x < g_hot_zone.min.x || x > g_hot_zone.max.x || y < g_hot_zone.min.z || y > g_hot_zone.max.z) {
 						height = 5 + RandomInt(height) + RandomInt(height);
 						new CBuilding (BUILDING_SIMPLE, x + 1, y + 1, height, width - 2, depth - 2, RandomInt(), building_color);
@@ -507,21 +508,18 @@ static void do_reset (void)
 						height = 15 + RandomInt(15);
 						width -=2;
 						depth -=2;
-						if (COIN_FLIP) 
-							new CBuilding (BUILDING_TOWER, x + 1, y + 1, height, width, depth, RandomInt(), building_color);
-						else
-							new CBuilding (BUILDING_BLOCKY, x + 1, y + 1, height, width, depth, RandomInt(), building_color);
+						new CBuilding((COIN_FLIP() ? BUILDING_TOWER : BUILDING_BLOCKY), x + 1, y + 1, height, width, depth, RandomInt(), building_color);
 					}
 					break;
 				}
 				width--;
 				depth--;
 			}
-			//leave big gaps near the edge of the map, no need to pack detail there.
+                //leave big gaps near the edge of the map, no need to pack detail there.
 			if (y < WORLD_EDGE || y > WORLD_SIZE - WORLD_EDGE) 
 				y += 32;
 		}
-		//leave big gaps near the edge of the map
+            //leave big gaps near the edge of the map
 		if (x < WORLD_EDGE || x > WORLD_SIZE - WORLD_EDGE) 
 			x += 28;
 	}
@@ -631,9 +629,7 @@ void WorldRender ()
 }
 
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 float WorldFade (void)
 {
@@ -642,31 +638,24 @@ float WorldFade (void)
 	
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 unsigned long WorldSceneBegin()
 {
 	return g_scene_begin;
 }
 
-/*-----------------------------------------------------------------------------
- 
- How long since this current iteration of the city went on display,
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+// How long since this current iteration of the city went on display,
 unsigned long WorldSceneElapsed()
 {
 	unsigned long elapsed = (!EntityReady () || !WorldSceneBegin ()) ? 1
                                                                      : GetTickCount () - (WorldSceneBegin());
-	return MAX(elapsed, 1);
+	return std::max(elapsed, 1ul);
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void WorldUpdate (void)
 {	
@@ -763,57 +752,13 @@ MakeDisplayList::~MakeDisplayList()
 
 
 DebugRep::DebugRep(const char* location)
+: _location(location)
 {
-	_location = location;
-	char buffer[128]; buffer[0] = '0';
-	sprintf(buffer, "Entered %s", _location);
-	DebugLog(buffer);
+	DebugLog("Entered %s", _location);
 }
 
 DebugRep::~DebugRep()
 {
-	char buffer[128]; buffer[0] = '0';
-	sprintf(buffer, "Left %s", _location);
-	DebugLog(buffer);
+	DebugLog("Left %s", _location);
 }
 
-void pwBegin(GLenum mode)	{ glBegin(mode); }	// note: glGetError() (hence glReportError()) is not legal inside a glBegin/glEnd pair.
-void pwEnd()				{ glEnd();			glReportError("glEnd");		}
-void pwNewList(GLint name, GLenum mode) { glNewList(name, mode);	glReportError("glNewList"); }
-void pwEndList()						{ glEndList();				glReportError("glEndList"); }
-void pwPushMatrix(void)	{ glPushMatrix();	glReportError("pwPushMatrix");	}
-void pwPopMatrix(void){	glPopMatrix();	glReportError("pwPopMatrix");	}
-void pwEnable (GLenum i) {	glEnable (i);	glReportError("glEnable");  }
-void pwDisable(GLenum i) {	glDisable(i);	glReportError("glDisable");  }
-void pwMatrixMode(GLenum i)	{ glMatrixMode(i);	glReportError("glMatrixMode"); }
-void pwLoadIdentity()		{ glLoadIdentity();	glReportError("glLoadIdentity"); }
-void pwDepthMask(GLboolean b) { assert(b == GL_TRUE || b == GL_FALSE); glDepthMask(b); glReportError("glDepthMask"); }
-void pwRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) { glRotatef(angle, x, y, z); glReportError("glRotatef"); }
-void pwTranslatef(GLfloat x, GLfloat y, GLfloat z) {  glTranslatef (x, y, z); glReportError("glTranslatef"); }
-void pwViewport(GLint x, GLint y, GLsizei w, GLsizei h) { glViewport(x, y, w, h);	glReportError("glViewport"); }
-void pwClearColor(GLclampf r, GLclampf g, GLclampf b, GLclampf a) { glClearColor (r, g, b, a);	glReportError("glClearColor"); }
-void pwClear(GLbitfield mask) { glClear(mask);	glReportError("glClear"); }
-void pwFogf(GLenum name, GLfloat param) { glFogf(name, param); glReportError("glFogf"); }
-void pwFogfv(GLenum name, const GLfloat* params) { glFogfv(name, params); glReportError("glFogfv"); }
-void pwHint(GLenum target, GLenum mode) {  glHint(target, mode);	glReportError("glHint"); }
-void pwShadeModel(GLenum e) { glShadeModel(e);						glReportError("glShadeModel"); }
-void pwFogi(GLenum name, GLint mode)    {  glFogi(name, mode);		glReportError("glFogi"); }
-void pwDepthFunc(GLenum f)              {  glDepthFunc(f);			glReportError("glDepthFunc"); }
-void pwCullFace(GLenum f)				{  glCullFace (f);			glReportError("glCullFace");  }
-void pwBlendFunc(GLenum sfactor, GLenum dfactor) { glBlendFunc (sfactor, dfactor);	glReportError("glBlendFunc"); }
-void pwBindTexture(GLenum type, GLuint texture) { 	glBindTexture(type, texture);	glReportError("glBindTexture"); }
-void pwPolygonMode(GLenum face, GLenum mode) { glPolygonMode(face, mode); glReportError("glPolygonMode");	}
-void pwLineWidth(GLfloat f) { glLineWidth(f);	glReportError("glLineWidth"); }
-void pwTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) 
-{ glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
-	glReportError("glTexImage2D");
-}
-void pwTexParameteri(GLenum target, GLenum pname, GLenum param) { glTexParameteri(target, pname, param); glReportError("glTexParameteri"); }
-
-void pwCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
-{	glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);	glReportError("glCopyTexImage2D"); }
-void pwGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid *pixels) { glGetTexImage(target, level, format, type, pixels); glReportError("glGetTexImage"); }
-GLint pwuBuild2DMipmaps( GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data )
-{ GLint rv = gluBuild2DMipmaps(target, internalFormat, width, height, format, type, data);	glReportError("gluBuild2DMipmaps");
-	return rv;
-}

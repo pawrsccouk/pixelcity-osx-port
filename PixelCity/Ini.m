@@ -30,28 +30,20 @@
 static NSUserDefaults* GetUserDefaults()
 {
 	static NSUserDefaults* defs = nil;
-	if(defs == nil)
-	{	defs = [NSUserDefaults standardUserDefaults];
-
-		NSDictionary* d = [NSDictionary dictionaryWithObjectsAndKeys:
-					[NSNumber numberWithInt:0]  , 	 @"PWLetterbox"      ,
-					[NSNumber numberWithInt:1]  , 	 @"PWWireframe"      ,
-					[NSNumber numberWithInt:0]  , 	 @"PWShowFPS"        ,
-					[NSNumber numberWithInt:0]  , 	 @"PWShowFog"        ,
-					[NSNumber numberWithInt:0]  , 	 @"PWEffect"         ,
-					[NSNumber numberWithInt:1]  , 	 @"PWFlat"           ,
-					[NSNumber numberWithInt:1]  , 	 @"PWSetDefaults"    ,
-					[NSNumber numberWithInt:0]  , 	 @"PWWindowMaximized",
-					[NSNumber numberWithInt:640], 	 @"PWWindowWidth"    ,
-					[NSNumber numberWithInt:480], 	 @"PWWindowHeight"   ,
-					[NSNumber numberWithInt:50] , 	 @"PWWindowX"        ,
-					[NSNumber numberWithInt:50] , 	 @"PWWindowY"        ,
-					nil];
-//		for (id key in d) {
-//			NSLog(@"key: %@, value: %@", key, [d objectForKey:key]);
-//		}
-
-		[defs registerDefaults:d];
+	if(! defs) {
+        defs = [NSUserDefaults standardUserDefaults];
+		[defs registerDefaults:@{
+         @"PWLetterbox"  : @0    ,
+         @"PWWireframe"  : @0    ,
+         @"PWShowFPS"    : @0    ,
+         @"PWShowFog"    : @0    ,
+         @"PWEffect"     : @0    ,
+         @"PWFlat"       : @0    ,
+         @"PWWindowMaximized" : @0  ,
+         @"PWWindowWidth"     : @640,
+         @"PWWindowHeight"    : @480,
+         @"PWWindowX"         : @50 ,
+         @"PWWindowY"         : @50}];
 	}
 	return defs;
 }

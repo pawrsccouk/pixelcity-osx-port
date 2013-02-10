@@ -15,13 +15,15 @@ extern "C"
 #endif
     
         // Functions called externally from Objective-C to toggle the various display elements.
-    void  RenderFlatToggle ();
-    void  RenderFogToggle ();
-    void  RenderFPSToggle ();
-    void  RenderWireframeToggle ();
-    void  RenderHelpToggle ();
     void  RenderEffectCycle ();
-    void  RenderLetterboxToggle ();
+
+    void  RenderSetFlat(bool);
+    void  RenderSetFog(bool);
+    void  RenderSetFPS(bool);
+    void  RenderSetWireframe(bool);
+    void  RenderSetHelpMode(bool);
+    void  RenderSetLetterbox(bool);
+    void  RenderSetNormalized(bool);
     
         // Ditto external functions for debugging.
     void EntityDump();

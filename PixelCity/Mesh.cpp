@@ -33,7 +33,6 @@
 CMesh::CMesh ()
 {
   _list = glGenLists(1);
-	glReportError("CMesh constructor, glGenLists() failed.");
   _compiled = false;
   _polycount = 0;
 }
@@ -45,7 +44,6 @@ CMesh::CMesh ()
 CMesh::~CMesh ()
 {
   glDeleteLists (_list, 1);
-	glReportError("CMesh destructor, glDeleteLists() failed.");
   _vertex.clear ();
   _fan.clear ();
   _quad_strip.clear ();
@@ -100,8 +98,6 @@ void CMesh::FanAdd (const fan& f)
 
 void CMesh::Render ()
 {
-	glReportError("CMesh::Render BEGIN");
-
 	std::vector<quad_strip>::iterator qsi;
 	std::vector<cube>::iterator ci;
 	std::vector<fan>::iterator fi;
@@ -109,7 +105,6 @@ void CMesh::Render ()
 	
 	if (_compiled) {
 		glCallList (_list);
-		glReportError("CMesh::Render, glCallList failed.");
 		return;
 	}
 	for (qsi = _quad_strip.begin(); qsi < _quad_strip.end(); ++qsi) {
@@ -121,7 +116,6 @@ void CMesh::Render ()
 		//	} // PAW
 		}
 	}
-	glReportError("CMesh::Render after Quad Strips");
 	
 	for (ci = _cube.begin(); ci < _cube.end(); ++ci) {
 		{	MakePrimitive mp(GL_QUAD_STRIP);
@@ -147,8 +141,6 @@ void CMesh::Render ()
 			glVertex3fv  (&_vertex[ci->index_list[6]].position.x);
 		}
 	}
-	
-	glReportError("CMesh::Render after Cubes");
 
 	for (fi = _fan.begin(); fi < _fan.end(); ++fi) {
 		MakePrimitive mp(GL_TRIANGLE_FAN);
@@ -157,7 +149,6 @@ void CMesh::Render ()
 			glVertex3fv  (&_vertex[*n].position.x);
 		}
 	}
-	glReportError("CMesh::Render END");
 }
 
 

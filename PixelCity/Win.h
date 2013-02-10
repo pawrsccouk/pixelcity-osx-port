@@ -40,12 +40,9 @@ enum
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-	
-	// If OpenGL had errors, report them. Where indicates where the first error was found.
-	void glReportError(const char* where);
-	// Write diagnostic information to the console.
-	void DebugLog(const char* str);
+#endif	
+        // Write diagnostic information to the console.
+	void DebugLog(const char* str, ...);
 
 // Milliseconds since computer started.
 	unsigned long GetTickCount();

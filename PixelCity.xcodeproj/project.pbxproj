@@ -26,7 +26,7 @@
 		5771096916C6E0AF007D32DA /* glQuat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095816C6E0AF007D32DA /* glQuat.cpp */; };
 		5771096A16C6E0AF007D32DA /* glRgba.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095916C6E0AF007D32DA /* glRgba.cpp */; };
 		5771096B16C6E0AF007D32DA /* GLString.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771095B16C6E0AF007D32DA /* GLString.m */; };
-		5771096C16C6E0AF007D32DA /* glTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095C16C6E0AF007D32DA /* glTypes.cpp */; };
+		5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095C16C6E0AF007D32DA /* glVertex.cpp */; };
 		5771096D16C6E0AF007D32DA /* glVector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095E16C6E0AF007D32DA /* glVector2.cpp */; };
 		5771096E16C6E0AF007D32DA /* glVector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095F16C6E0AF007D32DA /* glVector3.cpp */; };
 		5771096F16C6E0AF007D32DA /* Ini.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771096116C6E0AF007D32DA /* Ini.m */; };
@@ -42,6 +42,7 @@
 		5771098E16C6E0D6007D32DA /* Win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771098416C6E0D6007D32DA /* Win.cpp */; };
 		5771098F16C6E0D6007D32DA /* World.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771098616C6E0D6007D32DA /* World.cpp */; };
 		5771099316C6F90E007D32DA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5771099216C6F90D007D32DA /* MainMenu.xib */; };
+		5771099916C73792007D32DA /* PWGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771099816C73791007D32DA /* PWGL.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,7 +81,7 @@
 		5771095916C6E0AF007D32DA /* glRgba.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glRgba.cpp; sourceTree = "<group>"; };
 		5771095A16C6E0AF007D32DA /* GLString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLString.h; sourceTree = "<group>"; };
 		5771095B16C6E0AF007D32DA /* GLString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLString.m; sourceTree = "<group>"; };
-		5771095C16C6E0AF007D32DA /* glTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glTypes.cpp; sourceTree = "<group>"; };
+		5771095C16C6E0AF007D32DA /* glVertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glVertex.cpp; sourceTree = "<group>"; };
 		5771095D16C6E0AF007D32DA /* glTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glTypes.h; sourceTree = "<group>"; };
 		5771095E16C6E0AF007D32DA /* glVector2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glVector2.cpp; sourceTree = "<group>"; };
 		5771095F16C6E0AF007D32DA /* glVector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glVector3.cpp; sourceTree = "<group>"; };
@@ -111,6 +112,10 @@
 		5771098616C6E0D6007D32DA /* World.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = World.cpp; sourceTree = "<group>"; };
 		5771098716C6E0D6007D32DA /* World.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = World.h; sourceTree = "<group>"; };
 		5771099216C6F90D007D32DA /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainMenu.xib; path = PixelCity/MainMenu.xib; sourceTree = "<group>"; };
+		5771099716C73734007D32DA /* PWGL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWGL.h; sourceTree = "<group>"; };
+		5771099816C73791007D32DA /* PWGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PWGL.cpp; path = ../PWGL.cpp; sourceTree = "<group>"; };
+		5771099A16C73E01007D32DA /* glRgba.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glRgba.h; sourceTree = "<group>"; };
+		5771099B16C74178007D32DA /* glVertex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glVertex.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,58 +172,20 @@
 		5771092416C6DFB1007D32DA /* PixelCity */ = {
 			isa = PBXGroup;
 			children = (
-				5771097716C6E0D6007D32DA /* Random.cpp */,
-				5771097816C6E0D6007D32DA /* Random.h */,
-				5771097916C6E0D6007D32DA /* Render.cpp */,
-				5771097A16C6E0D6007D32DA /* Render.h */,
-				5771097B16C6E0D6007D32DA /* RenderAPI.h */,
-				5771097C16C6E0D6007D32DA /* Sky.cpp */,
-				5771097D16C6E0D6007D32DA /* Sky.h */,
-				5771097E16C6E0D6007D32DA /* Texture.cpp */,
-				5771097F16C6E0D6007D32DA /* texture.h */,
-				5771098016C6E0D6007D32DA /* trackball.c */,
-				5771098116C6E0D6007D32DA /* trackball.h */,
-				5771098216C6E0D6007D32DA /* Visible.cpp */,
-				5771098316C6E0D6007D32DA /* Visible.h */,
-				5771098416C6E0D6007D32DA /* Win.cpp */,
-				5771098516C6E0D6007D32DA /* Win.h */,
-				5771098616C6E0D6007D32DA /* World.cpp */,
-				5771098716C6E0D6007D32DA /* World.h */,
-				5771097116C6E0C5007D32DA /* Mathx.cpp */,
-				5771097216C6E0C5007D32DA /* Mathx.h */,
-				5771097316C6E0C5007D32DA /* Mesh.cpp */,
-				5771097416C6E0C5007D32DA /* Mesh.h */,
-				5771095216C6E0AF007D32DA /* Entity.cpp */,
-				5771095316C6E0AF007D32DA /* Entity.h */,
-				5771095416C6E0AF007D32DA /* glBbox.cpp */,
-				5771095516C6E0AF007D32DA /* GLCheck.c */,
-				5771095616C6E0AF007D32DA /* GLCheck.h */,
-				5771095716C6E0AF007D32DA /* glMatrix.cpp */,
-				5771095816C6E0AF007D32DA /* glQuat.cpp */,
-				5771095916C6E0AF007D32DA /* glRgba.cpp */,
-				5771095A16C6E0AF007D32DA /* GLString.h */,
-				5771095B16C6E0AF007D32DA /* GLString.m */,
-				5771095C16C6E0AF007D32DA /* glTypes.cpp */,
-				5771095D16C6E0AF007D32DA /* glTypes.h */,
-				5771095E16C6E0AF007D32DA /* glVector2.cpp */,
-				5771095F16C6E0AF007D32DA /* glVector3.cpp */,
-				5771096016C6E0AF007D32DA /* Ini.h */,
-				5771096116C6E0AF007D32DA /* Ini.m */,
-				5771096216C6E0AF007D32DA /* Light.cpp */,
-				5771096316C6E0AF007D32DA /* Light.h */,
-				5771096416C6E0AF007D32DA /* Macro.h */,
+				5771099616C7131B007D32DA /* Views */,
+				5771099516C712C8007D32DA /* OpenGL Support */,
+				5771099416C7124B007D32DA /* Model */,
 				5771093D16C6E08B007D32DA /* AppDelegate.h */,
 				5771093E16C6E08B007D32DA /* AppDelegate.m */,
-				5771093F16C6E08B007D32DA /* BasicOpenGLView.h */,
-				5771094016C6E08B007D32DA /* BasicOpenGLView.m */,
-				5771094116C6E08B007D32DA /* Building.cpp */,
-				5771094216C6E08B007D32DA /* Building.h */,
-				5771094316C6E08B007D32DA /* Camera.cpp */,
-				5771094416C6E08B007D32DA /* Camera.h */,
-				5771094516C6E08B007D32DA /* Car.cpp */,
-				5771094616C6E08B007D32DA /* Car.h */,
-				5771094716C6E08B007D32DA /* Deco.cpp */,
-				5771094816C6E08B007D32DA /* Deco.h */,
+				5771097716C6E0D6007D32DA /* Random.cpp */,
+				5771097816C6E0D6007D32DA /* Random.h */,
+				5771098016C6E0D6007D32DA /* trackball.c */,
+				5771098116C6E0D6007D32DA /* trackball.h */,
+				5771098416C6E0D6007D32DA /* Win.cpp */,
+				5771098516C6E0D6007D32DA /* Win.h */,
+				5771096016C6E0AF007D32DA /* Ini.h */,
+				5771096116C6E0AF007D32DA /* Ini.m */,
+				5771096416C6E0AF007D32DA /* Macro.h */,
 				5771094916C6E08B007D32DA /* drawInfo.h */,
 				5771094A16C6E08B007D32DA /* drawInfo.m */,
 				5771092516C6DFB1007D32DA /* Supporting Files */,
@@ -236,6 +203,72 @@
 				5771092D16C6DFB1007D32DA /* Credits.rtf */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5771099416C7124B007D32DA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				5771096216C6E0AF007D32DA /* Light.cpp */,
+				5771096316C6E0AF007D32DA /* Light.h */,
+				5771097316C6E0C5007D32DA /* Mesh.cpp */,
+				5771097416C6E0C5007D32DA /* Mesh.h */,
+				5771095216C6E0AF007D32DA /* Entity.cpp */,
+				5771095316C6E0AF007D32DA /* Entity.h */,
+				5771098616C6E0D6007D32DA /* World.cpp */,
+				5771098716C6E0D6007D32DA /* World.h */,
+				5771097E16C6E0D6007D32DA /* Texture.cpp */,
+				5771097F16C6E0D6007D32DA /* texture.h */,
+				5771097C16C6E0D6007D32DA /* Sky.cpp */,
+				5771097D16C6E0D6007D32DA /* Sky.h */,
+				5771094116C6E08B007D32DA /* Building.cpp */,
+				5771094216C6E08B007D32DA /* Building.h */,
+				5771094516C6E08B007D32DA /* Car.cpp */,
+				5771094616C6E08B007D32DA /* Car.h */,
+				5771094716C6E08B007D32DA /* Deco.cpp */,
+				5771094816C6E08B007D32DA /* Deco.h */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		5771099516C712C8007D32DA /* OpenGL Support */ = {
+			isa = PBXGroup;
+			children = (
+				5771099716C73734007D32DA /* PWGL.h */,
+				5771099816C73791007D32DA /* PWGL.cpp */,
+				5771095416C6E0AF007D32DA /* glBbox.cpp */,
+				5771095516C6E0AF007D32DA /* GLCheck.c */,
+				5771095616C6E0AF007D32DA /* GLCheck.h */,
+				5771095716C6E0AF007D32DA /* glMatrix.cpp */,
+				5771095816C6E0AF007D32DA /* glQuat.cpp */,
+				5771095916C6E0AF007D32DA /* glRgba.cpp */,
+				5771099A16C73E01007D32DA /* glRgba.h */,
+				5771099B16C74178007D32DA /* glVertex.h */,
+				5771095A16C6E0AF007D32DA /* GLString.h */,
+				5771095B16C6E0AF007D32DA /* GLString.m */,
+				5771095C16C6E0AF007D32DA /* glVertex.cpp */,
+				5771095D16C6E0AF007D32DA /* glTypes.h */,
+				5771095E16C6E0AF007D32DA /* glVector2.cpp */,
+				5771095F16C6E0AF007D32DA /* glVector3.cpp */,
+				5771097116C6E0C5007D32DA /* Mathx.cpp */,
+				5771097216C6E0C5007D32DA /* Mathx.h */,
+			);
+			name = "OpenGL Support";
+			sourceTree = "<group>";
+		};
+		5771099616C7131B007D32DA /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5771097916C6E0D6007D32DA /* Render.cpp */,
+				5771097A16C6E0D6007D32DA /* Render.h */,
+				5771097B16C6E0D6007D32DA /* RenderAPI.h */,
+				5771098216C6E0D6007D32DA /* Visible.cpp */,
+				5771098316C6E0D6007D32DA /* Visible.h */,
+				5771093F16C6E08B007D32DA /* BasicOpenGLView.h */,
+				5771094016C6E08B007D32DA /* BasicOpenGLView.m */,
+				5771094316C6E08B007D32DA /* Camera.cpp */,
+				5771094416C6E08B007D32DA /* Camera.h */,
+			);
+			name = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -318,7 +351,7 @@
 				5771096916C6E0AF007D32DA /* glQuat.cpp in Sources */,
 				5771096A16C6E0AF007D32DA /* glRgba.cpp in Sources */,
 				5771096B16C6E0AF007D32DA /* GLString.m in Sources */,
-				5771096C16C6E0AF007D32DA /* glTypes.cpp in Sources */,
+				5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */,
 				5771096D16C6E0AF007D32DA /* glVector2.cpp in Sources */,
 				5771096E16C6E0AF007D32DA /* glVector3.cpp in Sources */,
 				5771096F16C6E0AF007D32DA /* Ini.m in Sources */,
@@ -333,6 +366,7 @@
 				5771098D16C6E0D6007D32DA /* Visible.cpp in Sources */,
 				5771098E16C6E0D6007D32DA /* Win.cpp in Sources */,
 				5771098F16C6E0D6007D32DA /* World.cpp in Sources */,
+				5771099916C73792007D32DA /* PWGL.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

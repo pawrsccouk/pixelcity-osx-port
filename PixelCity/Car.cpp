@@ -19,7 +19,6 @@
 #include <math.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
-//include <gl\glaux.h>
 #include "glTypes.h"
 
 #include "building.h"
@@ -31,9 +30,10 @@
 #include "random.h"
 #include "render.h"
 #include "texture.h"
-#include "world.h"
+#include "PWGL.h"
 #include "visible.h"
 #include "win.h"
+#include "World.h"
 
 static GLvector           direction[] = 
 {
@@ -192,7 +192,7 @@ void CCar::Update (void)
   carmap[m_row][m_col]--;
   old_pos = m_position;
   m_speed += m_max_speed * 0.05f;
-  m_speed = MIN (m_speed, m_max_speed);
+  m_speed = std::min(m_speed, m_max_speed);
   m_position += direction[m_direction] * MOVEMENT_SPEED * m_speed;
   //If the car has moved out of view, there's no need to keep simulating it. 
   if (!Visible (glVector ((float)m_row, 0.0f, (float)m_col))) 

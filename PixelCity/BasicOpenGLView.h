@@ -28,30 +28,27 @@ typedef struct {
 	NSTimer* timer;
  
     bool fAnimate, fDrawCaps, fDrawHelp;
-	bool fWireframe, fLetterbox, fFPS, fFog, fFlat, fHelp;
+	bool fWireframe, fLetterbox, fFPS, fFog, fFlat, fHelp, fNormalize;
 	
-	IBOutlet NSMenuItem * animateMenuItem;
-	IBOutlet NSMenuItem * infoMenuItem;
-	IBOutlet NSMenuItem * resetMenuItem; 
-	IBOutlet NSMenuItem * wireframeToggleMenuItem;
-	IBOutlet NSMenuItem * effectCycleMenuItem;
-	IBOutlet NSMenuItem * letterboxToggleMenuItem;
-	IBOutlet NSMenuItem * FPSToggleMenuItem;
-	IBOutlet NSMenuItem * fogToggleMenuItem;
-	IBOutlet NSMenuItem * flatToggleMenuItem;
-	IBOutlet NSMenuItem * helpToggleMenuItem;
+	__weak IBOutlet NSMenuItem * animateMenuItem;
+	__weak IBOutlet NSMenuItem * infoMenuItem;
+	__weak IBOutlet NSMenuItem * resetMenuItem; 
+	__weak IBOutlet NSMenuItem * wireframeToggleMenuItem;
+	__weak IBOutlet NSMenuItem * effectCycleMenuItem;
+	__weak IBOutlet NSMenuItem * letterboxToggleMenuItem;
+	__weak IBOutlet NSMenuItem * FPSToggleMenuItem;
+	__weak IBOutlet NSMenuItem * fogToggleMenuItem;
+	__weak IBOutlet NSMenuItem * flatToggleMenuItem;
+	__weak IBOutlet NSMenuItem * helpToggleMenuItem;
+    __weak IBOutlet NSMenuItem * normalizeToggleMenuItem;
+    __weak IBOutlet NSMenuItem * debugLogToggleMenuItem;
 	
 	CFAbsoluteTime time;
 
-	// spin data, for X, Y, Z axes respectively.
-	Spin cubeSpin [3];
-	
-	// camera handling
+	Spin cubeSpin[3];	// spin data, for X, Y, Z axes respectively.
+        // camera handling
 	Camera camera;
-	GLfloat worldRotation [4];
-	GLfloat objectRotation [4];
-	GLfloat shapeSize;
-	
+	GLfloat worldRotation[4], objectRotation[4], shapeSize;
 }
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;
@@ -74,6 +71,8 @@ typedef struct {
 -(IBAction) toggleFog:       (id) sender;
 -(IBAction) toggleFlat:      (id) sender;
 -(IBAction) toggleHelp:      (id) sender;
+-(IBAction) toggleNormalized:(id) sender;
+-(IBAction) toggleDebugLog:  (id) sender;
 
 - (void) drawRect:(NSRect)rect;
 

@@ -51,6 +51,7 @@
 //
 
 #import "GLString.h"
+#import "PWGL.h"
 
 // The following is a NSBezierPath category to allow
 // for rounded corners of the border
@@ -204,7 +205,7 @@
 	texSize.height = [bitmap pixelsHigh];
 	
 	if((cgl_ctx = CGLGetCurrentContext())) { // if we successfully retrieve a current context (required)
-		glPushAttrib(GL_TEXTURE_BIT);
+		pwPushAttrib(GL_TEXTURE_BIT);
 		if (0 == texName) glGenTextures (1, &texName);
 		glBindTexture (GL_TEXTURE_RECTANGLE_EXT, texName);
 		if (NSEqualSizes(previousSize, texSize)) {
@@ -214,7 +215,7 @@
 			glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, texSize.width, texSize.height, 0, [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
 		}
-		glPopAttrib();
+		pwPopAttrib();
 	} else
 		NSLog (@"StringTexture -genTexture: Failure to get current OpenGL context\n");
 	
@@ -362,7 +363,7 @@
 	if (requiresUpdate)
 		[self genTexture];
 	if (texName) {
-		glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT); // GL_COLOR_BUFFER_BIT for glBlendFunc, GL_ENABLE_BIT for glEnable / glDisable
+		pwPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT); // GL_COLOR_BUFFER_BIT for glBlendFunc, GL_ENABLE_BIT for glEnable / glDisable
 		
 		glDisable (GL_DEPTH_TEST); // ensure text is not remove by depth buffer test.
 		glEnable (GL_BLEND); // for text fading
@@ -384,7 +385,7 @@
 			glVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y);
 		glEnd ();
 		
-		glPopAttrib();
+		pwPopAttrib();
 	}
 }
 

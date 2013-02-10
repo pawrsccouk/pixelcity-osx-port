@@ -1,7 +1,7 @@
 #ifndef glTYPES
 #define glTYPES
 
-#import <ostream>
+#include <iostream>
 #import <OpenGL/OpenGL.h>
 
 #define GL_CLAMP_TO_EDGE 0x812F
@@ -57,22 +57,9 @@ struct GLvector2
 };
 inline std::ostream &operator<<(std::ostream &os, const GLvector2 &v) { return v.operator<<(os); }
 
-struct GLrgba
-{
-  float       red;
-  float       green;
-  float       blue;
-  float       alpha;
-  OPERATORS(GLrgba);
-};
-inline std::ostream &operator<<(std::ostream &os, const GLrgba &v) { return v.operator<<(os); }
-
-    //Random SATURATED color
-GLrgba RANDOM_COLOR(void);
-
 struct GLmatrix
 {
-  float       elements[4][4];
+  float elements[4][4];
 };
 
 struct GLbbox
@@ -80,16 +67,6 @@ struct GLbbox
   GLvector3   min;
   GLvector3   max;
 };
-
-struct GLvertex
-{
-  GLvector3   position;
-  GLvector2   uv;
-  GLrgba      color;
-  int         bone;
-  std::ostream &operator<<(std::ostream &os) const;
-};
-inline std::ostream &operator<<(std::ostream &os, const GLvertex &v) { return v.operator<<(os); }
 
 struct GLrect
 {
@@ -171,19 +148,6 @@ GLbbox    glBboxClear (void);
 GLbbox    glBboxContainPoint (GLbbox box, GLvector point);
 bool      glBboxTestPoint (GLbbox box, GLvector point);
 
-GLrgba    glRgba (char* string);
-GLrgba    glRgba (float red, float green, float blue);
-GLrgba    glRgba (float luminance);
-GLrgba    glRgba (float red, float green, float blue, float alpha);
-GLrgba    glRgba (long c);
-GLrgba    glRgba (int red, int green, int blue);
-GLrgba    glRgbaAdd (GLrgba c1, GLrgba c2);
-GLrgba    glRgbaSubtract (GLrgba c1, GLrgba c2);
-GLrgba    glRgbaInterpolate (GLrgba c1, GLrgba c2, float delta);
-GLrgba    glRgbaScale (GLrgba c, float scale);
-GLrgba    glRgbaMultiply (GLrgba c1, GLrgba c2);
-GLrgba    glRgbaUnique (int i);
-GLrgba    glRgbaFromHsl (float h, float s, float l);
 
 GLmatrix  glMatrixIdentity (void);
 void      glMatrixElementsSet (GLmatrix* m, float* in);

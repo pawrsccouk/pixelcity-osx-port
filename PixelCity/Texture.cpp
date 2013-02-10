@@ -46,6 +46,7 @@ using std::vector;
 #include "texture.h"
 #include "world.h"
 #include "win.h"
+#include "PWGL.h"
 
 static const char* prefix[] = 
 {
@@ -166,14 +167,12 @@ static int          build_time = 0;
 
 void drawrect_simple (int left, int top, int right, int bottom, GLrgba color)
 {
-	glColor3fv (&color.red);
-	{	//MakePrimitive mp(GL_QUADS);
-		glBegin(GL_QUADS);
+	glColor3(color);
+	{	MakePrimitive mp(GL_QUADS);
 		glVertex2i (left, top);
 		glVertex2i (right, top);
 		glVertex2i (right, bottom);
 		glVertex2i (left, bottom);
-		glEnd();
 	}
 }
 
@@ -184,17 +183,15 @@ void drawrect_simple (int left, int top, int right, int bottom, GLrgba color)
 
 void drawrect_simple (int left, int top, int right, int bottom, GLrgba color1, GLrgba color2)
 {
-	glColor3fv (&color1.red);
-	{	//MakePrimitive mp(GL_TRIANGLE_FAN);
-		glBegin(GL_TRIANGLE_FAN);
+	glColor3(color1);
+	{	MakePrimitive mp(GL_TRIANGLE_FAN);
 		glVertex2i ((left + right) / 2, (top + bottom) / 2);
-		glColor3fv (&color2.red);
+		glColor3(color2);
 		glVertex2i (left, top);
 		glVertex2i (right, top);
 		glVertex2i (right, bottom);
 		glVertex2i (left, bottom);
 		glVertex2i (left, top);
-		glEnd();
 	}
 }
 
@@ -205,20 +202,19 @@ void drawrect_simple (int left, int top, int right, int bottom, GLrgba color1, G
 
 void drawrect (int left, int top, int right, int bottom, GLrgba color)
 {	
-//	glReportError("drawrect begin");
-//	DebugRep dbr("drawrect");
 	pwDisable(GL_CULL_FACE);
 	pwBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	pwEnable(GL_BLEND);
 	pwLineWidth(1.0f);
 	pwPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor3fv(&color.red);
+	glColor3(color);
 	
 	glReportError("drawrect setup done.");
 
 	// Try and clear any existing errors out of the system before loading the textures.
 	glBegin(GL_POINTS);
 	glEnd();
+
 	while(glGetError() != GL_NO_ERROR)
 	{
 	}
@@ -243,31 +239,26 @@ void drawrect (int left, int top, int right, int bottom, GLrgba color)
 			glVertex2i(left, bottom);
 		}
 		
-		float average   = (color.red + color.blue + color.green) / 3.0f;
-		bool  bright    = average > 0.5f;
+		float average   = (color.red() + color.blue() + color.green()) / 3.0f;
 		int   potential = (int)(average * 255.0f);
 		
-		if (bright) {
+		if (average > 0.5f) {
 			pwBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			{	MakePrimitive mp(GL_POINTS);
 				for(int i = left + 1; i < right - 1; i++) {
 					for(int j = top + 1; j < bottom - 1; j++) {
 						glColor4i(255, 0, RandomInt(potential), 255);
 						float hue = 0.2f + (float)RandomLong (100) / 300.0f + (float)RandomLong (100) / 300.0f + (float)RandomLong (100) / 300.0f;
-						GLrgba color_noise = glRgbaFromHsl(hue, 0.3f, 0.5f);
-						color_noise.alpha = (float)RandomLong (potential) / 144.0f;
-						glColor4f(RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, (float)RandomLong(potential) / 144.0f);
-						glColor4fv(&color_noise.red);
+						GLrgba color_noise = glRgbaFromHsl(hue, 0.3f, 0.5f).colorWithAlpha(float(RandomLong(potential)) / 144.0f);
+						glColor4f(RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, float(RandomLong(potential)) / 144.0f);
+						glColor4(color_noise);
 						glVertex2i(i, j);
 					}
 				}
 			}
 		}
-//		int repeats = RandomLong (6) + 1;
 		int hght = (bottom - top) + (RandomInt(3) - 1) + (RandomInt(3) - 1);
 		for (int i = left; i < right; i++) {
-//			if (RandomLong(3) == 0)
-//				repeats = RandomLong (4) + 1;
 			if (RandomLong(6) == 0) {
 				hght = bottom - top;
 				hght = RandomInt(hght);
@@ -276,12 +267,11 @@ void drawrect (int left, int top, int right, int bottom, GLrgba color)
 				hght = ((bottom - top) + hght) / 2;
 			}
 			for (int j = 0; j < 1; j++) {
-				{	MakePrimitive mp(GL_LINES);
-					glColor4f(0, 0, 0, (float)RandomLong(256) / 256.0f);
-					glVertex2i(i, bottom - hght);
-					glColor4f(0, 0, 0, (float)RandomLong(256) / 256.0f);
-					glVertex2i(i, bottom);
-				}
+                MakePrimitive mp(GL_LINES);
+                glColor4f(0, 0, 0, (float)RandomLong(256) / 256.0f);
+                glVertex2i(i, bottom - hght);
+                glColor4f(0, 0, 0, (float)RandomLong(256) / 256.0f);
+                glVertex2i(i, bottom);
 			}
 		}
 	}
@@ -442,7 +432,6 @@ void CTexture::DrawWindows ()
 
 void CTexture::DrawSky ()
 {
-	GLrgba          color;
 	float           grey;
 	float           scale, inv_scale;
 	int             i, x, y;
@@ -453,17 +442,17 @@ void CTexture::DrawSky ()
 	
 	glReportError("CTexture::DrawSky BEGIN");
 	
-	color = WorldBloomColor ();
-	grey = (color.red + color.green + color.blue) / 3.0f;
-	//desaturate, slightly dim
-	color = (color + glRgba (grey) * 2.0f) / 15.0f;
+	GLrgba color = WorldBloomColor();
+	grey = (color.red() + color.green() + color.blue()) / 3.0f;
+        //desaturate, slightly dim
+	color = (color + glRgba(grey) * 2.0f) / 15.0f;
 	pwDisable (GL_BLEND);
 	
 	{	MakePrimitive mp(GL_QUAD_STRIP);
 		glColor3f(0,0,0);
 		glVertex2i(0, _half);
 		glVertex2i(_size, _half);
-		glColor3fv(&color.red);
+		glColor3(color);
 		glVertex2i(0, _size - 2);  
 		glVertex2i(_size, _size - 2);  
 	}
@@ -484,7 +473,7 @@ void CTexture::DrawSky ()
 		width = RandomInt(_half / 2) + int(float(_half) * scale) / 2;
 		scale = 1.0f - (float)y / (float)_size;
 		hght = int(float(width) * scale);
-		hght = MAX (hght, 4);
+		hght = std::max(hght, 4);
 		
 		pwEnable (GL_BLEND);
 		pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -497,12 +486,9 @@ void CTexture::DrawSky ()
 				for (scale = 1.0f; scale > 0.0f; scale -= 0.25f) {
 					
 					inv_scale = 1.0f - (scale);
-					if (scale < 0.4f)
-						color = WorldBloomColor () * 0.1f;
-					else
-						color = glRgba (0.0f);
-					color.alpha = 0.2f;
-					glColor4fv (&color.red);
+					color = (scale < 0.4f) ? WorldBloomColor() * 0.1f : glRgba(0.0f);
+					color = color.colorWithAlpha(0.2f);
+					glColor4(color);
 					width_adjust = int(float(width) / 2.0f + int(inv_scale * (float(width) / 2.0f)));
 					height_adjust = hght + int(scale * float(hght) * 0.99f);
 					glTexCoord2f(0, 0);   glVertex2i(offset + x - width_adjust, y + hght - height_adjust);
@@ -516,9 +502,7 @@ void CTexture::DrawSky ()
 	glReportError("CTexture::DrawSky END");
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CTexture::DrawHeadlight ()
 {
@@ -683,10 +667,10 @@ void CTexture::Rebuild ()
 			glColor3f (1,1,1);
 			while (i < _size) {
 				//randomly use a prefix OR suffix, but not both.  Too verbose.
-				if (COIN_FLIP)
+				if (COIN_FLIP())
 					RenderPrint(2, _size - i - LOGO_PIXELS / 4, RandomInt() , glRgba (1.0f), "%s%s", prefix[prefix_num], name[name_num]);
 				else
-					RenderPrint(2, _size - i - LOGO_PIXELS / 4, RandomLong(), glRgba (1.0f), "%s%s", name[name_num]    , suffix[suffix_num]);
+					RenderPrint(2, _size - i - LOGO_PIXELS / 4, RandomInt(), glRgba (1.0f), "%s%s", name[name_num]    , suffix[suffix_num]);
 				name_num   = (name_num   + 1) % NAME_COUNT  ;
 				prefix_num = (prefix_num + 1) % PREFIX_COUNT;
 				suffix_num = (suffix_num + 1) % SUFFIX_COUNT;
@@ -696,7 +680,7 @@ void CTexture::Rebuild ()
 			break;
 			
 		case TEXTURE_TRIM:
-		{	int x = 0, y = 0, margin = MAX (TRIM_PIXELS / 4, 1);
+		{	int x = 0, y = 0, margin = std::max(TRIM_PIXELS / 4, 1);
 			for (x = 0; x < _size; x += TRIM_PIXELS) 
 				drawrect_simple(x + margin, y + margin    , x + TRIM_PIXELS - margin, y + TRIM_PIXELS - margin, glRgba (1.0f), glRgba (0.5f));
 			y += TRIM_PIXELS;

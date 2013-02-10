@@ -25,7 +25,9 @@
 #include "sky.h"
 #include "texture.h"
 #include "glTypes.h"
-#include "world.h"
+#include "PWGL.h"
+#include "World.h"
+#import "glVertex.h"
 
 static CSky*          sky;
 
@@ -66,7 +68,7 @@ void CSky::Render ()
   if (!TextureReady ())
     return;
   pwDepthMask (GL_FALSE);
-  glPushAttrib (GL_POLYGON_BIT | GL_FOG_BIT);
+  pwPushAttrib (GL_POLYGON_BIT | GL_FOG_BIT);
   pwPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
   pwDisable (GL_CULL_FACE);
   pwDisable (GL_FOG);
@@ -82,7 +84,7 @@ void CSky::Render ()
   pwBindTexture(GL_TEXTURE_2D, TextureId (TEXTURE_SKY));
   glCallList (m_list);
   pwPopMatrix ();
-  glPopAttrib ();
+  pwPopAttrib ();
   pwDepthMask (GL_TRUE);
   pwEnable (GL_COLOR_MATERIAL);
 

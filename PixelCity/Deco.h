@@ -1,6 +1,5 @@
-#ifndef ENTITY
-#include "entity.h"
-#endif
+#import "entity.h"
+#import "glRGBA.h"
 
 class CDeco : CEntity
 {

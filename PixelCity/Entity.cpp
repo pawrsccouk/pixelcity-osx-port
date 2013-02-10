@@ -24,11 +24,12 @@
 #include "mathx.h"
 #include "render.h"
 #include "texture.h"
-#include "world.h"
+#include "PWGL.h"
 #include "visible.h"
 #include "win.h"
 #include <iostream>
 #include "RenderAPI.h"
+#include "World.h"
 
 struct entity
 {
@@ -218,26 +219,24 @@ float EntityProgress ()
 
 void EntityUpdate ()
 {
-
-  unsigned    stop_time;
-
   if (!TextureReady ()) {
     sorted = false;
     return;
-  } 
+  }
+
   if (!sorted) {
     qsort (entity_list, entity_count, sizeof (struct entity), do_compare);
     sorted = true;
   }
+
   //We want to do several cells at once. Enough to get things done, but
   //not so many that the program is unresponsive.
   if (LOADING_SCREEN) {  //If we're using a loading screen, we want to build as fast as possible
-    stop_time = GetTickCount () + 100;
+    unsigned long stop_time = GetTickCount () + 100;
     while (!compiled && GetTickCount () < stop_time)
       do_compile ();
   } else //Take it slow
     do_compile ();
-
 }
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/

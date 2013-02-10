@@ -48,12 +48,11 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface AppDelegate : NSObject
+@interface AppDelegate : NSObject <NSApplicationDelegate>
 {
 }
 
 @property (assign) IBOutlet NSWindow *window;
 
-- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication;
 
 @end

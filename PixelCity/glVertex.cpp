@@ -6,7 +6,7 @@
 //
 //
 #include <iostream>
-#include "glTypes.h"
+#include "glVertex.h"
 
 std::ostream &GLvertex::operator<<(std::ostream &os) const
 {

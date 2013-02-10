@@ -19,7 +19,6 @@
 #include <math.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
-//include <gl\glaux.h>
 #include "glTypes.h"
 
 #include "camera.h"
@@ -32,10 +31,11 @@
 #include "texture.h"
 #include "visible.h"
 #include "win.h"
-#include "World.h"
+#include "PWGL.h"
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include "World.h"
 
 static GLvector2      angles[5][360];
 std::vector<CLight*>  all_lights;
@@ -127,7 +127,7 @@ void CLight::Render ()
 	
 	{
         MakePrimitive mp(GL_QUADS);
-		glColor4fv (&_color.red);
+		glColor4(_color);
 		glTexCoord2f (0, 0);   
 		glVertex3f (pos.x + offset.x, pos.y - _vert_size, pos.z + offset.y);
 		glTexCoord2f (0, 1);   

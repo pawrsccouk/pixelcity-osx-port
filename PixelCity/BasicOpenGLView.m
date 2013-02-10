@@ -11,6 +11,7 @@
 #import "trackball.h"
 #import "drawinfo.h"
 #import "win.h"
+#import "ini.h"
 #import "RenderAPI.h"
 
 // ==================================
@@ -104,9 +105,22 @@ static void reportError (const char * strError, const char *strLocation)
 	NSLog (@"%@\n", errString);
 }
 
-void DebugLog(const char* str)
+static bool fDebugLog = false;
+
+void DebugLog(const char* str, ...)
 {
-//	NSLog(@"%@\n", [NSString stringWithUTF8String:str]);
+    if(fDebugLog) {
+        va_list args;
+        va_start(args, str);
+        
+        char buffer[512];
+        memset(buffer, 0, 512);
+        
+        @try {        vsprintf(buffer, str, args);    }
+        @finally {    va_end(args);                   }
+        
+        NSLog(@"%@\n", [NSString stringWithUTF8String:buffer]);
+    }
 }
 
 // if error dump gl errors to debugger string, return error
@@ -309,14 +323,19 @@ void glReportError (const char* strLocation)
 
 -(IBAction) animate: (id) sender
 {
-	fAnimate = 1 - fAnimate;
-	if (fAnimate)
-		[animateMenuItem setState: NSOnState];
-	else 
-		[animateMenuItem setState: NSOffState];
+	fAnimate = ! fAnimate;
+    [animateMenuItem setState: fAnimate ? NSOnState : NSOffState];
 }
 
 // ---------------------------------
+
+static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), bool *pFlag)
+{
+	*pFlag = ! *pFlag;
+	[menuItem setState:(*pFlag) ? NSOnState : NSOffState];
+	if(pbl)
+        pbl(*pFlag);
+}
 
     // Dump logs and debug info to the console.
 -(IBAction) info: (id) sender
@@ -324,51 +343,60 @@ void glReportError (const char* strLocation)
     EntityDump();
 }
 
--(IBAction) toggleWireframe: (id) sender
+-(IBAction)toggleWireframe:(id)sender
 {
-	fWireframe = 1 - fWireframe;
-	[wireframeToggleMenuItem setState:fWireframe ? NSOnState : NSOffState];
-	RenderWireframeToggle();
+    toggleFlag(wireframeToggleMenuItem, ^(bool b) { RenderSetWireframe(b); }, &fWireframe);
 }
 
--(IBAction) nextEffect:      (id) sender
+-(IBAction)nextEffect:(id)sender
 {
 	RenderEffectCycle();
 }
 
 -(IBAction) toggleLetterbox: (id) sender
 {
-	fLetterbox = 1 - fLetterbox;
-	[letterboxToggleMenuItem setState:fWireframe ? NSOnState : NSOffState];
-	RenderLetterboxToggle();
-	NSRect bounds = [self bounds];
-	AppResize(bounds.size.width, bounds.size.height);
+    toggleFlag(letterboxToggleMenuItem, ^(bool b) { RenderSetLetterbox(b); }, &fLetterbox);
+        // PAW TODO: I think I'm supposed to change the window size to match the letterbox size here.
+	CGSize size = [self bounds].size;
+	AppResize(size.width, size.height);
 }
 
 -(IBAction) toggleFPS:       (id) sender
 {
 	// PAW disabled until I can get text working again.
+    NSLog(@"toggleFPS disabled for now");
 }
 
 -(IBAction) toggleFog:       (id) sender
 {
-	fFog = 1 - fFog;
-	[fogToggleMenuItem setState:fFog ? NSOnState : NSOffState];
-	RenderFogToggle();
+    toggleFlag(fogToggleMenuItem, ^(bool b) { RenderSetFog(b); }, &fFog);
 }
 
 -(IBAction) toggleFlat:      (id) sender
 {
-	fFlat = 1 - fFlat;
-	[flatToggleMenuItem setState:fFlat ? NSOnState : NSOffState];
-	RenderFlatToggle();
+    toggleFlag(flatToggleMenuItem, ^(bool b) { RenderSetFlat(b); }, &fFlat);
+}
+
+static void SetDebugLog(bool debugLog)
+{
+    
+}
+
+-(IBAction)toggleDebugLog:(id)sender
+{
+    toggleFlag(debugLogToggleMenuItem, nil, &fDebugLog);
 }
 
 -(IBAction) toggleHelp:      (id) sender
 {
 	// PAW disabled until I can get text working again.
+    NSLog(@"toggleHelp temporarily disabled.");
 }
 
+-(IBAction)toggleNormalized:(id)sender
+{
+    toggleFlag(normalizeToggleMenuItem, ^(bool b) { RenderSetNormalized(b); }, &fNormalize);
+}
 #pragma mark ---- Method Overrides ----
 
 // ---------------------------------
@@ -428,6 +456,15 @@ void glReportError (const char* strLocation)
 	NSOpenGLPixelFormat * pf = [BasicOpenGLView basicPixelFormat];
 
 	self = [super initWithFrame: frameRect pixelFormat: pf];
+    if(self) {
+            //load in our settings
+        fLetterbox = IniInt("Letterbox") != 0;
+        fWireframe = IniInt("Wireframe") != 0;
+        fFog       = IniInt("ShowFog")   != 0;
+        fFlat      = IniInt("Flat")      != 0;
+//        fShowFPS       = IniInt("ShowFPS")   != 0;
+        fDebugLog  = false;
+    }
     return self;
 }
 
@@ -456,6 +493,15 @@ void glReportError (const char* strLocation)
 
 - (void) awakeFromNib
 {
+        // Set the current values for the flags in Render, so the output matches the settings we show on the menus
+    RenderSetFlat(fFlat);
+    RenderSetFog(fFog);
+    RenderSetFPS(fFPS);
+    RenderSetHelpMode(fHelp);
+    RenderSetLetterbox(fLetterbox);
+    RenderSetNormalized(fNormalize);
+    RenderSetWireframe(fWireframe);
+
 	setStartTime (); // get app start time
 	getCurrentCaps (); // get current GL capabilites for all displays
 	

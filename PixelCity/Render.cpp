@@ -36,6 +36,7 @@
 #include "sky.h"
 #include "texture.h"
 #include "world.h"
+#include "PWGL.h"
 #include "win.h"
 #include "RenderAPI.h"
 
@@ -46,7 +47,8 @@ static const int    COLOR_CYCLE      =   (COLOR_CYCLE_TIME / 4);
 static const int    FONT_SIZE        =   (LOGO_PIXELS - LOGO_PIXELS / 8);
 static const float  BLOOM_SCALING    =     0.07f;
 
-#define YOUFAIL(message)    {WinPopup (message);return;}
+
+//#define YOUFAIL(message)    {WinPopup (message);return;}
 /*
  static	PIXELFORMATDESCRIPTOR pfd =			
  {
@@ -104,7 +106,6 @@ glFont g_fonts[] =
 static const size_t FONT_COUNT = (sizeof(g_fonts) / sizeof(g_fonts[0]));
 
 
-#if SCREENSAVER
 enum EffectType
 {
 	EFFECT_NONE,
@@ -112,42 +113,24 @@ enum EffectType
 	EFFECT_BLOOM_RADIAL,
 	EFFECT_COLOR_CYCLE,
 	EFFECT_GLASS_CITY,
-	EFFECT_COUNT,
 	EFFECT_DEBUG,
 	EFFECT_DEBUG_OVERBLOOM,
-};
-#else
-enum EffectType
-{
-	EFFECT_NONE,
-	EFFECT_BLOOM,
-	EFFECT_DEBUG_OVERBLOOM,
-	EFFECT_DEBUG,
-	EFFECT_BLOOM_RADIAL,
-	EFFECT_COLOR_CYCLE,
-	EFFECT_GLASS_CITY,
-
+    
 	EFFECT_COUNT,
 };
-#endif
 
-static float            g_render_aspect;
-static float            g_fog_distance;
-static int              g_render_width;
-static int              g_render_height;
-static bool             g_letterbox;
-static int              g_letterbox_offset;
-static EffectType       g_effect;
+static float g_render_aspect;
+static float g_fog_distance;
+static int   g_render_width;
+static int   g_render_height;
+static bool  g_letterbox;
+static int   g_letterbox_offset;
+static EffectType g_effect;
 
 //static unsigned         g_next_fps;
 
-static unsigned         g_current_fps;
-static unsigned         g_frames;
-static bool             g_show_wireframe;
-static bool             g_flat;
-static bool             g_show_fps;
-static bool             g_show_fog;
-static bool             g_show_help;
+static unsigned g_current_fps, g_frames;
+static bool g_show_wireframe, g_flat, g_show_fps, g_show_fog, g_show_help, g_show_normalized;
 
 /*-----------------------------------------------------------------------------
  
@@ -252,7 +235,7 @@ static void DrawBloomRadialEffect()
     pwEnable (GL_BLEND);
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * BLOOM_SCALING * 2;
-    glColor3fv (&color.red);
+    glColor3(color);
     for (int i = 0; i <= 100; i+=10) {
         glTexCoord2f (0, 0);  glVertex2i (-i, i + g_render_height);
         glTexCoord2f (0, 1);  glVertex2i (-i, -i);
@@ -274,16 +257,16 @@ static void DrawColorCycleEffect()
     pwBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
     MakePrimitive mp(GL_QUADS);
     GLrgba color = glRgbaFromHsl (hue1, 1.0f, 0.6f);
-    glColor3fv (&color.red);
+    glColor3(color);
     glTexCoord2f (0, 0);  glVertex2i (0, g_render_height);
     color = glRgbaFromHsl (hue2, 1.0f, 0.6f);
-    glColor3fv (&color.red);
+    glColor3(color);
     glTexCoord2f (0, 1);  glVertex2i (0, 0);
     color = glRgbaFromHsl (hue3, 1.0f, 0.6f);
-    glColor3fv (&color.red);
+    glColor3(color);
     glTexCoord2f (1, 1);  glVertex2i (g_render_width, 0);
     color = glRgbaFromHsl (hue4, 1.0f, 0.6f);
-    glColor3fv (&color.red);
+    glColor3(color);
     glTexCoord2f (1, 0);  glVertex2i (g_render_width, g_render_height);
 }
 
@@ -292,7 +275,7 @@ static void DrawBloomEffect()
 {
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * BLOOM_SCALING;
-    glColor3fv (&color.red);
+    glColor3(color);
 	int bloom_radius = 15, bloom_step  = bloom_radius / 3;
     for (int x = -bloom_radius; x <= bloom_radius; x += bloom_step) {
         for (int y = -bloom_radius; y <= bloom_radius; y += bloom_step) {
@@ -311,7 +294,7 @@ static void DrawDebugOverbloomEffect()
 {
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * 0.01f;
-    glColor3fv (&color.red);
+    glColor3(color);
     for (int x = -50; x <= 50; x+=5) {
         for (int y = -50; y <= 50; y+=5) {
             glTexCoord2f (0, 0);  glVertex2i (x, y + g_render_height);
@@ -325,9 +308,7 @@ static void DrawDebugOverbloomEffect()
 static void do_effects(EffectType type)
 {
 	DebugRep dbr("do_effects");
-	char buffer[16]; buffer[0] = '\0';
-	sprintf(buffer, "type=%d", type);
-	DebugLog(buffer);
+	DebugLog("type=%d", type);
 	
 	GLrgba          color;
 	
@@ -386,17 +367,12 @@ static void do_effects(EffectType type)
 
 int RenderMaxTextureSize ()
 {
-	
 	GLint mts;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mts);	glReportError("glGetIntegerv");
-	mts = MIN (mts, g_render_width);
-	return MIN (mts, g_render_height);
-	
+	return std::min(mts, std::min(g_render_width, g_render_height));
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderPrint (int x, int y, int font, GLrgba color, const char *fmt, ...)				
 {
@@ -412,16 +388,15 @@ void RenderPrint (int x, int y, int font, GLrgba color, const char *fmt, ...)
 		vsprintf (text, fmt, ap);				
 		va_end (ap);
 	}
-	glPushAttrib(GL_LIST_BIT);				
+	pwPushAttrib(GL_LIST_BIT);
 	glListBase(g_fonts[font % FONT_COUNT].base_char - 32);				
-	glColor3fv (&color.red);
+	glColor3(color);
 	glRasterPos2i (x, y);
 	glCallLists(GLsizei(strlen(text)), GL_UNSIGNED_BYTE, text);
+    pwPopAttrib();
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderPrint (int line, const char *fmt, ...)				
 {
@@ -463,9 +438,7 @@ void RenderPrint (int line, const char *fmt, ...)
 	pwMatrixMode (GL_MODELVIEW);
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void static do_help (void)
 {
@@ -482,21 +455,22 @@ void static do_help (void)
 }
 
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void do_fps ()
 {
-	LIMIT_INTERVAL (1000);
+    unsigned long interval = 1000;
+    static unsigned long next_update = 0;
+    if (next_update > GetTickCount())
+        return;
+    next_update = GetTickCount() + interval;
+
 	g_current_fps = g_frames;
 	g_frames = 0;	
 }
 
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderResize (int width, int height)		
 {
@@ -522,9 +496,7 @@ void RenderResize (int width, int height)
 	pwMatrixMode (GL_MODELVIEW);
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderTerm (void)
 {
@@ -536,9 +508,7 @@ void RenderTerm (void)
 	 */
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderInit (int width, int height)
 {
@@ -573,73 +543,81 @@ void RenderInit (int width, int height)
 	 DeleteObject(font);		
 	 }
 	 */
+     
+    g_effect         = EffectType(IniInt("Effect"));
+    g_fog_distance   = WORLD_HALF;
 
-	//If the program is running for the first time, set the defaults.
-	if (!IniInt ("SetDefaults")) {
-		IniIntSet ("SetDefaults", 1);
-		IniIntSet ("Effect", EFFECT_BLOOM);
-		IniIntSet ("ShowFog", 1);
-	}
-        //load in our settings
-	g_letterbox      = IniInt("Letterbox") != 0;
-	g_show_wireframe = IniInt("Wireframe") != 0;
-	g_show_fps       = IniInt("ShowFPS")   != 0;
-	g_show_fog       = IniInt("ShowFog")   != 0;
-	g_effect         = (EffectType)IniInt("Effect");
-	g_flat           = IniInt("Flat")      != 0;
-	g_fog_distance   = WORLD_HALF;
         //clear the viewport so the user isn't looking at trash while the program starts
 	pwViewport (0, 0, width, height);
 	pwClearColor (0.0f, 0.0f, 0.0f, 1.0f);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-static void logChange(bool  newValue, const char *varName) { std::clog << varName << " set to " << (newValue ? "ON" : "OFF") << std::endl; };
-static void logChange(int   newValue, const char *varName) { std::clog << varName << " changed to " << newValue << std::endl; };
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void RenderFPSToggle ()
+void RenderSetFPS(bool showFPS)
 {
-	g_show_fps = !g_show_fps;
+	g_show_fps = showFPS;
 	IniIntSet ("ShowFPS", g_show_fps ? 1 : 0);
-    logChange(g_show_fps, "ShowFPS");
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 bool RenderFog () {	return g_show_fog;	}
 
-void RenderFogToggle ()
+void RenderSetFog(bool fog)
 {	
-	g_show_fog = !g_show_fog;
+	g_show_fog = fog;
 	IniIntSet ("ShowFog", g_show_fog ? 1 : 0);
-    logChange(g_show_fog, "ShowFog");
 }
 
 float RenderFogDistance () { return g_fog_distance; }
 
-
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-extern "C" void RenderLetterboxToggle()
+extern "C" void RenderSetNormalized(bool norm)
 {
-	g_letterbox = !g_letterbox;
+    g_show_normalized = norm;
+    IniIntSet("ShowNormalized", g_show_normalized ? 1 : 0);
+}
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+extern "C" void RenderSetLetterbox(bool letterbox)
+{
+	g_letterbox = letterbox;
 	IniIntSet ("Letterbox", g_letterbox ? 1 : 0);
-    logChange(g_letterbox, "Letterbox");
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void RenderWireframeToggle ()
-{	
-	g_show_wireframe = !g_show_wireframe;
-	IniIntSet ("Wireframe", g_show_wireframe ? 1 : 0);
-    logChange(g_show_wireframe, "Wireframe");
-}
 
 bool RenderWireframe () {  return g_show_wireframe;	}
 
+void RenderSetWireframe(bool wireframe)
+{	
+	g_show_wireframe = wireframe;
+	IniIntSet ("Wireframe", g_show_wireframe ? 1 : 0);
+}
+
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+bool RenderFlat () { return g_flat;	}
+
+void RenderSetFlat(bool flat)
+{
+	g_flat = flat;
+	IniIntSet ("Flat", g_flat ? 1 : 0);
+}
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+void RenderSetHelpMode(bool helpMode)
+{
+	g_show_help = helpMode;
+        // This is transient and always defaults to Off.
+}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -647,37 +625,18 @@ void RenderEffectCycle ()
 {
 	g_effect = EffectType((g_effect + 1) % EFFECT_COUNT);
 	IniIntSet ("Effect", g_effect);
-    logChange(g_effect, "Effect");
 }
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 bool RenderBloom ()
 {
 	return g_effect == EFFECT_BLOOM || g_effect == EFFECT_BLOOM_RADIAL 
-    || g_effect == EFFECT_DEBUG_OVERBLOOM || g_effect == EFFECT_COLOR_CYCLE;	
+    || g_effect == EFFECT_DEBUG_OVERBLOOM || g_effect == EFFECT_COLOR_CYCLE;
 }
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-bool RenderFlat () { return g_flat;	}
-
-void RenderFlatToggle ()
-{
-	g_flat = !g_flat;
-	IniIntSet ("Flat", g_flat ? 1 : 0);
-    logChange(g_flat, "Flat");
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void RenderHelpToggle ()
-{
-	g_show_help = !g_show_help;
-    logChange(g_show_help, "Show Help");
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
 /*-----------------------------------------------------------------------------
@@ -694,7 +653,6 @@ void RenderFogFX (float scalar)
 	pwFogf (GL_FOG_START, 0.0f);
 	pwFogf (GL_FOG_END, g_fog_distance * 2.0f * scalar);
 	pwEnable (GL_FOG);
-	
 }
 
 static void FogRender()
@@ -702,7 +660,7 @@ static void FogRender()
     pwEnable (GL_FOG);
     pwFogf (GL_FOG_START, g_fog_distance - 100);
     pwFogf (GL_FOG_END  , g_fog_distance);
-    float red = glRgba(0.0f).red;
+    float red = glRgba(0.0f).red();
     pwFogfv(GL_FOG_COLOR, &red);
 }
 
@@ -781,6 +739,11 @@ void RenderUpdate (int width, int height)
 		pwEnable (GL_CULL_FACE);
 		pwDisable (GL_BLEND);
 	}
+    
+        // Enable or disable the normalization. This adds extra calculations but prevents errors where
+        // adding scaling to the model matrix causes the lighting to be too dark.
+    (g_show_normalized ? glEnable : glDisable)(GL_NORMALIZE);
+    
 	EntityRender ();
 	if (!LOADING_SCREEN) {
 		long elapsed = 3000 - WorldSceneElapsed();

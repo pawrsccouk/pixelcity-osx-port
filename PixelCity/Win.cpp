@@ -32,6 +32,7 @@
 #include "win.h"
 #include "world.h"
 #include "visible.h"
+#include "PWGL.h"
 
 /*
 #pragma comment(lib, "opengl32.lib")
@@ -213,8 +214,8 @@ void AppTerm (void)
   TextureTerm ();
   WorldTerm ();
   RenderTerm ();
-  CameraTerm ();
-  //WinTerm ();
+//  CameraTerm ();
+//  WinTerm ();
 }
 
 void AppResize(int width, int height)

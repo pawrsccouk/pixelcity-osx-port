@@ -42,12 +42,12 @@ Expand Bbox (if needed) to contain given point
 GLbbox glBboxContainPoint (GLbbox box, GLvector point)
 {
 
-  box.min.x = MIN (box.min.x, point.x);
-  box.min.y = MIN (box.min.y, point.y);
-  box.min.z = MIN (box.min.z, point.z);
-  box.max.x = MAX (box.max.x, point.x);
-  box.max.y = MAX (box.max.y, point.y);
-  box.max.z = MAX (box.max.z, point.z);
+  box.min.x = std::min(box.min.x, point.x);
+  box.min.y = std::min(box.min.y, point.y);
+  box.min.z = std::min(box.min.z, point.z);
+  box.max.x = std::max(box.max.x, point.x);
+  box.max.y = std::max(box.max.y, point.y);
+  box.max.z = std::max(box.max.z, point.z);
   return box;
   
 }

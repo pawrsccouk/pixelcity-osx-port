@@ -51,8 +51,7 @@ CBuilding::CBuilding (BuildingType type, int x, int y, int height, int width, in
     _center = glVector (float(_x + width / 2), 0.0f, float(_y + depth / 2));
     _seed = seed;
     _texture_type = RandomInt();
-    _color = color;
-    _color.alpha = 0.1f;
+    _color = color.colorWithAlpha(0.1f);
     _have_lights =  _have_logo = _have_trim = false;
     _roof_tiers = 0;
         //Pick a color for logos & roof lights
@@ -93,9 +92,11 @@ unsigned long CBuilding::PolyCount ()
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CBuilding::Render ()
-{ 
-  glColor3fv(&_color.red);
-  _mesh->Render();
+{
+    float rgb[3] = {};
+    _color.copyRGB(rgb);
+    glColor3fv(rgb);
+    _mesh->Render();
 }
 
 
@@ -103,9 +104,12 @@ void CBuilding::Render ()
 
 void CBuilding::RenderFlat (bool colored)
 { 
-  if (colored)
-    glColor3fv (&_color.red);
-  _mesh_flat->Render ();
+    if (colored) {
+        float rgb[3] = {};
+        _color.copyRGB(rgb);
+        glColor3fv (rgb);
+    }
+    _mesh_flat->Render ();
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -482,12 +486,12 @@ void CBuilding::CreateBlocky ()
     if (left == max_left || right == max_right || front == max_front || back == max_back) 
       skip = true;
     if (!skip) {
-      //if this is the top, then put some lights up here
-      max_left = MAX (left, max_left);
-      max_right = MAX (right, max_right);
-      max_front = MAX (front, max_front);
-      max_back = MAX (back, max_back);
-      //Now build the four walls of this part
+            //if this is the top, then put some lights up here
+      max_left  = std::max(left , max_left );
+      max_right = std::max(right, max_right);
+      max_front = std::max(front, max_front);
+      max_back  = std::max(back , max_back );
+            //Now build the four walls of this part
       uv_start = ConstructWall (mid_x - left, 0, mid_z + back, SOUTH, front + back, height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
       uv_start = ConstructWall (mid_x - left, 0, mid_z - front, EAST, right + left, height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
       uv_start = ConstructWall (mid_x + right, 0, mid_z - front, NORTH, front + back, height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
@@ -691,7 +695,7 @@ void CBuilding::CreateTower ()
     unsigned long   grouping      = RandomInt (3) + 2;               //How the windows are grouped
     bool  blank_corners = RandomInt (4) > 0;               //if the corners of the building have no windows
     //  bool roof_spike = RandomInt (3) == 0;              //if the roof is pointed or has infrastructure on it
-    unsigned long tier_fraction = 2 + RandomInt (4);               //What fraction of the remaining height should be given to each tier
+    unsigned tier_fraction = 2 + RandomInt (4);               //What fraction of the remaining height should be given to each tier
     unsigned long narrowing_interval = 1 + RandomInt (10);           //How often (in tiers) does the building get narrower?
     unsigned long foundation = 2 + RandomInt (3);               //The height of the windowsless slab at the bottom
     //  bool tower = RandomInt (5) != 0 && _height > 40;   //The odds that we'll have a big fancy spikey top
@@ -706,7 +710,7 @@ void CBuilding::CreateTower ()
         //now add tiers until we reach the top
     while (true) {
         int remaining_height = _height - bottom, section_depth = back - front;
-        int section_width = right - left, section_height = (remaining_height < 10) ? remaining_height : MAX (remaining_height / tier_fraction, 2);
+        int section_width = right - left, section_height = (remaining_height < 10) ? remaining_height : std::max(remaining_height / tier_fraction, 2u);
     
             //Build the four walls
         float uv_start = (float)RandomInt (SEGMENTS_PER_TEXTURE) / SEGMENTS_PER_TEXTURE;

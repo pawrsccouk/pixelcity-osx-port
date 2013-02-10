@@ -16,103 +16,57 @@
 #include <string.h>
 
 #include "mathx.h"
-#include "glTypes.h"
+#include "glRGBA.h"
 #include "macro.h"
 #include "Random.h"
+#include <iostream>
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgbaFromHsl (float h, float sl, float l)
 {
-  
-  float v;
-  float r,g,b;
-  
-  
-  r = l;   // default to gray
-  g = l;
-  b = l;
-  v = (l <= 0.5f) ? (l * (1.0f + sl)) : (l + sl - l * sl);
-  if (v > 0)  {
-    float m;
-    float sv;
-    int sextant;
-    float fract, vsf, mid1, mid2;
-   
-    m = l + l - v;
-    sv = (v - m ) / v;
+  float r = l, g = l, b = l;
+  float v = (l <= 0.5f) ? (l * (1.0f + sl)) : (l + sl - l * sl);
+  if (v > 0)  {   
+    float m = l + l - v, sv = (v - m) / v;
     h *= 6.0f;
-    sextant = (int)h;
-    fract = h - sextant;
-    vsf = v * sv * fract;
-    mid1 = m + vsf;
-    mid2 = v - vsf;
+    int sextant = (int)h;
+    float fract = h - sextant, vsf = v * sv * fract;
+    float mid1 = m + vsf, mid2 = v - vsf;
     switch (sextant) {
-    case 0:
-      r = v;  g = mid1; b = m;
-      break;
-    case 1:
-      r = mid2; g = v;  b = m;
-      break;
-    case 2:
-      r = m;  g = v;  b = mid1;
-      break;
-    case 3:
-      r = m; g = mid2; b = v;
-      break;
-    case 4:
-      r = mid1; g = m; b = v;
-      break;
-    case 5:
-      r = v;  g = m; b = mid2;
-      break;
+    case 0:      r = v;    g = mid1; b = m;     break;
+    case 1:      r = mid2; g = v;    b = m;     break;
+    case 2:      r = m;    g = v;    b = mid1;  break;
+    case 3:      r = m;    g = mid2; b = v;     break;
+    case 4:      r = mid1; g = m;    b = v;     break;
+    case 5:      r = v;    g = m;    b = mid2;  break;
     }
   }
-  return glRgba (r, g, b);
-
+  return glRgba(r, g, b);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgbaInterpolate (GLrgba c1, GLrgba c2, float delta)
 {
-
-  GLrgba     result;
-
-  result.red = MathInterpolate (c1.red, c2.red, delta);
-  result.green = MathInterpolate (c1.green, c2.green, delta);
-  result.blue = MathInterpolate (c1.blue, c2.blue, delta);
-  result.alpha = MathInterpolate (c1.alpha, c2.alpha, delta);
-  return result;
-
+  return GLrgba(MathInterpolate (c1.red()  , c2.red()  , delta),    // R
+                MathInterpolate (c1.green(), c2.green(), delta),    // G
+                MathInterpolate (c1.blue() , c2.blue() , delta),    // B
+                MathInterpolate (c1.alpha(), c2.alpha(), delta));   // A
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgbaAdd (GLrgba c1, GLrgba c2)
 {
-
-  GLrgba     result;
-
-  result.red = c1.red + c2.red;
-  result.green = c1.green + c2.green;
-  result.blue = c1.blue + c2.blue;
-  return result;
-
+  return GLrgba(c1.red() + c2.red(), c1.green() + c2.green(), c1.blue() + c2.blue());
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgbaSubtract (GLrgba c1, GLrgba c2)
 {
-
-  GLrgba     result;
-
-  result.red = c1.red - c2.red;
-  result.green = c1.green - c2.green;
-  result.blue = c1.blue - c2.blue;
-  return result;
-
+  return GLrgba(c1.red() - c2.red(), c1.green() - c2.green(), c1.blue() - c2.blue());
 }
 
 
@@ -120,100 +74,50 @@ GLrgba glRgbaSubtract (GLrgba c1, GLrgba c2)
 
 GLrgba glRgbaMultiply (GLrgba c1, GLrgba c2)
 {
-
-  GLrgba     result;
-
-  result.red = c1.red * c2.red;
-  result.green = c1.green * c2.green;
-  result.blue = c1.blue * c2.blue;
-  return result;
-
+  return GLrgba(c1.red() * c2.red(), c1.green() * c2.green(), c1.blue() * c2.blue());
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgbaScale (GLrgba c, float scale)
 {
-
-  c.red *= scale;
-  c.green *= scale;
-  c.blue *= scale;
-  return c;
-
+    return GLrgba(c.red() * scale, c.green() * scale, c.blue() * scale);
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgba (char* string)
 {
-
-  unsigned int color = 0;
-  char    buffer[10];
-  char*   pound = NULL;
-  GLrgba  result;
-
-  //strncmp(buffer, string, 10);
+  char buffer[10], *pound = NULL;
   if ((pound = strchr (buffer, '#')))
     pound[0] = ' ';
+    
+  unsigned int color = 0;
   if (sscanf (string, "%x", &color) != 1)
-	  return glRgba (0.0f);
-  result.red   = (float)GetBValue(color) / 255.0f;
-  result.green = (float)GetGValue(color) / 255.0f;
-  result.blue  = (float)GetRValue(color) / 255.0f;
-  result.alpha = 1.0f;
-  return result;  
-
+	  return glRgba(0.0f);
+    
+    return GLrgba(float(GetRValue(color)) / 255.0f, float(GetGValue(color)) / 255.0f, float(GetBValue(color)) / 255.0f, 1.0f);
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgba (int red, int green, int blue)
 {
-
-  GLrgba     result;
-
-  result.red = (float)red / 255.0f;
-  result.green = (float)green / 255.0f;
-  result.blue = (float)blue / 255.0f;
-  result.alpha = 1.0f;
-  return result;  
-
+  return GLrgba(float(red) / 255.0f, float(green) / 255.0f, float(blue) / 255.0f, 1.0f);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgba (float red, float green, float blue)
 {
-
-  GLrgba     result;
-
-  result.red = red;
-  result.green = green;
-  result.blue = blue;
-  result.alpha = 1.0f;
-  return result;
-
+  return GLrgba(red, green, blue, 1.0f);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgba (float red, float green, float blue, float alpha)
 {
-
-  GLrgba     result;
-
-  result.red = red;
-  result.green = green;
-  result.blue = blue;
-  result.alpha = alpha;
-  return result;
-
+  return GLrgba(red, green, blue, alpha);
 }
 
 
@@ -221,30 +125,14 @@ GLrgba glRgba (float red, float green, float blue, float alpha)
 
 GLrgba glRgba (long c)
 {
-
-  GLrgba     result;
-
-  result.red   = (float)GetRValue(c) / 255.0f;
-  result.green = (float)GetGValue(c) / 255.0f;
-  result.blue  = (float)GetBValue(c) / 255.0f;
-  result.alpha = 1.0f;
-  return result;
-
+  return GLrgba(float(GetRValue(c)) / 255.0f, float(GetGValue(c)) / 255.0f, float(GetBValue(c)) / 255.0f, 1.0f);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba glRgba (float luminance)
 {
-
-  GLrgba     result;
-
-  result.red = luminance;
-  result.green = luminance;
-  result.blue = luminance;
-  result.alpha = 1.0f;
-  return result;
-
+  return GLrgba(luminance, luminance, luminance, 1.0f);
 }
 
 /*-----------------------------------------------------------------------------
@@ -255,143 +143,157 @@ Useful for visual debugging in some situations.
 
 GLrgba glRgbaUnique (int i)
 {
-
-  GLrgba    c;
-
-  c.alpha = 1.0f;
-  c.red   = 0.4f + ((i & 1) ? 0.2f : 0.0f) + ((i &  8) ? 0.3f : 0.0f) - ((i &  64) ? 0.3f : 0.0f);
-  c.green = 0.4f + ((i & 2) ? 0.2f : 0.0f) + ((i & 32) ? 0.3f : 0.0f) - ((i & 128) ? 0.3f : 0.0f);
-  c.blue  = 0.4f + ((i & 4) ? 0.2f : 0.0f) + ((i & 16) ? 0.3f : 0.0f) - ((i & 256) ? 0.3f : 0.0f);
-  return c;
-
+  float red   = 0.4f + ((i & 1) ? 0.2f : 0.0f) + ((i &  8) ? 0.3f : 0.0f) - ((i &  64) ? 0.3f : 0.0f);
+  float green = 0.4f + ((i & 2) ? 0.2f : 0.0f) + ((i & 32) ? 0.3f : 0.0f) - ((i & 128) ? 0.3f : 0.0f);
+  float blue  = 0.4f + ((i & 4) ? 0.2f : 0.0f) + ((i & 16) ? 0.3f : 0.0f) - ((i & 256) ? 0.3f : 0.0f);
+  return GLrgba(red, green, blue, 1.0f);
 }
 
 GLrgba::GLrgba()
-:red(0.0f), green(0.0f), blue(0.0f), alpha(0.0f)
+:_red(0.0f), _green(0.0f), _blue(0.0f), _alpha(0.0f)
 {}
 
+GLrgba::GLrgba(float red, float green, float blue, float alpha)
+:_red(red), _green(green), _blue(blue), _alpha(alpha)
+{}
 
-std::ostream &GLrgba::operator<<(std::ostream &os) const
+using std::ostream;
+ostream& GLrgba::operator<<(ostream &os) const
 {
-    return os << "[GLrgba A=" << alpha << ", R=" << red << ", G=" << green << ", B=" << blue << "]";
+    return os << "[GLrgba A=" << alpha() << ", R=" << red() << ", G=" << green() << ", B=" << blue() << "]";
 }
 
 /*-----------------------------------------------------------------------------
   + operator                          
 -----------------------------------------------------------------------------*/
 
-GLrgba GLrgba::operator+ (const GLrgba& c)
+GLrgba GLrgba::operator+ (const GLrgba& c) const
 {
-  return glRgba (red + c.red, green + c.green, blue + c.blue, alpha);
+  return glRgba (red() + c.red(), green() + c.green(), blue() + c.blue(), alpha());
 }
 
-GLrgba GLrgba::operator+ (const float& c)
+GLrgba GLrgba::operator+ (const float& c) const
 {
-  return glRgba (red + c, green + c, blue + c, alpha);
+  return glRgba(red() + c, green() + c, blue() + c, alpha());
 } 
 
 void GLrgba::operator+= (const GLrgba& c)
 {
-  red += c.red;
-  green += c.green;
-  blue += c.blue;
+  _red += c.red();
+  _green += c.green();
+  _blue += c.blue();
 }
 
 void GLrgba::operator+= (const float& c)
 {
-  red += c;
-  green += c;
-  blue += c;
+  _red += c;
+  _green += c;
+  _blue += c;
 }
 
 /*-----------------------------------------------------------------------------
   - operator                          
 -----------------------------------------------------------------------------*/
 
-GLrgba GLrgba::operator- (const GLrgba& c)
+GLrgba GLrgba::operator- (const GLrgba& c) const
 {
-  return glRgba (red - c.red, green - c.green, blue - c.blue);
+  return glRgba (red() - c.red(), green() - c.green(), blue() - c.blue());
 }
 
-GLrgba GLrgba::operator- (const float& c)
+GLrgba GLrgba::operator- (const float& c) const
 {
-  return glRgba (red - c, green - c, blue - c, alpha);
+  return glRgba (red() - c, green() - c, blue() - c, alpha());
 }
 
 void GLrgba::operator-= (const GLrgba& c)
 {
-  red -= c.red;
-  green -= c.green;
-  blue -= c.blue;
+  _red   -= c.red();
+  _green -= c.green();
+  _blue  -= c.blue();
 }
 
 void GLrgba::operator-= (const float& c)
 {
-  red -= c;
-  green -= c;
-  blue -= c;
+  _red   -= c;
+  _green -= c;
+  _blue  -= c;
 }
 
 /*-----------------------------------------------------------------------------
   * operator                          
 -----------------------------------------------------------------------------*/
 
-GLrgba GLrgba::operator* (const GLrgba& c)
+GLrgba GLrgba::operator* (const GLrgba& c) const
 {
-  return glRgba (red * c.red, green * c.green, blue * c.blue);
+  return glRgba (red() * c.red(), green() * c.green(), blue() * c.blue());
 }
 
-GLrgba GLrgba::operator* (const float& c)
+GLrgba GLrgba::operator* (const float& c) const
 {
-  return glRgba (red * c, green * c, blue * c, alpha);
+  return glRgba (red() * c, green() * c, blue() * c, alpha());
 }
 
 void GLrgba::operator*= (const GLrgba& c)
 {
-  red *= c.red;
-  green *= c.green;
-  blue *= c.blue;
+  _red   *= c.red();
+  _green *= c.green();
+  _blue  *= c.blue();
 }
 
 void GLrgba::operator*= (const float& c)
 {
-  red *= c;
-  green *= c;
-  blue *= c;
+  _red   *= c;
+  _green *= c;
+  _blue  *= c;
 }
 
 /*-----------------------------------------------------------------------------
   / operator                          
 -----------------------------------------------------------------------------*/
 
-GLrgba GLrgba::operator/ (const GLrgba& c)
+GLrgba GLrgba::operator/ (const GLrgba& c) const
 {
-  return glRgba (red / c.red, green / c.green, blue / c.blue);
+  return glRgba (red() / c.red(), green() / c.green(), blue() / c.blue());
 }
 
-GLrgba GLrgba::operator/ (const float& c)
+GLrgba GLrgba::operator/ (const float& c) const
 {
-  return glRgba (red / c, green / c, blue / c, alpha);
+  return glRgba (red() / c, green() / c, blue() / c, alpha());
 }
 
 void GLrgba::operator/= (const GLrgba& c)
 {
-  red /= c.red;
-  green /= c.green;
-  blue /= c.blue;
+  _red   /= c.red();
+  _green /= c.green();
+  _blue  /= c.blue();
 }
 
 void GLrgba::operator/= (const float& c)
 {
-  red /= c;
-  green /= c;
-  blue /= c;
+  _red   /= c;
+  _green /= c;
+  _blue  /= c;
 }
 
-bool GLrgba::operator==  (const GLrgba& c)
+bool GLrgba::operator==(const GLrgba& c) const
 {
-  return (red == c.red && green == c.green && blue == c.blue);
+  return (red() == c.red() && green() == c.green() && blue() == c.blue());
 }
+
+void GLrgba::copyRGB(float output[3]) const
+{
+    output[0] = red();
+    output[1] = green();
+    output[2] = blue();
+}
+
+void GLrgba::copyRGBA(float output[4]) const
+{
+    copyRGB(output); // 0=R, 1=G, 2=B
+    output[3] = alpha();
+}
+
+GLrgba GLrgba::colorWithAlpha(float newAlpha) const { return GLrgba(red(), green(), blue(), newAlpha); }
 
     //Random SATURATED color
 GLrgba RANDOM_COLOR(void)
@@ -399,3 +301,18 @@ GLrgba RANDOM_COLOR(void)
     //was #define RANDOM_COLOR (glRgbaFromHsl(float(RandomVal(255))/255.0f, 1.0f, 0.75f))
     return glRgbaFromHsl(float(RandomInt(255))/255.0f, 1.0f, 0.75f);
 }
+
+void glColor4(const GLrgba &color)
+{
+    float rgba[4] = { 0, 0, 0, 0 };
+    color.copyRGBA(rgba);
+    glColor4fv(rgba);
+}
+
+void glColor3(const GLrgba &color)
+{
+    float rgb[3] = { 0, 0, 0 };
+    color.copyRGB(rgb);
+    glColor3fv(rgb);
+}
+

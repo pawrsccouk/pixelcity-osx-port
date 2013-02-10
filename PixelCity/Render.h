@@ -1,4 +1,4 @@
-
+#import "glRGBA.h"
 
 bool  RenderBloom ();
 bool  RenderFlat ();
