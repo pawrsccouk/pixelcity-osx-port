@@ -1,6 +1,6 @@
-#include <OpenGL/gl.h>
-#include "glTypes.h"
-#include "glRGBA.h"
+#import <OpenGL/gl.h>
+#import "glTypes.h"
+#import "glRGBA.h"
 
 GLrgba    WorldBloomColor ();
 char      WorldCell (int x, int y);
@@ -32,6 +32,35 @@ struct MakeDisplayList
 	MakeDisplayList(GLint name, GLenum mode);
 	~MakeDisplayList();
 };	
+
+// Generic template class to handle creating/setting something in the constructor
+// and deleting/unsetting it when it goes out of scope.
+// Templated so that std::ptr_fun, std::bind2nd etc will work.
+
+// Not working, and I can't find out why right now.
+//template <class _Arg, class _Result>
+//struct RAII
+//{
+//    RAII( std::unary_function<_Arg, _Result> createFunction, std::unary_function<_Arg, _Result> releaseFunction)
+//    : _releaseFn(releaseFunction)
+//    {
+//        createFunction();
+//    }
+//    
+//    ~RAII()
+//    {
+//        _releaseFn();
+//    }
+//
+//private:
+//    std::unary_function<_Arg, _Result> _releaseFn;
+//};
+
+struct PWMatrixStacker
+{
+    PWMatrixStacker();
+    ~PWMatrixStacker();
+};
 
 struct DebugRep
 {

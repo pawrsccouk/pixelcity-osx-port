@@ -6,13 +6,13 @@
 
 typedef struct {
    GLdouble x,y,z;
-} Vector;
+} Vector3;
 
 typedef struct {
-	Vector viewPos;    // View position
-	Vector viewDir;    // View direction vector
-	Vector viewUp;     // View up direction
-	Vector rotPoint;   // Point to rotate about
+	Vector3 viewPos;    // View position
+	Vector3 viewDir;    // View direction vector
+	Vector3 viewUp;     // View up direction
+	Vector3 rotPoint;   // Point to rotate about
 	GLdouble aperture; // pContextInfo->camera aperture
 	GLint viewWidth, viewHeight; // current window/screen height and width
 } Camera;
@@ -21,7 +21,7 @@ typedef struct {
 	GLfloat rotation, velocity, acceleration;
 } Spin;	// Spin variables for one object along one axis.
 
-@interface BasicOpenGLView : NSOpenGLView
+@interface BasicOpenGLView : NSOpenGLView <NSWindowDelegate>
 {
 	CFAbsoluteTime msgTime; // message posting time for expiration
 

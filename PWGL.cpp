@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
 //
 
-#include "PWGL.h"
-#include <cassert>
+#import "PWGL.h"
+#import <cassert>
 
 void pwBegin(GLenum mode)	{ glBegin(mode); }	// note: glGetError() (hence glReportError()) is not legal inside a glBegin/glEnd pair.
 void pwEnd()				{ glEnd();			glReportError("glEnd");		}
@@ -56,4 +56,7 @@ GLint pwuBuild2DMipmaps( GLenum target, GLint internalFormat, GLsizei width, GLs
 { GLint rv = gluBuild2DMipmaps(target, internalFormat, width, height, format, type, data);	glReportError("gluBuild2DMipmaps");
 	return rv;
 }
+void pwTexSubImage2D (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
+                      GLenum format, GLenum type, const GLvoid *pixels)
+{ glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels); glReportError("glTexSubImage2D"); }
 

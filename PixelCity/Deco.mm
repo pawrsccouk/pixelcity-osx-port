@@ -11,25 +11,26 @@
 
 -----------------------------------------------------------------------------*/
 
-#define LOGO_OFFSET           0.2f //How far a logo sticks out from the given surface
 
-#include <math.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-//include <gl\glaux.h>
-#include "glTypes.h"
+#import <math.h>
+#import "glTypes.h"
+#import "glTypesObjC.h"
+#import "light.h"
 
-#include "deco.h"
-#include "light.h"
-#include "mesh.h"
-#include "macro.h"
-#include "mathx.h"
-#include "random.h"
-#include "render.h"
-#include "texture.h"
-#include "world.h"
-#include "visible.h"
-#include "win.h"
+#import "deco.h"
+#import "mesh.h"
+#import "macro.h"
+#import "mathx.h"
+#import "random.h"
+#import "render.h"
+#import "texture.h"
+#import "world.h"
+#import "visible.h"
+#import "win.h"
+
+
+static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the given surface
+
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -86,6 +87,8 @@ GLuint CDeco::Texture ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+static const short LIGHT_SIZE = 3;
+
 void CDeco::CreateRadioTower (GLvector pos, float height)
 {
   float offset = height / 15.0f;
@@ -112,8 +115,9 @@ void CDeco::CreateRadioTower (GLvector pos, float height)
     f.index_list.push_back(i);
   _mesh->FanAdd (f);
   
-  CLight *l = new CLight (glVector (_center.x, _center.y + height + 1.0f, _center.z), glRgba (255,192,160), 1);
-  l->Blink();
+  LightAdd([Vector vectorWithX:_center.x Y:_center.y Z:_center.z],
+           [NSColor colorWithDeviceRed:1.0 green:192.0f/255.0f blue:160.0f/255.0f alpha:1.0f],
+           LIGHT_SIZE, true);
   
   _texture = TextureId (TEXTURE_LATTICE);
 }
@@ -126,28 +130,20 @@ void CDeco::CreateLogo (GLvector2 start, GLvector2 end, float bottom, int seed, 
   _use_alpha = true;
   _color = color;
   int logo_index = seed % LOGO_ROWS;
-  GLvector to = glVector (start.x, 0.0f, start.y) - glVector (end.x, 0.0f, end.y);
-  to = glVectorNormalize (to);
-  GLvector out = glVectorCrossProduct (glVector (0.0f, 1.0f, 0.0f), to) * LOGO_OFFSET;
+  GLvector to = glVectorNormalize (glVector(start.x, 0.0f, start.y) - glVector(end.x, 0.0f, end.y));
+  GLvector out = glVectorCrossProduct (glVector(0.0f, 1.0f, 0.0f), to) * LOGO_OFFSET;
   GLvector2 center2d = (start + end) / 2;
-  _center = glVector (center2d.x, bottom, center2d.y);
-  float length = glVectorLength (start - end);
-  float height = (length / 8.0f) * 1.5f;
+  _center = glVector(center2d.x, bottom, center2d.y);
+  
+  float height = (glVectorLength(start - end) / 8.0f) * 1.5f;
   float top = bottom + height;
-  float u1 = 0.0f;
-  float u2 = 0.5f;//We actually only use the left half of the texture
-  float v1 = (float)logo_index / LOGO_ROWS;
-  float v2 = v1 + (1.0f / LOGO_ROWS);
+  float u1 = 0.0f, u2 = 0.5f;                   //We actually only use the left half of the texture
+  float v1 = (float)logo_index / LOGO_ROWS, v2 = v1 + (1.0f / LOGO_ROWS);
 
-  GLvertex   p;
-  p.position = glVector (start.x, bottom, start.y) + out;  p.uv = glVector (u1,v1);
-  _mesh->VertexAdd (p);
-  p.position = glVector (end.x, bottom, end.y) + out;  p.uv = glVector (u2, v1);
-  _mesh->VertexAdd (p);
-  p.position = glVector (end.x, top, end.y) + out;  p.uv = glVector (u2, v2);
-  _mesh->VertexAdd (p);
-  p.position = glVector (start.x, top, start.y) + out;  p.uv = glVector (u1, v2);
-  _mesh->VertexAdd (p);
+  _mesh->VertexAdd( GLvertex(glVector(start.x, bottom, start.y) + out, glVector(u1, v1)) );
+  _mesh->VertexAdd( GLvertex(glVector(end.x  , bottom, end.y  ) + out, glVector(u2, v1)) );
+  _mesh->VertexAdd( GLvertex(glVector(end.x  , top   , end.y  ) + out, glVector(u2, v2)) );
+  _mesh->VertexAdd( GLvertex(glVector(start.x, top   , start.y) + out, glVector(u1, v2)) );
   
   quad_strip qs;
   qs.index_list.push_back(0);
@@ -157,7 +153,6 @@ void CDeco::CreateLogo (GLvector2 start, GLvector2 end, float bottom, int seed, 
   _mesh->QuadStripAdd (qs);
   
   _texture = TextureId (TEXTURE_LOGOS);
-
 }
 
 /*-----------------------------------------------------------------------------

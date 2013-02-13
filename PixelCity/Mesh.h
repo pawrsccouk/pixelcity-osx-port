@@ -1,6 +1,6 @@
 
-#include <vector>
-#include "glVertex.h"
+#import <vector>
+#import "glVertex.h"
 
 struct cube
 {

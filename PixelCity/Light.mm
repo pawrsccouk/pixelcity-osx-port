@@ -14,32 +14,69 @@
 
 -----------------------------------------------------------------------------*/
 
-#define MAX_SIZE            5
+#import "glTypesObjC.h"
+#import "light.h"
+#import "glRGBA.h"
+#import "glTypes.h"
+#import <math.h>
+#import "camera.h"
+#import "entity.h"
+#import "macro.h"
+#import "mathx.h"
+#import "random.h"
+#import "render.h"
+#import "texture.h"
+#import "visible.h"
+#import "win.h"
+#import "PWGL.h"
+#import "World.h"
+#import <vector>
+#import <algorithm>
+#import <functional>
 
-#include <math.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include "glTypes.h"
+static void addLight(float x, float y, float z, float r, float g, float b, float a, int size, bool blinks);
 
-#include "camera.h"
-#include "entity.h"
-#include "light.h"
-#include "macro.h"
-#include "mathx.h"
-#include "random.h"
-#include "render.h"
-#include "texture.h"
-#include "visible.h"
-#include "win.h"
-#include "PWGL.h"
-#include <vector>
-#include <algorithm>
-#include <functional>
-#include "World.h"
+
+class CLight
+{
+    GLvector        _position;
+    GLrgba          _color;
+    int             _size;
+    float           _vert_size;
+    float           _flat_size;
+    bool            _blink;
+    unsigned long   _blink_interval;
+    int             _cell_x;
+    int             _cell_z;
+    
+public:
+    CLight(GLvector pos, GLrgba color, int size);
+    void            Render ();
+    void            Blink ();
+    
+};
 
 static GLvector2      angles[5][360];
 std::vector<CLight*>  all_lights;
 static bool           angles_done;
+
+// PAW: Don't know why this is necessary, but the light.h isn't always marking this as a "C" function.
+//extern "C" void LightAdd(Vector*, NSColor *, int, BOOL);
+
+void LightAdd(Vector *position,
+              NSColor *color,
+              int size, BOOL blink)
+{
+    CGFloat red = 1.0f, green = 1.0f, blue = 1.0f, alpha = 1.0f;
+    [color getRed:&red green:&green blue:&blue alpha:&alpha];
+
+    CLight *newLight = new CLight(GLvector(position.x, position.y, position.z), GLrgba(red, green, blue, alpha), size);
+    all_lights.push_back(newLight);
+    if(blink)
+        newLight->Blink();
+}
+
+static const short MAX_SIZE = 5;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -56,6 +93,7 @@ void LightClear ()
 unsigned long LightCount () {  return all_lights.size();  }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 
 void LightRender ()
 {	
@@ -75,7 +113,7 @@ void LightRender ()
 	pwEnable (GL_BLEND);
 	pwDisable (GL_CULL_FACE);
 	pwBlendFunc (GL_ONE, GL_ONE);
-	pwBindTexture(GL_TEXTURE_2D, TextureId (TEXTURE_LIGHT));
+	pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_LIGHT));
 	pwDisable (GL_CULL_FACE);
 	
     std::for_each(all_lights.begin(), all_lights.end(), std::mem_fun(&CLight::Render));
@@ -95,7 +133,6 @@ CLight::CLight (GLvector pos, GLrgba color, int size)
     _blink = false;
     _cell_x = WORLD_TO_GRID(pos.x);
     _cell_z = WORLD_TO_GRID(pos.z);
-    all_lights.push_back(this);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -109,19 +146,21 @@ void CLight::Blink ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+static GLvector VectorToGLvector(Vector *v) { return GLvector(v.x, v.y, v.z); }
+
 void CLight::Render ()
 {
 	if (!Visible (_cell_x, _cell_z))
 		return;
-	GLvector camera = CameraAngle ();
-	GLvector camera_position = CameraPosition ();
+	GLvector camera = VectorToGLvector(CameraAngle());
+	GLvector camera_position = VectorToGLvector(CameraPosition());
     
 	if( (fabs (camera_position.x - _position.x) > RenderFogDistance ())
 	||  (fabs (camera_position.z - _position.z) > RenderFogDistance ())
 	|| (_blink && (GetTickCount () % _blink_interval) > 200) )
 		return;
 
-	int angle = (int)MathAngle (camera.y);
+	int angle = (int)MathAngle1 (camera.y);
 	GLvector2 offset = angles[_size][angle];
 	GLvector pos = _position;
 	

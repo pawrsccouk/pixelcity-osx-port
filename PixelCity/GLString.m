@@ -52,11 +52,12 @@
 
 #import "GLString.h"
 #import "PWGL.h"
+#import "RenderAPI.h"
 
 // The following is a NSBezierPath category to allow
 // for rounded corners of the border
 
-#pragma mark - NSBezierPath Category
+#pragma mark NSBezierPath Category
 
 @implementation NSBezierPath (RoundRect)
 
@@ -91,21 +92,19 @@
 
 @end
 
-
 #pragma mark - GLString
 
-// GLString follows
-
 @implementation GLString
+@synthesize textureId = _textureId, texSize = _texSize, textColor = _textColor, boxColor = _boxColor, borderColor = _borderColor;
+@synthesize marginSize = _marginSize, antialias = _antialias, staticFrame = _staticFrame, frameSize = _frameSize;
 
-#pragma mark - Deallocs
 
 - (void) deleteTexture
 {
-	if (texName && cgl_ctx) {
-		(*cgl_ctx->disp.delete_textures)(cgl_ctx->rend, 1, &texName);
-		texName = 0; // ensure it is zeroed for failure cases
-		cgl_ctx = 0;
+	if (_textureId && _cgl_ctx) {
+		(*_cgl_ctx->disp.delete_textures)(_cgl_ctx->rend, 1, &_textureId);
+		_textureId = 0; // ensure it is zeroed for failure cases
+		_cgl_ctx = 0;
 	}
 }
 
@@ -114,193 +113,218 @@
 	[self deleteTexture];
 }
 
-#pragma mark - Initializers
-
 // designated initializer
-- (id) initWithAttributedString:(NSAttributedString *)attributedString withTextColor:(NSColor *)text withBoxColor:(NSColor *)box withBorderColor:(NSColor *)border
+- (id) initWithAttributedString:(NSAttributedString *)attributedString
+                      textColor:(NSColor *)text
+                       boxColor:(NSColor *)box
+                    borderColor:(NSColor *)border
 {
 	self = [super init];
     if(self) {
-        cgl_ctx = NULL;
-        texName = 0;
-        texSize.width = 0.0f;
-        texSize.height = 0.0f;
-        string = attributedString;
-        textColor = text;
-        boxColor = box;
-        borderColor = border;
-        staticFrame = NO;
-        antialias = YES;
-        marginSize.width = 4.0f; // standard margins
-        marginSize.height = 2.0f;
-        cRadius = 4.0f;
-        requiresUpdate = YES;
+        _cgl_ctx = NULL;
+        _textureId = 0;
+        _texSize.width = 0.0f;
+        _texSize.height = 0.0f;
+        _string = attributedString;
+        _textColor = text;
+        _boxColor = box;
+        _borderColor = border;
+        _staticFrame = NO;
+        _antialias = YES;
+        _marginSize.width = 4.0f; // standard margins
+        _marginSize.height = 2.0f;
+        _cRadius = 4.0f;
+        _requiresUpdate = YES;
             // all other variables 0 or NULL
     }
 	return self;
 }
 
-- (id) initWithString:(NSString *)aString withAttributes:(NSDictionary *)attribs withTextColor:(NSColor *)text withBoxColor:(NSColor *)box withBorderColor:(NSColor *)border
+- (id) initWithString:(NSString *)aString
+           attributes:(NSDictionary *)attribs
+            textColor:(NSColor *)text
+             boxColor:(NSColor *)box
+          borderColor:(NSColor *)border
 {
 	return [self initWithAttributedString:[[NSAttributedString alloc] initWithString:aString attributes:attribs]
-                            withTextColor:text
-                             withBoxColor:box
-                          withBorderColor:border];
+                                textColor:text
+                                 boxColor:box
+                              borderColor:border];
 }
 
 // basic methods that pick up defaults
 - (id) initWithAttributedString:(NSAttributedString *)attributedString;
 {
 	return [self initWithAttributedString:attributedString
-                            withTextColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:1.0f]
-                             withBoxColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]
-                          withBorderColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]];
+                                textColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:1.0f]
+                                 boxColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]
+                              borderColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]];
 }
 
-- (id) initWithString:(NSString *)aString withAttributes:(NSDictionary *)attribs
+- (id) initWithString:(NSString *)aString attributes:(NSDictionary *)attribs
 {
 	return [self initWithAttributedString:[[NSAttributedString alloc] initWithString:aString attributes:attribs]
-                            withTextColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:1.0f]
-                             withBoxColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]
-                          withBorderColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]];
+                                textColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:1.0f]
+                                 boxColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]
+                              borderColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]];
+}
+
+static NSBitmapImageRep* makeBitmap(NSAttributedString *string, CGSize frameSize, CGSize marginSize,
+                                    NSColor *boxColor, NSColor *borderColor, NSColor *textColor,
+                                    BOOL antialias, float cornerRadius)
+{
+    NSBitmapImageRep *bitmap;
+	NSImage *image = [[NSImage alloc] initWithSize:frameSize];
+	[image lockFocus];
+    @try {
+        [[NSGraphicsContext currentContext] setShouldAntialias:antialias];
+        
+        if ([boxColor alphaComponent]) { // this should be == 0.0f but need to make sure
+            [boxColor set];
+            NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(NSMakeRect (0.0f, 0.0f, frameSize.width, frameSize.height) , 0.5, 0.5)
+                                                            cornerRadius:cornerRadius];
+            [path fill];
+        }
+        
+        if ([borderColor alphaComponent]) {
+            [borderColor set];
+            NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(NSMakeRect (0.0f, 0.0f, frameSize.width, frameSize.height), 0.5, 0.5)
+                                                            cornerRadius:cornerRadius];
+            [path setLineWidth:1.0f];
+            [path stroke];
+        }
+        
+        [textColor set];
+        [string drawAtPoint:NSMakePoint (marginSize.width, marginSize.height)]; // draw at offset position
+       bitmap = [[NSBitmapImageRep alloc] initWithFocusedViewRect:NSMakeRect (0.0f, 0.0f, frameSize.width, frameSize.height)];
+    }
+    @finally { [image unlockFocus]; }
+    return bitmap;
+}
+
+static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBitmapImageRep *bitmap, GLuint textureId, BOOL isDecal)
+{
+    pwPushAttrib(GL_TEXTURE_BIT);
+    @try {
+		pwBindTexture(isDecal ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE_EXT, textureId);
+		if (NSEqualSizes(previousSize, texSize)) {
+			pwTexSubImage2D(isDecal ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE_EXT,
+                            0,x,y,texSize.width,texSize.height,
+                            [bitmap hasAlpha] ? GL_RGBA : GL_RGB,GL_UNSIGNED_BYTE,[bitmap bitmapData]);
+		} else {
+			pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			pwTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, texSize.width, texSize.height, 0,
+                         [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
+		}
+    }
+	@finally { pwPopAttrib(); }
 }
 
 - (void) genTexture; // generates the texture without drawing texture to current context
-{
-	NSImage * image;
-	NSBitmapImageRep * bitmap;
-	
-	NSSize previousSize = texSize;
-	
-	if ((NO == staticFrame) && (0.0f == frameSize.width) && (0.0f == frameSize.height)) { // find frame size if we have not already found it
-		frameSize = [string size]; // current string size
-		frameSize.width += marginSize.width * 2.0f; // add padding
-		frameSize.height += marginSize.height * 2.0f;
-	}
-	image = [[NSImage alloc] initWithSize:frameSize];
-	
-	[image lockFocus];
-	[[NSGraphicsContext currentContext] setShouldAntialias:antialias];
-	
-	if ([boxColor alphaComponent]) { // this should be == 0.0f but need to make sure
-		[boxColor set]; 
-		NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(NSMakeRect (0.0f, 0.0f, frameSize.width, frameSize.height) , 0.5, 0.5)
-														cornerRadius:cRadius];
-		[path fill];
+{	
+	if ((NO == _staticFrame) && (0.0f == _frameSize.width) && (0.0f == _frameSize.height)) { // find frame size if we have not already found it
+		_frameSize = [_string size]; // current string size
+		_frameSize.width += _marginSize.width * 2.0f; // add padding
+		_frameSize.height += _marginSize.height * 2.0f;
 	}
 
-	if ([borderColor alphaComponent]) {
-		[borderColor set]; 
-		NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(NSMakeRect (0.0f, 0.0f, frameSize.width, frameSize.height), 0.5, 0.5) 
-														cornerRadius:cRadius];
-		[path setLineWidth:1.0f];
-		[path stroke];
-	}
-	
-	[textColor set]; 
-	[string drawAtPoint:NSMakePoint (marginSize.width, marginSize.height)]; // draw at offset position
-	bitmap = [[NSBitmapImageRep alloc] initWithFocusedViewRect:NSMakeRect (0.0f, 0.0f, frameSize.width, frameSize.height)];
-	[image unlockFocus];
-	texSize.width = [bitmap pixelsWide];
-	texSize.height = [bitmap pixelsHigh];
-	
-	if((cgl_ctx = CGLGetCurrentContext())) { // if we successfully retrieve a current context (required)
-		pwPushAttrib(GL_TEXTURE_BIT);
-		if (0 == texName) glGenTextures (1, &texName);
-		glBindTexture (GL_TEXTURE_RECTANGLE_EXT, texName);
-		if (NSEqualSizes(previousSize, texSize)) {
-			glTexSubImage2D(GL_TEXTURE_RECTANGLE_EXT,0,0,0,texSize.width,texSize.height,[bitmap hasAlpha] ? GL_RGBA : GL_RGB,GL_UNSIGNED_BYTE,[bitmap bitmapData]);
-		} else {
-			glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, texSize.width, texSize.height, 0, [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
-		}
-		pwPopAttrib();
-	} else
+    NSBitmapImageRep *bitmap = makeBitmap(_string, _frameSize, _marginSize, _boxColor, _borderColor, _textColor, _antialias, _cRadius);
+
+	NSSize previousSize = _texSize;
+	_texSize.width = [bitmap pixelsWide];
+	_texSize.height = [bitmap pixelsHigh];
+    
+    if (0 == _textureId) glGenTextures (1, &_textureId);
+	if((_cgl_ctx = CGLGetCurrentContext())) { // if we successfully retrieve a current context (required)
+        pwPushAttrib(GL_TEXTURE_BIT);
+        @try {
+            pwBindTexture(GL_TEXTURE_RECTANGLE_EXT, _textureId);
+            if (NSEqualSizes(previousSize, _texSize)) {
+                pwTexSubImage2D(GL_TEXTURE_RECTANGLE_EXT,
+                                0, 0, 0,_texSize.width, _texSize.height,
+                                [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
+            } else {
+                pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                pwTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _texSize.width, _texSize.height, 0,
+                             [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
+            }
+        }
+        @finally { pwPopAttrib(); }
+    } else
 		NSLog (@"StringTexture -genTexture: Failure to get current OpenGL context\n");
 	
-	requiresUpdate = NO;
+	_requiresUpdate = NO;
 }
 
-#pragma mark - Accessors
-
-- (GLuint) texName
+-(void)drawIntoTexture:(GLuint)textureId x:(int)x y:(int)y width:(GLuint)texWidth height:(GLuint)texHeight
 {
-	return texName;
+    glReportError("drawIntoTexture BEGIN");
+
+    _staticFrame = YES;
+    _frameSize = CGSizeMake(texWidth, texHeight);
+    _texSize   = _frameSize;
+    _marginSize = CGSizeZero;
+
+	if((_cgl_ctx = CGLGetCurrentContext())) {
+        NSBitmapImageRep *bitmap = makeBitmap(_string, _frameSize, _marginSize, _boxColor, _borderColor, _textColor, _antialias, _cRadius);
+        pwPushAttrib(GL_TEXTURE_BIT);
+        @try {
+            pwBindTexture(GL_TEXTURE_2D, textureId);
+            NSAssert(bitmap.hasAlpha, @"Bitmap needs an alpha channel for RGBA textures");
+            pwTexSubImage2D(GL_TEXTURE_2D,
+                            0, x, y, _texSize.width, _texSize.height,
+                            /*[bitmap hasAlpha] ?*/ GL_RGBA /*: GL_RGB*/, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
+        }
+        @finally { pwPopAttrib(); }
+    }
+	else
+		NSLog (@"StringTexture -genTexture: Failure to get current OpenGL context\n");
+    
+    glReportError("drawIntoTexture END");
 }
 
-- (NSSize) texSize
-{
-	return texSize;
-}
 
-#pragma mark Text Color
+#pragma mark Accessors
 
 - (void) setTextColor:(NSColor *)color // set default text color
 {
-	textColor = color;
-	requiresUpdate = YES;
+	_textColor = color;
+	_requiresUpdate = YES;
 }
 
-- (NSColor *) textColor
-{
-	return textColor;
-}
-
-#pragma mark Box Color
 
 - (void) setBoxColor:(NSColor *)color // set default text color
 {
-	boxColor = color;
-	requiresUpdate = YES;
+	_boxColor = color;
+	_requiresUpdate = YES;
 }
 
-- (NSColor *) boxColor
-{
-	return boxColor;
-}
-
-#pragma mark Border Color
 
 - (void) setBorderColor:(NSColor *)color // set default text color
 {
-	borderColor = color;
-	requiresUpdate = YES;
+	_borderColor = color;
+	_requiresUpdate = YES;
 }
 
-- (NSColor *) borderColor
-{
-	return borderColor;
-}
-
-#pragma mark Margin Size
 
 // these will force the texture to be regenerated at the next draw
 - (void) setMargins:(NSSize)size // set offset size and size to fit with offset
 {
-	marginSize = size;
-	if (NO == staticFrame) { // ensure dynamic frame sizes will be recalculated
-		frameSize.width = 0.0f;
-		frameSize.height = 0.0f;
+	_marginSize = size;
+	if (NO == _staticFrame) { // ensure dynamic frame sizes will be recalculated
+		_frameSize.width = 0.0f;
+		_frameSize.height = 0.0f;
 	}
-	requiresUpdate = YES;
+	_requiresUpdate = YES;
 }
 
-- (NSSize) marginSize
-{
-	return marginSize;
-}
 
-#pragma mark Antialiasing
-- (BOOL) antialias
+- (void) setAntialias:(BOOL)request
 {
-	return antialias;
-}
-
-- (void) setAntialias:(bool)request
-{
-	antialias = request;
-	requiresUpdate = YES;
+	_antialias = request;
+	_requiresUpdate = YES;
 }
 
 
@@ -308,33 +332,28 @@
 
 - (NSSize) frameSize
 {
-	if ((NO == staticFrame) && (0.0f == frameSize.width) && (0.0f == frameSize.height)) { // find frame size if we have not already found it
-		frameSize = [string size]; // current string size
-		frameSize.width += marginSize.width * 2.0f; // add padding
-		frameSize.height += marginSize.height * 2.0f;
+	if ((NO == _staticFrame) && (0.0f == _frameSize.width) && (0.0f == _frameSize.height)) { // find frame size if we have not already found it
+		_frameSize = [_string size]; // current string size
+		_frameSize.width += _marginSize.width * 2.0f; // add padding
+		_frameSize.height += _marginSize.height * 2.0f;
 	}
-	return frameSize;
-}
-
-- (BOOL) staticFrame
-{
-	return staticFrame;
+	return _frameSize;
 }
 
 - (void) useStaticFrame:(NSSize)size // set static frame size and size to frame
 {
-	frameSize = size;
-	staticFrame = YES;
-	requiresUpdate = YES;
+	_frameSize = size;
+	_staticFrame = YES;
+	_requiresUpdate = YES;
 }
 
 - (void) useDynamicFrame
 {
-	if (staticFrame) { // set to dynamic frame and set to regen texture
-		staticFrame = NO;
-		frameSize.width = 0.0f; // ensure frame sizes will be recalculated
-		frameSize.height = 0.0f;
-		requiresUpdate = YES;
+	if (_staticFrame) { // set to dynamic frame and set to regen texture
+		_staticFrame = NO;
+		_frameSize.width = 0.0f; // ensure frame sizes will be recalculated
+		_frameSize.height = 0.0f;
+		_requiresUpdate = YES;
 	}
 }
 
@@ -342,12 +361,12 @@
 
 - (void) setString:(NSAttributedString *)attributedString // set string after initial creation
 {
-	string = attributedString;
-	if (NO == staticFrame) { // ensure dynamic frame sizes will be recalculated
-		frameSize.width = 0.0f;
-		frameSize.height = 0.0f;
+	_string = attributedString;
+	if (NO == _staticFrame) { // ensure dynamic frame sizes will be recalculated
+		_frameSize.width = 0.0f;
+		_frameSize.height = 0.0f;
 	}
-	requiresUpdate = YES;
+	_requiresUpdate = YES;
 }
 
 - (void) setString:(NSString *)aString withAttributes:(NSDictionary *)attribs; // set string after initial creation
@@ -356,13 +375,13 @@
 }
 
 
-#pragma mark -  Drawing
+#pragma mark Drawing
 
 - (void) drawWithBounds:(NSRect)bounds
 {
-	if (requiresUpdate)
+	if (_requiresUpdate)
 		[self genTexture];
-	if (texName) {
+	if (_textureId) {
 		pwPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT); // GL_COLOR_BUFFER_BIT for glBlendFunc, GL_ENABLE_BIT for glEnable / glDisable
 		
 		glDisable (GL_DEPTH_TEST); // ensure text is not remove by depth buffer test.
@@ -370,18 +389,18 @@
 		glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // ditto
 		glEnable (GL_TEXTURE_RECTANGLE_EXT);	
 		
-		glBindTexture (GL_TEXTURE_RECTANGLE_EXT, texName);
+		glBindTexture (GL_TEXTURE_RECTANGLE_EXT, _textureId);
 		glBegin (GL_QUADS);
 			glTexCoord2f (0.0f, 0.0f); // draw upper left in world coordinates
 			glVertex2f (bounds.origin.x, bounds.origin.y);
 	
-			glTexCoord2f (0.0f, texSize.height); // draw lower left in world coordinates
+			glTexCoord2f (0.0f, _texSize.height); // draw lower left in world coordinates
 			glVertex2f (bounds.origin.x, bounds.origin.y + bounds.size.height);
 	
-			glTexCoord2f (texSize.width, texSize.height); // draw upper right in world coordinates
+			glTexCoord2f (_texSize.width, _texSize.height); // draw upper right in world coordinates
 			glVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y + bounds.size.height);
 	
-			glTexCoord2f (texSize.width, 0.0f); // draw lower right in world coordinates
+			glTexCoord2f (_texSize.width, 0.0f); // draw lower right in world coordinates
 			glVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y);
 		glEnd ();
 		
@@ -391,10 +410,13 @@
 
 - (void) drawAtPoint:(NSPoint)point
 {
-	if (requiresUpdate)
+	if (_requiresUpdate)
 		[self genTexture]; // ensure size is calculated for bounds
-	if (texName) // if successful
-		[self drawWithBounds:NSMakeRect (point.x, point.y, texSize.width, texSize.height)];
+
+	if (_textureId) // if successful
+		[self drawWithBounds:NSMakeRect (point.x, point.y, _texSize.width, _texSize.height)];
 }
 
+
 @end
+

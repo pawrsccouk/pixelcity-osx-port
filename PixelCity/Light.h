@@ -1,24 +1,21 @@
-#import "glRGBA.h"
+#ifndef _LIGHT_H_
+#define _LIGHT_H_
 
-class CLight
-{
-  GLvector        _position;
-  GLrgba          _color;
-  int             _size;
-  float           _vert_size;
-  float           _flat_size;
-  bool            _blink;
-  unsigned long   _blink_interval;
-  int             _cell_x;
-  int             _cell_z;
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-public:
-  CLight(GLvector pos, GLrgba color, int size);
-  void            Render ();
-  void            Blink ();
+    void  LightRender (void);
+    
+    void  LightClear (void);
+    
+    unsigned long   LightCount (void);
+    
+    void LightAdd(Vector *position, NSColor *color, int size, BOOL blink);
 
-};
+#if defined(__cplusplus)
+}
+#endif
 
-void  LightRender ();
-void  LightClear ();
-unsigned long LightCount ();
+
+#endif // _LIGHT_H_

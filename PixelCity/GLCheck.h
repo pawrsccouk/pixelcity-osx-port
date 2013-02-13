@@ -53,7 +53,7 @@
 // Copyright ( C ) 2003-2007 Apple Inc. All Rights Reserved.
 //
 
-#include <ApplicationServices/ApplicationServices.h>
+#import <ApplicationServices/ApplicationServices.h>
 #import <OpenGL/gl.h> // PAW for GLint
 
 typedef struct {

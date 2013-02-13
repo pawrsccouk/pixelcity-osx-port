@@ -12,27 +12,27 @@
 
 #define MOUSE_MOVEMENT          0.5f
 
-#include <math.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <sys/time.h>
-//#include <scrnsave.h>
+#import <math.h>
+#import <stdarg.h>
+#import <string.h>
+#import <stdio.h>
+#import <time.h>
+#import <sys/time.h>
 
-#include "camera.h"
-#include "car.h"
-#include "entity.h"
-#include "glTypes.h"
-#include "ini.h"
-#include "macro.h"
-#include "random.h"
-#include "render.h"
-#include "texture.h"
-#include "win.h"
-#include "world.h"
-#include "visible.h"
-#include "PWGL.h"
+#import "camera.h"
+#import "car.h"
+#import "entity.h"
+#import "glTypes.h"
+#import "ini.h"
+#import "macro.h"
+#import "random.h"
+#import "render.h"
+#import "texture.h"
+#import "win.h"
+#import "world.h"
+#import "visible.h"
+#import "PWGL.h"
+#import "RenderAPI.h"
 
 /*
 #pragma comment(lib, "opengl32.lib")
@@ -143,9 +143,7 @@ void WinTerm (void)
 }
 */
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*
 HWND WinHwnd (void)
 {
@@ -153,38 +151,39 @@ HWND WinHwnd (void)
 }
 */
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void AppQuit ()
 {
   quit = true;
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void AppUpdate (int width, int height)
 {
 	DebugLog("AppUpdate");
 	glReportError("AppUpdate begins");
+    
 	CameraUpdate ();
 	glReportError("AppUpdate:After CameraUpdate");
+    
 	EntityUpdate ();
 	glReportError("AppUpdate:After EntityUpdate");
+    
 	WorldUpdate  ();
 	glReportError("AppUpdate:After WorldUpdate");
-	TextureUpdate();
-	glReportError("AppUpdate:After TextureUpdate");
-	//cleanup and restore the viewport after TextureUpdate()
+    
+        //cleanup and restore the viewport after TextureUpdate()
 	RenderResize (width, height); 
 	glReportError("AppUpdate:After RenderResize");
+    
 	VisibleUpdate();
 	glReportError("AppUpdate:After VisibleUpdate");
+    
 	CarUpdate    ();
 	glReportError("AppUpdate:After CarUpdate");
+    
 	RenderUpdate (width, height);
 	glReportError("AppUpdate:After RenderUpdate");
 }
@@ -211,11 +210,9 @@ void AppInit(int width, int height)
 void AppTerm (void) 
 {
 	DebugLog("AppTerm");
-  TextureTerm ();
-  WorldTerm ();
-  RenderTerm ();
-//  CameraTerm ();
-//  WinTerm ();
+    TextureTerm ();
+    WorldTerm ();
+    RenderTerminate();
 }
 
 void AppResize(int width, int height)

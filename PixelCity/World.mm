@@ -15,31 +15,28 @@
 #define HUE_COUNT         (sizeof(hue_list)/sizeof(float))
 #define LIGHT_COLOR_COUNT (sizeof(light_colors)/sizeof(HSL))
 
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-//#include <gl\glaux.h>
-#include <math.h>
-#include <time.h>
-#include <vector>
-#include <assert.h>
+#import <math.h>
+#import <time.h>
+#import <vector>
+#import <assert.h>
 
-#include "glTypes.h"
-#include "building.h"
-#include "car.h"
-#include "deco.h"
-#include "camera.h"
-#include "light.h"
-#include "macro.h"
-#include "mathx.h"
-#include "mesh.h"
-#include "random.h"
-#include "render.h"
-#include "sky.h"
-#include "texture.h"
-#include "visible.h"
-#include "win.h"
-#include "world.h"
-#include "PWGL.h"
+#import "glTypes.h"
+#import "glTypesObjC.h"
+#import "building.h"
+#import "car.h"
+#import "deco.h"
+#import "light.h"
+#import "macro.h"
+#import "mathx.h"
+#import "mesh.h"
+#import "random.h"
+#import "render.h"
+#import "sky.h"
+#import "texture.h"
+#import "visible.h"
+#import "win.h"
+#import "world.h"
+#import "PWGL.h"
 
 using namespace std;
 
@@ -103,7 +100,6 @@ static HSL            light_colors[] =
 static GLrgba         g_bloom_color;
 static long           g_last_update;
 static char           g_world[WORLD_SIZE][WORLD_SIZE];
-static CSky*          g_sky;
 static unsigned long  g_fade_start = 0;
 static float          g_fade_current = 0.0f;
 static unsigned long  g_scene_begin = 0;
@@ -709,8 +705,9 @@ void WorldInit (void)
 	g_last_update = GetTickCount ();
 	
 	for (int i = 0; i < CARS; i++)
-		new CCar ();
-	g_sky = new CSky ();
+        CarAdd();
+    
+    SkyInit();
 	
 	WorldReset ();
 	g_fade_state = FADE_OUT;
@@ -750,6 +747,16 @@ MakeDisplayList::~MakeDisplayList()
 	--nestCount;
 }
 
+
+PWMatrixStacker::PWMatrixStacker()
+{
+    pwPushMatrix();
+}
+
+PWMatrixStacker::~PWMatrixStacker()
+{
+    pwPopMatrix();
+}
 
 DebugRep::DebugRep(const char* location)
 : _location(location)

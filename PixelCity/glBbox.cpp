@@ -13,10 +13,10 @@
 
 #define MAX_VALUE               999999999999999.9f
 
-#include <math.h>
+#import <math.h>
 
-#include "macro.h"
-#include "glTypes.h"
+#import "macro.h"
+#import "glTypes.h"
 
 /*-----------------------------------------------------------------------------
 Does the given point fall within the given Bbox?

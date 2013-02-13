@@ -10,22 +10,22 @@
 
 -----------------------------------------------------------------------------*/
 
-#define MAX_VBUFFER         256
+static const int MAX_VBUFFER = 256;
 
-#include <math.h>
-#include <OpenGL/gl.h>
-#include "glTypes.h"
+#import <math.h>
+#import "glTypes.h"
+#import "glTypesObjC.h"
+#import "light.h"
 
-#include "building.h"
-#include "deco.h"
-#include "light.h"
-#include "mesh.h"
-#include "macro.h"
-#include "mathx.h"
-#include "random.h"
-#include "texture.h"
-#include "world.h"
-#include "win.h"
+#import "building.h"
+#import "deco.h"
+#import "mesh.h"
+#import "macro.h"
+#import "mathx.h"
+#import "random.h"
+#import "texture.h"
+#import "world.h"
+#import "win.h"
 
 //This is used by the recursive roof builder to decide what items may be added.
 enum
@@ -38,10 +38,13 @@ enum
 };
 
 static GLvector         vector_buffer[MAX_VBUFFER];
+static short LIGHT_SIZE = 1;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 CBuilding::CBuilding (BuildingType type, int x, int y, int height, int width, int depth, int seed, GLrgba color)
+:    _color(color.colorWithAlpha(0.1f))
+,    _trim_color(WorldLightColor (seed))
 {
     _x = x;
     _y = y;
@@ -51,11 +54,9 @@ CBuilding::CBuilding (BuildingType type, int x, int y, int height, int width, in
     _center = glVector (float(_x + width / 2), 0.0f, float(_y + depth / 2));
     _seed = seed;
     _texture_type = RandomInt();
-    _color = color.colorWithAlpha(0.1f);
     _have_lights =  _have_logo = _have_trim = false;
     _roof_tiers = 0;
         //Pick a color for logos & roof lights
-    _trim_color = WorldLightColor (seed);
     _mesh       = new CMesh; //The main textured mesh for the building
     _mesh_flat  = new CMesh; //Flat-color mesh for untextured detail items.
     switch (type) {
@@ -116,12 +117,7 @@ void CBuilding::RenderFlat (bool colored)
 
 static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
 {
-    GLvertex vert;
-    vert.bone = 0;
-    vert.color = glRgba(1.0f, 1.0f, 1.0f);
-    vert.position = glVector(x, y, z);
-    vert.uv = glVector(u, v);
-    return vert;
+    return GLvertex(glVector(x, y, z), glVector(u, v), GLrgba(1.0f, 1.0f, 1.0f, 1.0f), 0);
 }
 
 void CBuilding::ConstructCube (int left, int right, int front, int back, int bottom, int top)
@@ -198,11 +194,16 @@ void CBuilding::ConstructCube (float left, float right, float front, float back,
 
 }
 
-/*-----------------------------------------------------------------------------
+static void addLight(const GLvector &position, const GLrgba &color, int size)
+{
+    LightAdd([Vector vectorWithX:position.x Y:position.y Z:position.z],
+             [NSColor colorWithDeviceRed:color.red() green:color.green() blue:color.blue() alpha:color.alpha()], 
+             size,  NO);
+}
 
+/*-----------------------------------------------------------------------------
   This will take the given area and populate it with rooftop stuff like
   air conditioners or light towers.
-
 -----------------------------------------------------------------------------*/
 
 void CBuilding::ConstructRoof (float left, float right, float front, float back, float bottom)
@@ -262,10 +263,10 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
         vector_buffer[3] = glVector (right, bottom, back);
         d->CreateLightTrim (vector_buffer, 4, (float)RandomInt (2) + 1.0f, _seed, _trim_color);
     } else if (addon == ADDON_LIGHTS && !_have_lights) {
-        new CLight(glVector (left , (float)(bottom + 2), front), _trim_color, 2);
-        new CLight(glVector (right, (float)(bottom + 2), front), _trim_color, 2);
-        new CLight(glVector (right, (float)(bottom + 2), back ), _trim_color, 2);
-        new CLight(glVector (left , (float)(bottom + 2), back ), _trim_color, 2);
+        addLight(glVector (left , (float)(bottom + 2), front), _trim_color, LIGHT_SIZE);
+        addLight(glVector (right, (float)(bottom + 2), front), _trim_color, LIGHT_SIZE);
+        addLight(glVector (right, (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE);
+        addLight(glVector (left , (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE);
         _have_lights = true;
     }
     bottom += (float)height;

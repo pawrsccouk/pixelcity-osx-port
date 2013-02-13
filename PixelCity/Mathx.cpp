@@ -10,16 +10,16 @@
 
 -----------------------------------------------------------------------------*/
 
-#include <math.h>
+#import "mathx.h"
 
-#include "macro.h"
-#include "mathx.h"
+#import <math.h>
+#import "macro.h"
 
 /*-----------------------------------------------------------------------------
 Keep an angle between 0 and 360
 -----------------------------------------------------------------------------*/
 
-float MathAngle (float angle)
+float MathAngle1(float angle)
 {
 
   if (angle < 0.0f) 
@@ -34,7 +34,7 @@ float MathAngle (float angle)
 Get an angle between two given points on a grid
 -----------------------------------------------------------------------------*/
 
-float MathAngle (float x1, float y1, float x2, float y2)
+float MathAngle2(float x1, float y1, float x2, float y2)
 {
 
   float   x_delta;

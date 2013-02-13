@@ -13,6 +13,7 @@
 #import "win.h"
 #import "ini.h"
 #import "RenderAPI.h"
+#import "PWGL.h"
 
 // ==================================
 
@@ -35,20 +36,24 @@ short cube_faces [6][4] = {
 	{3, 2, 1, 0},    {2, 3, 7, 6},    {0, 1, 5, 4},    {3, 0, 4, 7},    {1, 2, 6, 5},    {4, 5, 6, 7} 
 };
 
-Vector gOrigin = {0.0, 0.0, 0.0};
+Vector3 gOrigin = {0.0, 0.0, 0.0};
 
 // single set of interaction flags and states
 GLint gDollyPanStartPoint[2] = {0, 0};
 GLfloat gTrackBallRotation [4] = {0.0f, 0.0f, 0.0f, 0.0f};
 GLboolean gDolly = GL_FALSE, gPan = GL_FALSE, gTrackball = GL_FALSE;
-BasicOpenGLView * gTrackingViewInfo = NULL;
+__weak BasicOpenGLView * gTrackingViewInfo = nil;
 
 // time and message info
 CFAbsoluteTime gMsgPresistance = 10.0f;
 
 // error output
-//GLString * gErrStringTex;
 float gErrorTime;
+
+// Hack - assumes there will be only one OpenGL view. Needed to convert between the OpenGL Objective-C object
+// and the C runtime API.
+
+__weak BasicOpenGLView *theOpenGLView = nil;
 
 // ==================================
 
@@ -157,34 +162,27 @@ void glReportError (const char* strLocation)
 // update the projection matrix based on camera and view info
 - (void) updateProjection
 {
-	GLdouble ratio, radians, wd2;
-	GLdouble left, right, top, bottom, near, far;
-
     [[self openGLContext] makeCurrentContext];
 
-	// set projection
+        // set projection
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity ();
-	near = -camera.viewPos.z - shapeSize * 0.5;
+    
+	GLdouble near = -camera.viewPos.z - shapeSize * 0.5;
 	if (near < 0.00001)
 		near = 0.00001;
-	far = -camera.viewPos.z + shapeSize * 0.5;
+    
+	GLdouble far = -camera.viewPos.z + shapeSize * 0.5;
 	if (far < 1.0)
 		far = 1.0;
-	radians = 0.0174532925 * camera.aperture / 2; // half aperture degrees to radians 
-	wd2 = near * tan(radians);
-	ratio = camera.viewWidth / (float) camera.viewHeight;
-	if (ratio >= 1.0) {
-		left  = -ratio * wd2;
-		right = ratio * wd2;
-		top = wd2;
-		bottom = -wd2;	
-	} else {
-		left  = -wd2;
-		right = wd2;
-		top = wd2 / ratio;
-		bottom = -wd2 / ratio;	
-	}
+	GLdouble radians = 0.0174532925 * camera.aperture / 2; // half aperture degrees to radians
+	GLdouble wd2 = near * tan(radians);
+	
+    GLdouble ratio = camera.viewWidth / (float)camera.viewHeight;
+	GLdouble left = (ratio >= 1.0) ? -ratio * wd2 : -wd2,
+            right = (ratio >= 1.0) ?  ratio * wd2 :  wd2,
+              top = (ratio >= 1.0) ?  wd2 :  wd2 / ratio,
+           bottom = (ratio >= 1.0) ? -wd2 : -wd2 / ratio;
 	glFrustum (left, right, bottom, top, near, far);
 	
 	glReportError("updateProjection");
@@ -197,7 +195,7 @@ void glReportError (const char* strLocation)
 {
     [[self openGLContext] makeCurrentContext];
 	
-	// move view
+        // move view
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
 	gluLookAt (camera.viewPos.x, camera.viewPos.y, camera.viewPos.z,
@@ -206,16 +204,18 @@ void glReportError (const char* strLocation)
 			   camera.viewPos.z + camera.viewDir.z,
 			   camera.viewUp.x, camera.viewUp.y ,camera.viewUp.z);
 			
-	// if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
+        // if we have trackball rotation to map (this IS the test I want as it can be explicitly 0.0f)
 	if ((gTrackingViewInfo == self) && gTrackBallRotation[0] != 0.0f) 
 		glRotatef (gTrackBallRotation[0], gTrackBallRotation[1], gTrackBallRotation[2], gTrackBallRotation[3]);
-	else {
-	}
-	// accumlated world rotation via trackball
+
+        // accumlated world rotation via trackball
 	glRotatef (worldRotation[0], worldRotation[1], worldRotation[2], worldRotation[3]);
-	// object itself rotating applied after camera rotation
+    
+        // object itself rotating applied after camera rotation
 	glRotatef (objectRotation[0], objectRotation[1], objectRotation[2], objectRotation[3]);
-	cubeSpin[0].rotation = 0.0f; // reset animation rotations (do in all cases to prevent rotating while moving with trackball)
+    
+        // reset animation rotations (do in all cases to prevent rotating while moving with trackball)
+	cubeSpin[0].rotation = 0.0f;
 	cubeSpin[1].rotation = 0.0f;
 	cubeSpin[2].rotation = 0.0f;
 	glReportError("GLModelView");
@@ -319,15 +319,72 @@ void glReportError (const char* strLocation)
 		[self drawRect:[self bounds]]; // redraw now instead dirty to enable updates during live resize
 }
 
-#pragma mark ---- IB Actions ----
 
--(IBAction) animate: (id) sender
+-(void)drawOverlayText:(NSString*)overlayText
 {
-	fAnimate = ! fAnimate;
-    [animateMenuItem setState: fAnimate ? NSOnState : NSOffState];
+    CGRect bounds = self.bounds;
+        // TODO: If this is slow, try cacheing the glString objects by the text, so they don't need to be regenerated each time.
+        // The text is mostly boilerplate and there isn't that much of it.
+    static NSMutableDictionary *cachedStrings;
+    static CGSize lastSize = { 0, 0 };
+    if(!cachedStrings) cachedStrings = [NSMutableDictionary dictionary];
+    if(lastSize.width <= 0 || lastSize.height <= 0) lastSize = bounds.size;
+    
+        // Clear the cache if the image size has changed.
+    if( ! CGSizeEqualToSize(lastSize, bounds.size) ) {
+        [cachedStrings removeAllObjects];
+        lastSize = bounds.size;
+    }
+    
+    GLString *glString = cachedStrings[overlayText];
+    if(! glString) {
+        glString = [[GLString alloc] initWithString:overlayText attributes:@{
+                    NSForegroundColorAttributeName : [NSColor whiteColor],
+                    NSFontAttributeName            : [NSFont fontWithName: @"Helvetica-Bold" size: 12.0f] }];
+        
+        [glString useDynamicFrame];
+        cachedStrings[overlayText] = glString;
+    }
+    
+    pwMatrixMode (GL_PROJECTION);
+    pwPushMatrix();
+    @try {
+        pwLoadIdentity();
+        glOrtho(0, bounds.size.width, bounds.size.height, 0, 0.1f, 2048);	glReportError("glOrtho");
+        
+        pwMatrixMode (GL_MODELVIEW);
+        pwPushMatrix ();
+        @try {
+            pwLoadIdentity();
+            pwTranslatef(0, 0, -1.0f);
+            pwDisable(GL_BLEND);
+            pwDisable(GL_FOG);
+            pwDisable(GL_TEXTURE_2D);
+            pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            [glString drawAtPoint:bounds.origin];
+        }
+        @finally {
+            pwPopMatrix();
+            glMatrixMode(GL_PROJECTION);
+        }
+    }
+    @finally {
+        pwPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+    }
 }
 
-// ---------------------------------
+
+
+#pragma mark ---- IB Actions ----
+
+    // Dump logs and debug info to the console.
+-(IBAction) info: (id) sender
+{
+    EntityDump();
+}
+
 
 static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), bool *pFlag)
 {
@@ -337,10 +394,9 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), bool *pFlag)
         pbl(*pFlag);
 }
 
-    // Dump logs and debug info to the console.
--(IBAction) info: (id) sender
+-(IBAction) animate: (id) sender
 {
-    EntityDump();
+    toggleFlag(animateMenuItem, nil, &fAnimate);
 }
 
 -(IBAction)toggleWireframe:(id)sender
@@ -363,8 +419,7 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), bool *pFlag)
 
 -(IBAction) toggleFPS:       (id) sender
 {
-	// PAW disabled until I can get text working again.
-    NSLog(@"toggleFPS disabled for now");
+    toggleFlag(FPSToggleMenuItem, ^(bool b) {  RenderSetFPS(b); }, &fFPS);
 }
 
 -(IBAction) toggleFog:       (id) sender
@@ -377,11 +432,6 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), bool *pFlag)
     toggleFlag(flatToggleMenuItem, ^(bool b) { RenderSetFlat(b); }, &fFlat);
 }
 
-static void SetDebugLog(bool debugLog)
-{
-    
-}
-
 -(IBAction)toggleDebugLog:(id)sender
 {
     toggleFlag(debugLogToggleMenuItem, nil, &fDebugLog);
@@ -389,24 +439,26 @@ static void SetDebugLog(bool debugLog)
 
 -(IBAction) toggleHelp:      (id) sender
 {
-	// PAW disabled until I can get text working again.
-    NSLog(@"toggleHelp temporarily disabled.");
+    toggleFlag(helpToggleMenuItem, ^(bool b) { RenderSetHelpMode(b); }, &fHelp);
 }
 
 -(IBAction)toggleNormalized:(id)sender
 {
     toggleFlag(normalizeToggleMenuItem, ^(bool b) { RenderSetNormalized(b); }, &fNormalize);
 }
+
+
+
+
 #pragma mark ---- Method Overrides ----
 
-// ---------------------------------
+
+
 
 - (void) drawRect:(NSRect)rect
 {		
 	glReportError("drawRect:Beginning");
 	// setup viewport and prespective
-//	[self resizeGL]; // forces projection matrix update (does test for size changes)
-//	[self updateModelView];  // update model view matrix for object
 
 	NSRect r = [self bounds];
 	AppUpdate(r.size.width, r.size.height);
@@ -419,10 +471,10 @@ static void SetDebugLog(bool debugLog)
 	glReportError("drawRect:End");
 }
 
-// ---------------------------------
 
-// set initial OpenGL state (current context is set)
-// called after context is created
+
+
+// set initial OpenGL state (current context is set). called after context is created
 - (void) prepareOpenGL
 {
     GLint swapInt = 1;
@@ -436,10 +488,11 @@ static void SetDebugLog(bool debugLog)
 	AppResize(r.size.width, r.size.height);	
 	glReportError("prepareOpenGL");
 }
-// ---------------------------------
 
-// this can be a troublesome call to do anything heavyweight, as it is called on window moves, resizes, and display config changes.  So be
-// careful of doing too much here.
+
+
+// this can be a troublesome call to do anything heavyweight, as it is called on window moves, resizes, and display config changes.
+// So be careful of doing too much here.
 - (void) update // window resizes, moves and display changes (resize, depth and display config change)
 {
 	[super update];
@@ -453,41 +506,25 @@ static void SetDebugLog(bool debugLog)
 
 -(id) initWithFrame: (NSRect) frameRect
 {
-	NSOpenGLPixelFormat * pf = [BasicOpenGLView basicPixelFormat];
-
-	self = [super initWithFrame: frameRect pixelFormat: pf];
+	self = [super initWithFrame:frameRect pixelFormat:[BasicOpenGLView basicPixelFormat]];
     if(self) {
             //load in our settings
         fLetterbox = IniInt("Letterbox") != 0;
         fWireframe = IniInt("Wireframe") != 0;
         fFog       = IniInt("ShowFog")   != 0;
         fFlat      = IniInt("Flat")      != 0;
-//        fShowFPS       = IniInt("ShowFPS")   != 0;
+        fFPS       = IniInt("ShowFPS")   != 0;
         fDebugLog  = false;
+        
+        NSAssert(theOpenGLView == nil, @"theOpenGLView already had a value. Is there more than one opengl view?");
+        theOpenGLView = self;
     }
     return self;
 }
 
-// ---------------------------------
-
-- (BOOL)acceptsFirstResponder
-{
-  return YES;
-}
-
-// ---------------------------------
-
-- (BOOL)becomeFirstResponder
-{
-  return  YES;
-}
-
-// ---------------------------------
-
-- (BOOL)resignFirstResponder
-{
-  return YES;
-}
+- (BOOL)acceptsFirstResponder { return YES; }
+- (BOOL)becomeFirstResponder  { return YES; }
+- (BOOL)resignFirstResponder  { return YES; }
 
 // ---------------------------------
 
@@ -517,5 +554,72 @@ static void SetDebugLog(bool debugLog)
 	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode]; // ensure timer fires during resize (otherwise the cube will freeze when resizing).
 }
 
+#pragma mark - NSWindow delegate
+
+-(void)windowWillClose:(NSNotification *)notification
+{
+    NSAssert(notification.object == self.window, @"The object %@ is not our window.", notification.object);
+    RenderTerminate();  // Stop any OpenGL renders and wait for the window to be closed.
+}
 
 @end
+
+
+
+void RenderPrintOverlayText(int line, const char *fmt, ...)
+{
+    NSString *text, *fmtText = [NSString stringWithUTF8String:fmt];
+    va_list args;
+    va_start(args, fmt);
+    @try { text = [[NSString alloc] initWithFormat:fmtText arguments:args]; }
+    @finally {  va_end(args); }
+    
+    assert(theOpenGLView);
+    [theOpenGLView drawOverlayText:text];
+}
+
+static NSArray *getFontAttributes()
+{
+    static NSMutableArray *fontAttribs;
+    if(!fontAttribs) {
+        NSString *fontNames[] = { @"Helvetica", @"Courier New", @"Arial Black", @"Impact", @"Chalkboard", @"Baskerville" };
+        int arraySize = sizeof(fontNames) / sizeof(fontNames[0]);
+        fontAttribs = [NSMutableArray arrayWithCapacity:6];
+        
+        for(NSUInteger i = 0; i < arraySize; i++) {
+            NSFont *font = [NSFont fontWithName:fontNames[i] size:18];
+            if(font)
+                [fontAttribs addObject:@{
+                  NSFontAttributeName            : font,
+                  NSForegroundColorAttributeName : [NSColor whiteColor]}];
+            else  NSLog(@"Font %@ could not be created.", fontNames[i]);
+        }
+    }
+    return fontAttribs;
+}
+
+int RenderGetNumFonts()
+{
+    return (int)getFontAttributes().count;
+}
+
+void RenderPrintIntoTexture(GLuint textureId, int x, int y, int texWidth, int texHeight,
+                            int font, float red, float green, float blue, float alpha,
+                            const char *fmt, ...)
+{
+    NSString *text, *fmtText = [NSString stringWithUTF8String:fmt];
+    va_list args;
+    va_start(args, fmt);
+    @try { text = [[NSString alloc] initWithFormat:fmtText arguments:args]; }
+    @finally {  va_end(args); }
+    
+    NSDictionary *stringAttrs = getFontAttributes()[font];
+    assert(stringAttrs[NSFontAttributeName]);
+    GLString *glString = [[GLString alloc] initWithString:text
+                                               attributes:stringAttrs
+                                                textColor:[NSColor whiteColor]
+                                                 boxColor:[NSColor redColor]
+                                              borderColor:[NSColor greenColor]];
+    [glString drawIntoTexture:textureId x:x y:y width:texWidth height:texHeight];
+}
+

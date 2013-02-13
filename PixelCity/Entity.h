@@ -1,5 +1,5 @@
 #ifndef TYPES
-#include "glTypes.h"
+#import "glTypes.h"
 #endif
 
 #ifndef ENTITY
@@ -33,7 +33,7 @@ void      EntityClear ();
 int       EntityCount (void);
 float     EntityProgress ();
 bool      EntityReady ();
-void      EntityRender (void);
+void      EntityRender (bool showFlat);
 void      EntityUpdate (void);
 int       EntityPolyCount (void);
 void      EntityDump(std::ostream &os);

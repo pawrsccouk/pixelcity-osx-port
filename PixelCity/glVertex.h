@@ -9,11 +9,15 @@
 #ifndef PixelCity_glVertex_h
 #define PixelCity_glVertex_h
 
-#include "glTypes.h"
-#include "GLrgba.h"
+#import "glTypes.h"
+#import "GLrgba.h"
 
 struct GLvertex
 {
+    GLvertex();
+    GLvertex(const GLvector3 &position, const GLvector2 &uv, const GLrgba &color, int bone = 0);
+    GLvertex(const GLvector3 &position, const GLvector2 &uv);
+    
     GLvector3   position;
     GLvector2   uv;
     GLrgba      color;

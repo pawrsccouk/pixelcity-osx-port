@@ -19,12 +19,12 @@
 #define INI_FILE            ".\\" APP ".ini"
 #define SECTION             "Settings"
 
-#include <stdio.h>
-#include <stdlib.h>
-//#include "glTypes.h"
+#import <stdio.h>
+#import <stdlib.h>
+//#import "glTypes.h"
 
-#include "ini.h"
-//#include "win.h"
+#import "ini.h"
+//#import "win.h"
 
 // Get the user defaults, creating and registering them if necessary.
 static NSUserDefaults* GetUserDefaults()

@@ -56,14 +56,14 @@
 // see glcheck.h for more explanation on the use of CheckOpenGLCaps and it's associated data
 
  
-#include "GLCheck.h"
+#import "GLCheck.h"
 
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <OpenGL/glext.h>
+#import <OpenGL/OpenGL.h>
+#import <OpenGL/gl.h>
+#import <OpenGL/glu.h>
+#import <OpenGL/glext.h>
 
-#include <string.h>
+#import <string.h>
 
 // -------------------------
 

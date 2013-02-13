@@ -10,13 +10,13 @@
 
 -----------------------------------------------------------------------------*/
 
-#include <float.h>
-#include <math.h>
-#include <OpenGL/gl.h>
+#import <float.h>
+#import <math.h>
+#import <OpenGL/gl.h>
 
-#include "glTypes.h"
-#include "mathx.h"
-#include "macro.h"
+#import "glTypes.h"
+#import "mathx.h"
+#import "macro.h"
 
 /*-----------------------------------------------------------------------------
                            

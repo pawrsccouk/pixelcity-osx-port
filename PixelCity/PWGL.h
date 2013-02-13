@@ -9,8 +9,8 @@
 #ifndef PixelCity_PWGL_h
 #define PixelCity_PWGL_h
 
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+#import <OpenGL/gl.h>
+#import <OpenGL/glu.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +50,8 @@ void pwTexParameteri(GLenum target, GLenum pname, GLenum param);
 void pwCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
 void pwGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid *pixels);
 GLint pwuBuild2DMipmaps( GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data );
-
+void pwTexSubImage2D (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
+                      GLenum format, GLenum type, const GLvoid *pixels);
 
     // Replacements for glPush/PopMatrix that track and debug.
 void pwPushMatrix(void);

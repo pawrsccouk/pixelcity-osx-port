@@ -47,9 +47,9 @@
 // Copyright ( C ) 2000-2007 Apple Inc. All Rights Reserved.
 //
 
-#include "trackball.h"
+#import "trackball.h"
 
-#include <math.h>
+#import <math.h>
 
 static const float kTol = 0.001;
 static const float kRad2Deg = 180. / 3.1415927;

@@ -74,11 +74,12 @@
 #define EulOrdXYZr    EulOrd(Z,EulParOdd,EulRepNo,EulFrmR)
 #define EulOrdZYZr    EulOrd(Z,EulParOdd,EulRepYes,EulFrmR)
 
-#include <math.h>
-#include <float.h>
+#import <math.h>
+#import <float.h>
 
-#include "macro.h"
-#include "glTypes.h"
+#import "macro.h"
+#import "glTypes.h"
+#import "Mathx.h"
 
 static float      identity[4][4] = 
 {

@@ -15,16 +15,16 @@
 
 -----------------------------------------------------------------------------*/
 
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+#import <OpenGL/gl.h>
+#import <OpenGL/glu.h>
 
-#include <vector>
-#include <assert.h>
-#include "glTypes.h"
-#include "Mesh.h"
-#include "World.h"
-#include "Win.h"
-#include <iterator>
+#import <vector>
+#import <assert.h>
+#import "glTypes.h"
+#import "Mesh.h"
+#import "World.h"
+#import "Win.h"
+#import <iterator>
 
 /*-----------------------------------------------------------------------------
 

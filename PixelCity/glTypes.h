@@ -1,10 +1,11 @@
 #ifndef glTYPES
 #define glTYPES
 
-#include <iostream>
 #import <OpenGL/OpenGL.h>
+//static const int GL_CLAMP_TO_EDGE = 0x812F;
 
-#define GL_CLAMP_TO_EDGE 0x812F
+#import <iostream>
+
 
 #define OPERATORS(type)                 \
   type();                               \
@@ -27,27 +28,17 @@
   bool    operator== (const type& c);   \
   std::ostream &operator<<(std::ostream &os) const;
 
-#define JOINT_MAX_CHILDREN  8
-
-struct GLquat
-{
-  float       x;
-  float       y;
-  float       z;
-  float       w;
-};
-
-struct GLvector
+typedef struct GLvector
 {
   float       x;
   float       y;
   float       z;
   OPERATORS(GLvector);
   GLvector(float xx, float yy, float zz) : x(xx), y(yy), z(zz) {}
-};
+} GLvector, GLvector3;
+
 inline std::ostream &operator<<(std::ostream &os, const GLvector &v) { return v.operator<<(os); }
 
-typedef GLvector       GLvector3;
 
 struct GLvector2
 {
@@ -57,10 +48,6 @@ struct GLvector2
 };
 inline std::ostream &operator<<(std::ostream &os, const GLvector2 &v) { return v.operator<<(os); }
 
-struct GLmatrix
-{
-  float elements[4][4];
-};
 
 struct GLbbox
 {
@@ -68,87 +55,23 @@ struct GLbbox
   GLvector3   max;
 };
 
-struct GLrect
+struct GLmatrix
 {
-  float       left;
-  float       top;
-  float       right;
-  float       bottom;
+  float elements[4][4];
 };
 
-struct GLtriangle
+struct GLquat
 {
-  int         v1;
-  int         v2;
-  int         v3;
-  int         normal1;
-  int         normal2;
-  int         normal3;
+    float       x;
+    float       y;
+    float       z;
+    float       w;
 };
 
-/*
-class GLmodel
-{
-public:
-  unsigned    vertex_count;
-  unsigned    triangle_count;
-  unsigned    normal_count;
-  GLvertex*   vertex;  
-  GLvector*   normal;
-  GLtriangle* triangle;
-
-  void        TriangleRender (unsigned n);
-  GLtriangle* TriangleAdd (unsigned v1, int unsigned, int unsigned);
-  GLtriangle* TriangleAdd (GLtriangle c);
-  void        NormalAdd (GLvector n);
-  void        VertexAdd (GLvertex v);
-              GLmodel ();
-              ~GLmodel ();
-  void        Render ();
-  GLbbox      BBox ();
-private:
-  GLbbox      m_bbox;
-
-};
-
-struct GLkeyframe
-{
-  float     time;
-  GLvector  offset;
-  GLvector  rotation;
-};
-
-struct GLsegment
-{
-  int           index;
-  GLvector      rotation;
-  GLvector      offset;
-  GLkeyframe    keyframes[255];
-  int           frame_count;
-};
-
-class GLanimate
-{
-public:
-                GLanimate ();
-  void          KeyframeAdd (int joint, float time, GLquat q);
-  void          TimeSet (float time);
-  void          PositionSet (float pos);
-  GLvector      Rotation (int);
-  GLvector      Offset (int);
-
-private:
-  GLsegment*    m_segments;
-  int           m_segment_count;
-  float         m_length;
-};
-*/
 
 GLbbox    glBboxClear (void);
 GLbbox    glBboxContainPoint (GLbbox box, GLvector point);
 bool      glBboxTestPoint (GLbbox box, GLvector point);
-
-
 GLmatrix  glMatrixIdentity (void);
 void      glMatrixElementsSet (GLmatrix* m, float* in);
 GLmatrix  glMatrixMultiply (GLmatrix a, GLmatrix b);
@@ -179,9 +102,5 @@ GLvector2 glVectorSinCos (float angle);
 float     glVectorLength (GLvector2 v);
 inline GLvector2 glVector(int x, int y) { return glVector(float(x), float(y)); }
 
-#endif
-
-#ifndef NULL
-#define NULL  0
 #endif
 

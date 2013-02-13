@@ -13,32 +13,32 @@
  -----------------------------------------------------------------------------*/
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <stdarg.h>
-#include <math.h>
-#include <string.h> 
-#include <iostream>
+#import <stdio.h>
+#import <stdlib.h>
+#import <time.h>
+#import <stdarg.h>
+#import <math.h>
+#import <string.h> 
+#import <iostream>
 
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+#import <OpenGL/gl.h>
+#import <OpenGL/glu.h>
 
-#include "gltypes.h"
-#include "entity.h"
-#include "car.h"
-#include "camera.h"
-#include "ini.h"
-#include "light.h"
-#include "macro.h"
-#include "math.h"
-#include "render.h"
-#include "sky.h"
-#include "texture.h"
-#include "world.h"
-#include "PWGL.h"
-#include "win.h"
-#include "RenderAPI.h"
+#import "gltypes.h"
+#import "entity.h"
+#import "car.h"
+#import "camera.h"
+#import "ini.h"
+#import "light.h"
+#import "Mathx.h"
+#import "math.h"
+#import "render.h"
+#import "sky.h"
+#import "texture.h"
+#import "world.h"
+#import "PWGL.h"
+#import "win.h"
+#import "RenderAPI.h"
 
 static const int    RENDER_DISTANCE  =   1280;
 static const int    MAX_TEXT         =   256;
@@ -73,37 +73,36 @@ static const float  BLOOM_SCALING    =     0.07f;
  };
  */
 
-static const char g_help[] = 
-"ESC - Exit!\n" 
-"F1  - Show this help screen\n" 
+static const char g_help[] =
+"\n"        // Leave space for the FPS display on the top line.
+"H   - Show this help screen\n" 
 "R   - Rebuild city\n" 
 "L   - Toggle 'letterbox' mode\n"
 "F   - Show Framecounter\n"
 "W   - Toggle Wireframe\n"
 "E   - Change full-scene effects\n"
 "T   - Toggle Textures\n"
-"G   - Toggle Fog\n";
+"G   - Toggle Fog";
 
 static const size_t HELP_SIZE = sizeof(g_help);
 
-struct glFont
-{
-	const char* name;
-	unsigned	  base_char;
-};
-
-glFont g_fonts[] = 
-{
-	"Courier New",      0,
-	"Arial",            0,
-	"Times New Roman",  0,
-	"Arial Black",      0,
-	"Impact",           0,
-	"Agency FB",        0,
-	"Book Antiqua",     0,
-};
-
-static const size_t FONT_COUNT = (sizeof(g_fonts) / sizeof(g_fonts[0]));
+//struct glFont
+//{
+//	const char* name;
+//	unsigned    base_char;
+//};
+//
+//glFont g_fonts[] =
+//{
+//	"Courier New",      0,
+//	"Arial",            0,
+//	"Times New Roman",  0,
+//	"Arial Black",      0,
+//	"Impact",           0,
+//	"Agency FB",        0,
+//	"Book Antiqua",     0,
+//};
+//static const size_t FONT_COUNT = (sizeof(g_fonts) / sizeof(g_fonts[0]));
 
 
 enum EffectType
@@ -119,15 +118,11 @@ enum EffectType
 	EFFECT_COUNT,
 };
 
-static float g_render_aspect;
-static float g_fog_distance;
-static int   g_render_width;
-static int   g_render_height;
+static float g_render_aspect, g_fog_distance;
+static int   g_render_width, g_render_height, g_letterbox_offset;
 static bool  g_letterbox;
-static int   g_letterbox_offset;
 static EffectType g_effect;
-
-//static unsigned         g_next_fps;
+static bool g_terminating = false;
 
 static unsigned g_current_fps, g_frames;
 static bool g_show_wireframe, g_flat, g_show_fps, g_show_fog, g_show_help, g_show_normalized;
@@ -187,11 +182,45 @@ static void do_progress (float center_x, float center_y, float radius, float opa
 	}
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#pragma mark - effects
 
-static void FadeDisplay(float fade)
+    // This is used to set a gradient fog that goes from camera to some portion of the normal fog distance.
+    // This is used for making wireframe outlines and flat surfaces fade out after rebuild.  Looks cool.
+static void drawFogFX(float scalar)
+{
+	if (scalar >= 1.0f) {
+		pwDisable (GL_FOG);
+		return;
+	}
+	pwFogf (GL_FOG_START, 0.0f);
+	pwFogf (GL_FOG_END, g_fog_distance * 2.0f * scalar);
+	pwEnable (GL_FOG);
+}
+
+static void drawFog()
+{
+    pwEnable (GL_FOG);
+    pwFogf (GL_FOG_START, g_fog_distance - 100);
+    pwFogf (GL_FOG_END  , g_fog_distance);
+    float red = GLrgba(0.0f).red();
+    pwFogfv(GL_FOG_COLOR, &red);
+}
+
+static void setupGlassCityEffect(const GLvector &pos)
+{
+    pwDisable (GL_CULL_FACE);
+    pwEnable (GL_BLEND);
+    pwBlendFunc (GL_ONE, GL_ONE);
+    pwDepthFunc (GL_NEVER);
+    pwDisable(GL_DEPTH_TEST);
+    pwMatrixMode (GL_TEXTURE);
+    pwTranslatef ((pos.x + pos.z) / SEGMENTS_PER_TEXTURE, 0, 0);
+    pwMatrixMode (GL_MODELVIEW);
+}
+
+
+static void fadeDisplay(float fade)
 {
     pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     pwEnable (GL_BLEND);
@@ -204,33 +233,40 @@ static void FadeDisplay(float fade)
     glVertex2i (g_render_width, 0);
 }
 
-static void UpdateProgress(float fade)
+static void updateProgress(float fade)
 {
     int radius = g_render_width / 16;
+    GLrgba color(0.5f);
     do_progress ((float)g_render_width / 2, (float)g_render_height / 2, (float)radius, fade, EntityProgress ());
-    RenderPrint (g_render_width / 2 - LOGO_PIXELS, g_render_height / 2 + LOGO_PIXELS, 0, glRgba (0.5f), "%1.2f%%", EntityProgress () * 100.0f);
-    RenderPrint (1, "%s v%d.%d.%03d", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+    RenderPrintIntoTexture (0, g_render_width / 2 - LOGO_PIXELS, g_render_height / 2 + LOGO_PIXELS,
+                            g_render_width, g_render_height,
+                            0, color.red(), color.green(), color.blue(), color.alpha(),
+                            "%1.2f%%", EntityProgress () * 100.0f);
+    RenderPrintOverlayText (1, "%s v%d.%d.%03d", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 }
 
-static void DrawDebugEffect()
+static void drawDebugEffect()
 {
     pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_LOGOS));
     pwDisable (GL_BLEND);
-    MakePrimitive mp(GL_QUADS);
-    glColor3f (1.0f, 1.0f, 1.0f);
-    glTexCoord2f (0.0f, 0.0f);  glVertex2i (0, g_render_height / 4);
-    glTexCoord2f (0.0f, 1.0f);  glVertex2i (0, 0);
-    glTexCoord2f (1.0f, 1.0f);  glVertex2i (g_render_width / 4, 0);
-    glTexCoord2f (1.0f, 0.0f);  glVertex2i (g_render_width / 4, g_render_height / 4);
-    
-    glTexCoord2f (0.0f, 0.0f);  glVertex2i (0, 512);
-    glTexCoord2f (0.0f, 1.0f);  glVertex2i (0, 0);
-    glTexCoord2f (1.0f, 1.0f);  glVertex2i (512, 0);
-    glTexCoord2f (1.0f, 0.0f);  glVertex2i (512, 512);
+    pwBegin(GL_QUADS);
+    @try {
+        glColor3f (1.0f, 1.0f, 1.0f);
+        glTexCoord2f (0.0f, 0.0f);  glVertex2i (0, g_render_height / 4);
+        glTexCoord2f (0.0f, 1.0f);  glVertex2i (0, 0);
+        glTexCoord2f (1.0f, 1.0f);  glVertex2i (g_render_width / 4, 0);
+        glTexCoord2f (1.0f, 0.0f);  glVertex2i (g_render_width / 4, g_render_height / 4);
+        
+        glTexCoord2f (0.0f, 0.0f);  glVertex2i (0, 512);
+        glTexCoord2f (0.0f, 1.0f);  glVertex2i (0, 0);
+        glTexCoord2f (1.0f, 1.0f);  glVertex2i (512, 0);
+        glTexCoord2f (1.0f, 0.0f);  glVertex2i (512, 512);
+    }
+    @finally { pwEnd(); }
 }
 
 	//Psychedelic bloom
-static void DrawBloomRadialEffect()
+static void drawBloomRadialEffect()
 {
     pwEnable (GL_BLEND);
     MakePrimitive mp(GL_QUADS);
@@ -245,7 +281,7 @@ static void DrawBloomRadialEffect()
 }
 
 	//Oooh. Pretty colors.  Tint the scene according to screenspace.
-static void DrawColorCycleEffect()
+static void drawColorCycleEffect()
 {
     float hue1 = (float) (GetTickCount () % COLOR_CYCLE_TIME) / COLOR_CYCLE_TIME;
     float hue2 = (float)((GetTickCount () + COLOR_CYCLE) % COLOR_CYCLE_TIME) / COLOR_CYCLE_TIME;
@@ -271,7 +307,7 @@ static void DrawColorCycleEffect()
 }
 
 	//Simple bloom effect
-static void DrawBloomEffect()
+static void drawBloomEffect()
 {
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * BLOOM_SCALING;
@@ -290,7 +326,7 @@ static void DrawBloomEffect()
 }
 
 	//This will punish that uppity GPU. Good for testing low frame rate behavior.
-static void DrawDebugOverbloomEffect()
+static void drawDebugOverbloomEffect()
 {
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * 0.01f;
@@ -305,65 +341,63 @@ static void DrawDebugOverbloomEffect()
     }
 }
 
-static void do_effects(EffectType type)
+static void doEffects(EffectType type)
 {
-	DebugRep dbr("do_effects");
-	DebugLog("type=%d", type);
-	
-	GLrgba          color;
-	
-	if (!TextureReady ())
+    if (!TextureReady ())
 		return;
-
+    
         //Now change projection modes so we can render full-screen effects
 	pwMatrixMode (GL_PROJECTION);
-	pwPushMatrix ();
-	pwLoadIdentity ();
-	glOrtho (0, g_render_width, g_render_height, 0, 0.1f, 2048);
-    
-	pwMatrixMode (GL_MODELVIEW);
-	pwPushMatrix ();
-	pwLoadIdentity();
-	pwTranslatef(0, 0, -1.0f);
-    
-	pwDisable (GL_CULL_FACE);
-	pwDisable (GL_FOG);
-	pwPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        //Render full-screen effects
-	pwBlendFunc (GL_ONE, GL_ONE);
-	pwEnable (GL_TEXTURE_2D);
-	pwDisable(GL_DEPTH_TEST);
-	pwDepthMask (GL_FALSE);
-	pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_BLOOM));
-
-	switch (type) {
-		case EFFECT_DEBUG:            DrawDebugEffect();            break;
-		case EFFECT_BLOOM_RADIAL:     DrawBloomRadialEffect();      break;
-		case EFFECT_COLOR_CYCLE:      DrawColorCycleEffect();       break;
-		case EFFECT_BLOOM:            DrawBloomEffect();            break;
-		case EFFECT_DEBUG_OVERBLOOM:  DrawDebugOverbloomEffect(); 	break;
-        default:
-            break;
-	}
-    
-	//Do the fade to / from darkness used to hide scene transitions
-	if (LOADING_SCREEN) {
-        float fade = WorldFade ();
-		if (fade > 0.0f)
-            FadeDisplay(fade);
-
-		if (TextureReady () && !EntityReady () && fade != 0.0f)
-            UpdateProgress(fade);
-	}
-	pwPopMatrix ();
-	pwMatrixMode (GL_PROJECTION);
-	pwPopMatrix ();
-	pwMatrixMode (GL_MODELVIEW);
-	pwEnable(GL_DEPTH_TEST);
+	{
+        PWMatrixStacker pushMatrix;
+        pwLoadIdentity ();
+        glOrtho (0, g_render_width, g_render_height, 0, 0.1f, 2048);
+        
+        pwMatrixMode (GL_MODELVIEW);
+        {
+            PWMatrixStacker pushMatrix;
+            pwLoadIdentity();
+            pwTranslatef(0, 0, -1.0f);
+            
+            pwDisable (GL_CULL_FACE);
+            pwDisable (GL_FOG);
+            pwPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                //Render full-screen effects
+            pwBlendFunc (GL_ONE, GL_ONE);
+            pwEnable (GL_TEXTURE_2D);
+            pwDisable(GL_DEPTH_TEST);
+            pwDepthMask (GL_FALSE);
+            pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_BLOOM));
+            
+            switch (type) {
+                case EFFECT_DEBUG:            drawDebugEffect();            break;
+                case EFFECT_BLOOM_RADIAL:     drawBloomRadialEffect();      break;
+                case EFFECT_COLOR_CYCLE:      drawColorCycleEffect();       break;
+                case EFFECT_BLOOM:            drawBloomEffect();            break;
+                case EFFECT_DEBUG_OVERBLOOM:  drawDebugOverbloomEffect(); 	break;
+                default:
+                    break;
+            }
+            
+                //Do the fade to / from darkness used to hide scene transitions
+            if(LOADING_SCREEN) {
+                float fade = WorldFade ();
+                if (fade > 0.0f)
+                    fadeDisplay(fade);
+                
+                if (TextureReady () && !EntityReady () && fade != 0.0f)
+                    updateProgress(fade);
+            }
+        }
+        pwMatrixMode (GL_PROJECTION);
+    }
+    pwMatrixMode (GL_MODELVIEW);
+    pwEnable(GL_DEPTH_TEST);
 }
 
-
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#pragma mark -
+
 
 int RenderMaxTextureSize ()
 {
@@ -374,84 +408,99 @@ int RenderMaxTextureSize ()
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void RenderPrint (int x, int y, int font, GLrgba color, const char *fmt, ...)				
-{
-//	return;	// PAW - these are causing stack overflow errors. Enable later, or use the better ones in the Cocoa sample code.
-	if (fmt == NULL)
-		return;						
-	DebugRep dbr("RenderPrint");
-	
-	char text[MAX_TEXT] = {'\0'};	
-	{
-		va_list ap;
-		va_start (ap, fmt);		
-		vsprintf (text, fmt, ap);				
-		va_end (ap);
-	}
-	pwPushAttrib(GL_LIST_BIT);
-	glListBase(g_fonts[font % FONT_COUNT].base_char - 32);				
-	glColor3(color);
-	glRasterPos2i (x, y);
-	glCallLists(GLsizei(strlen(text)), GL_UNSIGNED_BYTE, text);
-    pwPopAttrib();
-}
+//PAW: I think this works because he has set up a series of display lists, for each character in the font.
+// The glListBase lets him use the offset of the letter (e.g. 'A' - 32 == 0, so 'A' will map to the first index).
+// Then he passes in the string, which OpenGL treats as a list of display list IDs, each of which maps to a letter.
+// This is done by a call to wglMakeFontBitmaps which had to be removed.
+// The code is below:
+//for (int i = 0; i < FONT_COUNT; i++) {
+//    fonts[i].base_char = glGenLists(96);
+//    font = CreateFont (FONT_SIZE,	0, 0,	0,
+//                       FW_BOLD, FALSE,	FALSE, FALSE,	DEFAULT_CHARSET,	OUT_TT_PRECIS,
+//                       CLIP_DEFAULT_PRECIS,	ANTIALIASED_QUALITY, FF_DONTCARE|DEFAULT_PITCH,
+//                       fonts[i].name);
+//    oldfont = (HFONT)SelectObject(hDC, font);
+//    wglUseFontBitmaps(hDC, 32, 96, fonts[i].base_char);
+//    SelectObject(hDC, oldfont);
+//    DeleteObject(font);		
+//}
+
+
+// Moved into an ObjectiveC file.
+
+//void RenderPrintIntoTexture (int x, int y, int font, GLrgba color, const char *fmt, ...)				
+//{
+//	if (fmt == NULL)
+//		return;						
+//	DebugRep dbr("RenderPrint");
+//	
+//	char text[MAX_TEXT] = {'\0'};	
+//	{
+//		va_list ap;
+//		va_start (ap, fmt);		
+//		vsprintf (text, fmt, ap);				
+//		va_end (ap);
+//	}
+//	pwPushAttrib(GL_LIST_BIT);
+//	glListBase(g_fonts[font % FONT_COUNT].base_char - 32);
+//	glColor3(color);
+//	glRasterPos2i (x, y);
+//	glCallLists(GLsizei(strlen(text)), GL_UNSIGNED_BYTE, text);
+//  pwPopAttrib();
+//}
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void RenderPrint (int line, const char *fmt, ...)				
-{
-//	return;	// PAW - these cause stack overflow errors, re-enable later or use the better ones in the Cocoa sample code.
-	if (fmt == NULL)
-		return;						
+// Print a line of text which will be displayed on the main window
 
-	DebugRep dbr("RenderPrint");
-
-	char text[MAX_TEXT] = {'\0'};	
-	{
-		va_list ap;
-		va_start (ap, fmt);		
-		vsprintf (text, fmt, ap);				
-		va_end (ap);
-	}
-	
-	pwMatrixMode (GL_PROJECTION);
-	pwPushMatrix ();
-	pwLoadIdentity ();
-	glOrtho (0, g_render_width, g_render_height, 0, 0.1f, 2048);	glReportError("glOrtho");
-	pwDisable(GL_DEPTH_TEST);
-	pwDepthMask (GL_FALSE);	
-	pwMatrixMode (GL_MODELVIEW);
-	pwPushMatrix ();
-	pwLoadIdentity();
-	pwTranslatef(0, 0, -1.0f);
-	pwDisable(GL_BLEND);
-	pwDisable(GL_FOG);
-	pwDisable(GL_TEXTURE_2D);
-	pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	RenderPrint (0, line * FONT_SIZE - 2, 0, glRgba (0.0f), text);
-	RenderPrint (4, line * FONT_SIZE + 2, 0, glRgba (0.0f), text);
-	RenderPrint (2, line * FONT_SIZE, 0, glRgba (1.0f), text);
-	glPopAttrib();							glReportError("glPopAttrib");
-	pwPopMatrix ();
-	pwMatrixMode (GL_PROJECTION);
-	pwPopMatrix ();
-	pwMatrixMode (GL_MODELVIEW);
-}
+//void RenderPrintOverlay(int line, const char *fmt, ...)
+//{
+//	if (fmt == NULL)
+//		return;						
+//
+//	DebugRep dbr("RenderPrint");
+//
+//	char text[MAX_TEXT] = {'\0'};	
+//	{
+//		va_list ap;
+//		va_start (ap, fmt);		
+//		vsprintf (text, fmt, ap);				
+//		va_end (ap);
+//	}
+//	
+//	pwMatrixMode (GL_PROJECTION);
+//	pwPushMatrix();
+//	pwLoadIdentity();
+//	glOrtho(0, g_render_width, g_render_height, 0, 0.1f, 2048);	glReportError("glOrtho");
+//	pwDisable(GL_DEPTH_TEST);
+//	pwDepthMask (GL_FALSE);
+//
+//	pwMatrixMode (GL_MODELVIEW);
+//	pwPushMatrix ();
+//	pwLoadIdentity();
+//	pwTranslatef(0, 0, -1.0f);
+//	pwDisable(GL_BLEND);
+//	pwDisable(GL_FOG);
+//	pwDisable(GL_TEXTURE_2D);
+//	pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    
+//	RenderPrintIntoTexture (0, line * FONT_SIZE - 2, 0, glRgba (0.0f), text);
+//	RenderPrintIntoTexture (4, line * FONT_SIZE + 2, 0, glRgba (0.0f), text);
+//	RenderPrintIntoTexture (2, line * FONT_SIZE    , 0, glRgba (1.0f), text);
+//    
+//	pwPopMatrix ();
+//    
+//	pwMatrixMode (GL_PROJECTION);
+//	pwPopMatrix ();
+//    
+//	pwMatrixMode (GL_MODELVIEW);
+//}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void static do_help (void)
 {
-	char parse[HELP_SIZE] = {'\0'}; 
-	strcpy (parse, g_help);
-	char *text = strtok (parse, "\n");
-	int line = 0;
-	while (text) {
-		RenderPrint (line + 2, text);
-		text = strtok (NULL, "\n");
-		line++;
-	}
-	
+    RenderPrintOverlayText(1, g_help);
 }
 
 
@@ -472,7 +521,17 @@ void do_fps ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void RenderResize (int width, int height)		
+
+static bool isBloom()
+{
+	return g_effect == EFFECT_BLOOM           || g_effect == EFFECT_BLOOM_RADIAL
+    || g_effect == EFFECT_DEBUG_OVERBLOOM || g_effect == EFFECT_COLOR_CYCLE;
+}
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#pragma mark - Render External API
+
+void RenderResize (int width, int height)
 {
 	DebugLog("RenderResize");
 	g_render_width  = width;
@@ -481,80 +540,37 @@ void RenderResize (int width, int height)
 	if (g_letterbox) {
 		g_letterbox_offset = g_render_height / 6;
 		g_render_height = g_render_height - g_letterbox_offset * 2;
-	} 
-	else 
+	}
+	else
 		g_letterbox_offset = 0;
-	//render_aspect = (float)render_height / (float)render_width;
+        //render_aspect = (float)render_height / (float)render_width;
 	pwViewport (0, g_letterbox_offset, g_render_width, g_render_height);
 	pwMatrixMode (GL_PROJECTION);
 	pwLoadIdentity ();
 	g_render_aspect = (float)g_render_width / (float)g_render_height;
 	float fovy = 60.0f;
-	if (g_render_aspect > 1.0f) 
-		fovy /= g_render_aspect; 
+	if (g_render_aspect > 1.0f)
+		fovy /= g_render_aspect;
 	gluPerspective (fovy, g_render_aspect, 0.1f, RENDER_DISTANCE);			glReportError("gluPerspective");
 	pwMatrixMode (GL_MODELVIEW);
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void RenderTerm (void)
-{
-	/*  Let NSOpenGLView handle this.
-	 if (!hRC)
-	 return;
-	 wglDeleteContext (hRC);
-	 hRC = NULL;
-	 */
-}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderInit (int width, int height)
 {
 	DebugLog("RenderInit");
-	/*
-	 unsigned		  PixelFormat;
-	 hWnd = WinHwnd ();
-	 if (!(hDC = GetDC (hWnd))) 
-	 YOUFAIL ("Can't Create A GL Device Context.") ;
-	 if (!(PixelFormat = ChoosePixelFormat(hDC,&pfd)))
-	 YOUFAIL ("Can't Find A Suitable PixelFormat.") ;
-	 if(!SetPixelFormat(hDC,PixelFormat,&pfd))
-	 YOUFAIL ("Can't Set The PixelFormat.");
-	 if (!(hRC = wglCreateContext (hDC)))	
-	 YOUFAIL ("Can't Create A GL Rendering Context.");
-	 if(!wglMakeCurrent(hDC,hRC))	
-	 YOUFAIL ("Can't Activate The GL Rendering Context.");
-	 */
-	
-	//Load the fonts for printing debug info to the window.
-	/*
-	 HFONT	          font, oldfont;
-	 for (int i = 0; i < FONT_COUNT; i++) {
-	 fonts[i].base_char = glGenLists(96); 
-	 font = CreateFont (FONT_SIZE,	0, 0,	0,	
-	 FW_BOLD, false,	false, false,	DEFAULT_CHARSET,	OUT_TT_PRECIS,		
-	 CLIP_DEFAULT_PRECIS,	ANTIALIASED_QUALITY, FF_DONTCARE|DEFAULT_PITCH,
-	 fonts[i].name);
-	 oldfont = (HFONT)SelectObject(hDC, font);	
-	 wglUseFontBitmaps(hDC, 32, 96, fonts[i].base_char);
-	 SelectObject(hDC, oldfont);
-	 DeleteObject(font);		
-	 }
-	 */
-     
+    
     g_effect         = EffectType(IniInt("Effect"));
     g_fog_distance   = WORLD_HALF;
-
+    
         //clear the viewport so the user isn't looking at trash while the program starts
 	pwViewport (0, 0, width, height);
 	pwClearColor (0.0f, 0.0f, 0.0f, 1.0f);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderSetFPS(bool showFPS)
 {
@@ -629,60 +645,30 @@ void RenderEffectCycle ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+void RenderTerminate()
+{
+    g_terminating = true;   // Stops all updating and wait for the window to close.
+}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-bool RenderBloom ()
-{
-	return g_effect == EFFECT_BLOOM || g_effect == EFFECT_BLOOM_RADIAL 
-    || g_effect == EFFECT_DEBUG_OVERBLOOM || g_effect == EFFECT_COLOR_CYCLE;
-}
+#pragma mark -
 
-
-/*-----------------------------------------------------------------------------
- This is used to set a gradient fog that goes from camera to some portion of the normal fog distance.  This is used for making wireframe outlines and
- flat surfaces fade out after rebuild.  Looks cool.
- -----------------------------------------------------------------------------*/
-
-void RenderFogFX (float scalar)
-{
-	if (scalar >= 1.0f) {
-		pwDisable (GL_FOG);
-		return;
-	}
-	pwFogf (GL_FOG_START, 0.0f);
-	pwFogf (GL_FOG_END, g_fog_distance * 2.0f * scalar);
-	pwEnable (GL_FOG);
-}
-
-static void FogRender()
-{
-    pwEnable (GL_FOG);
-    pwFogf (GL_FOG_START, g_fog_distance - 100);
-    pwFogf (GL_FOG_END  , g_fog_distance);
-    float red = glRgba(0.0f).red();
-    pwFogfv(GL_FOG_COLOR, &red);
-}
-
-static void SetupGlassCityEffect(const GLvector &pos)
-{
-    pwDisable (GL_CULL_FACE);
-    pwEnable (GL_BLEND);
-    pwBlendFunc (GL_ONE, GL_ONE);
-    pwDepthFunc (GL_NEVER);
-    pwDisable(GL_DEPTH_TEST);
-    pwMatrixMode (GL_TEXTURE);
-    pwTranslatef ((pos.x + pos.z) / SEGMENTS_PER_TEXTURE, 0, 0);
-    pwMatrixMode (GL_MODELVIEW);
-}
+static GLvector VectorToGLvector(Vector *v) { return GLvector(v.x, v.y, v.z); }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderUpdate (int width, int height)		
 {
+    if(g_terminating) return;   // Stop if we are in the process of shutting down.
+
 	g_render_width  = width;
 	g_render_height = height;
 	g_frames++;
+    
+	TextureUpdate(g_flat, isBloom());
+	glReportError("AppUpdate:After TextureUpdate");
+
 	do_fps();
     
 	pwViewport (0, 0, width, height);
@@ -695,7 +681,7 @@ void RenderUpdate (int width, int height)
 		pwViewport (0, g_letterbox_offset, g_render_width, g_render_height);
     
 	if (LOADING_SCREEN && TextureReady () && !EntityReady ()) {
-		do_effects (EFFECT_NONE);
+		doEffects (EFFECT_NONE);
 		return;
 	}
 	pwHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -717,8 +703,8 @@ void RenderUpdate (int width, int height)
 	pwLoadIdentity();
     
 	pwLineWidth (1.0f);
-	GLvector pos   = CameraPosition();
-	GLvector angle = CameraAngle();
+	GLvector pos   = VectorToGLvector(CameraPosition());
+	GLvector angle = VectorToGLvector(CameraAngle());
 	pwRotatef (angle.x, 1.0f, 0.0f, 0.0f);
 	pwRotatef (angle.y, 0.0f, 1.0f, 0.0f);
 	pwRotatef (angle.z, 0.0f, 0.0f, 1.0f);
@@ -728,13 +714,17 @@ void RenderUpdate (int width, int height)
     
         //Render all the stuff in the whole entire world.
 	pwDisable (GL_FOG);
-	SkyRender ();
+    
+    if(! g_flat)
+        SkyRender();
+    
 	if (g_show_fog)
-        FogRender();
+        drawFog();
 
 	WorldRender ();
+    
 	if (g_effect == EFFECT_GLASS_CITY) {
-        SetupGlassCityEffect(pos);
+        setupGlassCityEffect(pos);
 	} else {
 		pwEnable (GL_CULL_FACE);
 		pwDisable (GL_BLEND);
@@ -744,15 +734,16 @@ void RenderUpdate (int width, int height)
         // adding scaling to the model matrix causes the lighting to be too dark.
     (g_show_normalized ? glEnable : glDisable)(GL_NORMALIZE);
     
-	EntityRender ();
+	EntityRender (g_flat);
+    
 	if (!LOADING_SCREEN) {
 		long elapsed = 3000 - WorldSceneElapsed();
 		if (elapsed >= 0 && elapsed <= 3000) {
-			RenderFogFX(float(elapsed) / 3000.0f);
+			drawFogFX(float(elapsed) / 3000.0f);
 			pwDisable(GL_TEXTURE_2D);
 			pwEnable(GL_BLEND);
 			pwBlendFunc(GL_ONE, GL_ONE);
-			EntityRender();
+			EntityRender(g_flat);
 		}
 	} 
 	if (EntityReady ())
@@ -763,15 +754,15 @@ void RenderUpdate (int width, int height)
 	if (RenderWireframe()) {
 		pwDisable (GL_TEXTURE_2D);
 		pwPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		EntityRender ();
+		EntityRender(g_flat);
 	}
 
-	do_effects(g_effect);
+	doEffects(g_effect);
     
 	if (g_show_fps)     //Framerate tracker
-		RenderPrint (1, "FPS=%d : Entities=%d : polys=%d",
-                     g_current_fps, EntityCount () + LightCount () + CarCount (),
-                     EntityPolyCount () + LightCount () + CarCount ());
+		RenderPrintOverlayText(1, "FPS=%d : Entities=%d : polys=%d",
+                               g_current_fps, EntityCount () + LightCount () + CarCount (),
+                               EntityPolyCount () + LightCount () + CarCount ());
     
 	if (g_show_help)    //Show the help overlay
 		do_help ();

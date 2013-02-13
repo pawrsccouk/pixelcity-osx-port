@@ -14,22 +14,22 @@
 
 -----------------------------------------------------------------------------*/
 
-#include <math.h>
-#include <stdlib.h>
-#include <OpenGL/gl.h>
+#import <math.h>
+#import <stdlib.h>
+#import <OpenGL/gl.h>
 
-#include "camera.h"
-#include "entity.h"
-#include "macro.h"
-#include "mathx.h"
-#include "render.h"
-#include "texture.h"
-#include "PWGL.h"
-#include "visible.h"
-#include "win.h"
-#include <iostream>
-#include "RenderAPI.h"
-#include "World.h"
+//#import "camera.h"
+#import "entity.h"
+#import "macro.h"
+#import "mathx.h"
+#import "render.h"
+#import "texture.h"
+#import "PWGL.h"
+#import "visible.h"
+#import "win.h"
+#import <iostream>
+#import "RenderAPI.h"
+#import "World.h"
 
 struct entity
 {
@@ -251,25 +251,28 @@ void EntityDump(void)
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void EntityRender ()
+
+
+void EntityRender (bool showFlat)
 {
-    long elapsed = 0;
 	glReportError("EntityRender: Begin");
 	
 	//Draw all textured objects
 	int       polymode[2];
 	glGetIntegerv (GL_POLYGON_MODE, &polymode[0]);
 	bool wireframe = polymode[0] != GL_FILL;
-	if (RenderFlat ())
+	if (showFlat)
 		pwDisable (GL_TEXTURE_2D);
 
-	if (!LOADING_SCREEN && wireframe) {     //If we're not using a loading screen, make the wireframe fade out via fog
-		elapsed = 6000 - WorldSceneElapsed ();
-		if (elapsed >= 0 && elapsed <= 6000)
-			RenderFogFX (float(elapsed) / 6000.0f);
-		else
-			return;
-	}
+// PAW: I think this is a duplicate of the code in RenderUpdate
+//  long elapsed = 0;
+//	if (!LOADING_SCREEN && wireframe) {     //If we're not using a loading screen, make the wireframe fade out via fog
+//		elapsed = 6000 - WorldSceneElapsed ();
+//		if (elapsed >= 0 && elapsed <= 6000)
+//			RenderFogFX (float(elapsed) / 6000.0f);
+//		else
+//			return;
+//	}
 	
     for (int x = 0; x < GRID_SIZE; x++)
 		for (int y = 0; y < GRID_SIZE; y++)

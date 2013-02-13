@@ -2,8 +2,8 @@
 									               r a n d o m
 -----------------------------------------------------------------------------*/
 
-#include <memory.h>
-#include "random.h"
+#import <memory.h>
+#import "random.h"
 
 /*-----------------------------------------------------------------------------
   The Mersenne Twister by Matsumoto and Nishimura <matumoto@math.keio.ac.jp>.
