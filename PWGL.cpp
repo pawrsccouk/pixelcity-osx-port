@@ -60,3 +60,10 @@ void pwTexSubImage2D (GLenum target, GLint level, GLint xoffset, GLint yoffset, 
                       GLenum format, GLenum type, const GLvoid *pixels)
 { glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels); glReportError("glTexSubImage2D"); }
 
+// PAW: These are NOT error-checked because glGetError() is not allowed between glBegin()/glEnd()
+// so checking for errors is, in itself, an error. (it returns "invalid operation" from glEnd()).
+
+void pwColor3f(GLfloat r, GLfloat g, GLfloat b) { glColor3f(r, g, b); }
+void pwCallList(GLuint list) { glCallList(list); }
+void pwVertex2f(GLfloat x, GLfloat y) { glVertex2f(x, y); }
+void pwTexCoord2f(GLfloat s, GLfloat t) { glTexCoord2f(s, t); }

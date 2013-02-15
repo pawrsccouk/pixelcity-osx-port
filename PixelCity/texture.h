@@ -50,6 +50,11 @@ bool      TextureReady ();
 void      TextureReset (void);
 void      TextureUpdate (bool showFlat, bool showBloom);
 
+    // PAW: Return the texture ID of one of a set of pre-defined logos.
+    // Shamus' code worked by creating one large logo texture, and then getting each logo to map a different sub-rect of it.
+    // I'm going to try creating an array of smaller textures instead.
+GLuint    TextureRandomLogo();
+
 #ifdef __cplusplus
 }
 #endif

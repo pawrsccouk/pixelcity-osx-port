@@ -3,7 +3,6 @@
 #endif
 
 #ifndef ENTITY
-
 #define ENTITY
 
 class CEntity
@@ -29,6 +28,12 @@ public:
 
 inline std::ostream &operator<<(std::ostream &os, const CEntity &e) { return e.operator<<(os); }
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void      EntityClear ();
 int       EntityCount (void);
 float     EntityProgress ();
@@ -36,6 +41,11 @@ bool      EntityReady ();
 void      EntityRender (bool showFlat);
 void      EntityUpdate (void);
 int       EntityPolyCount (void);
-void      EntityDump(std::ostream &os);
+void      EntityDump(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif

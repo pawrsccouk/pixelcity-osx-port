@@ -43,7 +43,7 @@ extern "C"
         // red, green, blue, alpha are the color
         // fmt + varargs are for the printf which makes the string.
     void  RenderPrintIntoTexture (GLuint textureId, int x, int y, int texWidth, int texHeight,
-                                  int font, float red, float green, float blue, float alpha, const char *fmt, ...);
+                                  int font, NSColor *textColor, const char *fmt, ...);
     
         // Create a texture containing a line of text, and then display it over the main screen.
         // line = 0 means the top of the screen, line = 1 is the next line down and so on.

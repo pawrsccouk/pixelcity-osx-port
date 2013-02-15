@@ -114,7 +114,7 @@ static time_t         g_start_time = 0;
 
 static GLrgba get_light_color (float sat, float lum)
 {
-	int index = RandomInt(LIGHT_COLOR_COUNT);
+	int index = RandomIntR(LIGHT_COLOR_COUNT);
 	return glRgbaFromHsl (light_colors[index].hue, sat, lum);
 }
 
@@ -260,7 +260,7 @@ void do_building (plot p)
 	
 	//The roundy mod buildings look best on square plots.
 	if (square && p.width > 20) {
-		int height = 45 + RandomInt(10);
+		int height = 45 + RandomIntR(10);
 		g_modern_count++;
 		g_skyscrapers++;
 		new CBuilding (BUILDING_MODERN, p.x, p.z, height, p.width, p.depth, seed, color);
@@ -269,7 +269,7 @@ void do_building (plot p)
 	
 	 //Rectangular plots are a good place for Blocky style buildings to sprawl blockily.
 	 if (p.width > p.depth * 2 || (p.depth > p.width * 2 && area > 800)) {
-		 int height = 20 + RandomInt(10);
+		 int height = 20 + RandomIntR(10);
 		 g_blocky_count++;
 		 g_skyscrapers++;
 		 new CBuilding (BUILDING_BLOCKY, p.x, p.z, height, p.width, p.depth, seed, color);
@@ -289,7 +289,7 @@ void do_building (plot p)
 		type = BUILDING_MODERN;
 		g_modern_count++;
 	}
-	int height = 45 + RandomInt(10);
+	int height = 45 + RandomIntR(10);
 	new CBuilding (type, p.x, p.z, height, p.width, p.depth, seed, color);
 	g_skyscrapers++;
 }
@@ -302,33 +302,18 @@ static int build_light_strip (int x1, int z1, int direction)
 {
 	glReportError("build_light_strip START");
 	
-	CDeco*  d;
-	GLrgba  color;
-	int     x2, z2;
-	int     length;
-	int     width, depth;
 	int     dir_x, dir_z;
-	float   size_adjust;
-	
-	//We adjust the size of the lights with this.  
-	size_adjust = 2.5f;
-	color = glRgbaFromHsl (0.09f,  0.99f,  0.85f);
 	switch (direction) {
-		case NORTH:
-			dir_z = 1; dir_x = 0;break;
-		case SOUTH:
-			dir_z = 1; dir_x = 0;break;
-		case EAST:
-			dir_z = 0; dir_x = 1;break;
-		case WEST:
-			dir_z = 0; dir_x = 1;break;
+		case NORTH:	dir_z = 1; dir_x = 0;break;
+		case SOUTH:	dir_z = 1; dir_x = 0;break;
+		case EAST:	dir_z = 0; dir_x = 1;break;
+		case WEST:	dir_z = 0; dir_x = 1;break;
 	}
 	//So we know we're on the corner of an intersection
 	//look in the given  until we reach the end of the sidewalk
-	x2 = x1;
-	z2 = z1;
-	length = 0;
-	while (x2 > 0 && x2 < WORLD_SIZE && z2 > 0 && z2 < WORLD_SIZE) {
+	int x2 = x1, z2 = z1, length = 0;
+	while (x2 > 0 && x2 < WORLD_SIZE && z2 > 0 && z2 < WORLD_SIZE)
+    {
 		if ((g_world[x2][z2] & CLAIM_ROAD))
 			break;
 		length++;
@@ -339,9 +324,11 @@ static int build_light_strip (int x1, int z1, int direction)
 		glReportError("build_light_strip END early.");
 		return length;
 	}
-	width = std::max(abs(x2 - x1), 1);
-	depth = std::max(abs(z2 - z1), 1);
-	d = new CDeco;
+	int width = std::max(abs(x2 - x1), 1);
+	int depth = std::max(abs(z2 - z1), 1);
+	GLrgba color = glRgbaFromHsl (0.09f,  0.99f,  0.85f);
+	float size_adjust = 2.5f;	//We adjust the size of the lights with this.  
+	CDeco *d = new CDeco;
 	if (direction == EAST)
 		d->CreateLightStrip ((float)x1, (float)z1 - size_adjust, (float)width, (float)depth + size_adjust, 2, color);
 	else if (direction == WEST)
@@ -361,10 +348,7 @@ static int build_light_strip (int x1, int z1, int direction)
 
 static void do_reset (void)
 {	
-	int       x, y;
-	unsigned int depth, width, height;
 	int       attempts;
-	bool      road_left, road_right;
 	GLrgba    light_color;
 	GLrgba    building_color;
 	float     west_street, north_street, east_street, south_street;
@@ -385,16 +369,16 @@ static void do_reset (void)
 	glReportError("do_reset after clearing Entities, Lights, Cars & Textures.");
 	
 	//Pick a tint for the bloom 
-	g_bloom_color = get_light_color(0.5f + (float)RandomLong (10) / 20.0f, 0.75f);
+	g_bloom_color = get_light_color(0.5f + (float)RandomLongR(10) / 20.0f, 0.75f);
 	light_color = glRgbaFromHsl (0.11f, 1.0f, 0.65f);
 	memset(g_world, 0, WORLD_SIZE * WORLD_SIZE);
-	for (y = WORLD_EDGE; y < WORLD_SIZE - WORLD_EDGE; y += RandomLong (25) + 25) {
+	for (int y = WORLD_EDGE; y < WORLD_SIZE - WORLD_EDGE; y += RandomLongR(25) + 25) {
 		if (!broadway_done && y > WORLD_HALF - 20) {
 			build_road (0, y, WORLD_SIZE, 19);
 			y += 20;
 			broadway_done = true;
 		} else {
-			depth = 6 + RandomInt(6);
+			unsigned int depth = 6 + RandomIntR(6);
 			if (y < WORLD_HALF / 2)
 				north_street = (float)(y + depth / 2);
 			if (y < (WORLD_SIZE - WORLD_HALF / 2))
@@ -404,13 +388,17 @@ static void do_reset (void)
 	}
 	
 	broadway_done = false;
-	for (x = WORLD_EDGE; x < WORLD_SIZE - WORLD_EDGE; x += RandomLong (25) + 25) {
-		if (!broadway_done && x > WORLD_HALF - 20) {
+	for (int x = WORLD_EDGE; x < WORLD_SIZE - WORLD_EDGE; x += RandomLongR(25) + 25)
+    {
+		if (!broadway_done && x > WORLD_HALF - 20)
+        {
 			build_road (x, 0, 19, WORLD_SIZE);
 			x += 20;
 			broadway_done = true;
-		} else {
-			width = 6 + RandomInt(6);
+		}
+        else
+        {
+			unsigned int width = 6 + RandomIntR(6);
 			if (x <= WORLD_HALF / 2)
 				west_street = (float)(x + width / 2);
 			if (x <= WORLD_HALF + WORLD_HALF / 2)
@@ -425,16 +413,18 @@ static void do_reset (void)
 	g_hot_zone = glBboxContainPoint (g_hot_zone, glVector (east_street, 0.0f, south_street));
 	
 	//Scan for places to put runs of streetlights on the east & west side of the road
-	for (x = 1; x < WORLD_SIZE - 1; x++) {
-		for (y = 0; y < WORLD_SIZE; y++) {
+	for (int x = 1; x < WORLD_SIZE - 1; x++)
+    {
+		for (int y = 0; y < WORLD_SIZE; y++)
+        {
 			//if this isn't a bit of sidewalk, then keep looking
 			if (!(g_world[x][y] & CLAIM_WALK))
 				continue;
 			//If it's used as a road, skip it.
 			if ((g_world[x][y] & CLAIM_ROAD))
 				continue;
-			road_left = (g_world[x + 1][y] & CLAIM_ROAD) != 0;
-			road_right = (g_world[x - 1][y] & CLAIM_ROAD) != 0;
+			bool road_left = (g_world[x + 1][y] & CLAIM_ROAD) != 0;
+			bool road_right = (g_world[x - 1][y] & CLAIM_ROAD) != 0;
 			//if the cells to our east and west are not road, then we're not on a corner. 
 			if (!road_left && !road_right)
 				continue;
@@ -446,16 +436,16 @@ static void do_reset (void)
 	}
 	
 	//Scan for places to put runs of streetlights on the north & south side of the road
-	for (y = 1; y < WORLD_SIZE - 1; y++) {
-		for (x = 1; x < WORLD_SIZE - 1; x++) {
+	for (int y = 1; y < WORLD_SIZE - 1; y++) {
+		for (int x = 1; x < WORLD_SIZE - 1; x++) {
 			//if this isn't a bit of sidewalk, then keep looking
 			if (!(g_world[x][y] & CLAIM_WALK))
 				continue;
 			//If it's used as a road, skip it.
 			if ((g_world[x][y] & CLAIM_ROAD))
 				continue;
-			road_left = (g_world[x][y + 1] & CLAIM_ROAD) != 0;
-			road_right = (g_world[x][y - 1] & CLAIM_ROAD) != 0;
+			bool road_left = (g_world[x][y + 1] & CLAIM_ROAD) != 0;
+			bool road_right = (g_world[x][y - 1] & CLAIM_ROAD) != 0;
 			//if the cell to our east AND west is road, then we're on a median. skip it
 			if (road_left && road_right)
 				continue;
@@ -470,10 +460,10 @@ static void do_reset (void)
 	//Scan over the center area of the map and place the big buildings 
 	attempts = 0;
 	while (g_skyscrapers < 50 && attempts < 350) {
-		x = (WORLD_HALF / 2) + (RandomLong () % WORLD_HALF);
-		y = (WORLD_HALF / 2) + (RandomLong () % WORLD_HALF);
-		if (!claimed (x, y, 1,1)) {
-			do_building (find_plot (x, y));
+		int sx = (WORLD_HALF / 2) + (RandomLong () % WORLD_HALF);
+		int sy = (WORLD_HALF / 2) + (RandomLong () % WORLD_HALF);
+		if (!claimed (sx, sy, 1,1)) {
+			do_building (find_plot (sx, sy));
 			g_skyscrapers++;
 		}
 		attempts++;
@@ -481,27 +471,35 @@ static void do_reset (void)
   	glReportError("do_reset After big buildings");
 
 	//now blanket the rest of the world with lesser buildings
-	for (x = 0; x < WORLD_SIZE; x ++) {
-		for (y = 0; y < WORLD_SIZE; y ++) {
+	for (int x = 0; x < WORLD_SIZE; x ++)
+    {
+		for (int y = 0; y < WORLD_SIZE; y ++)
+        {
 			if (g_world[CLAMP (x,0,WORLD_SIZE)][CLAMP (y,0,WORLD_SIZE)])
 				continue;
-			width = 12 + RandomInt(20);
-			depth = 12 + RandomInt(20);
-			height = std::min(width, depth);
+            
+			unsigned int width = 12 + RandomIntR(20);
+			unsigned int depth = 12 + RandomIntR(20);
+			unsigned int height = std::min(width, depth);
 			if (x < 30 || y < 30 || x > WORLD_SIZE - 30 || y > WORLD_SIZE - 30)
-				height = RandomInt(15) + 20;
+				height = RandomIntR(15) + 20;
 			else if (x < WORLD_HALF / 2)
 				height /= 2;
-			while (width > 8 && depth > 8) {
-				if (!claimed (x, y, width, depth)) {
+			while (width > 8 && depth > 8)
+            {
+				if (!claimed (x, y, width, depth))
+                {
 					claim(x, y, width, depth, CLAIM_BUILDING);
 					building_color = WorldLightColor (RandomInt());
                         //if we're out of the hot zone, use simple buildings
-					if (x < g_hot_zone.min.x || x > g_hot_zone.max.x || y < g_hot_zone.min.z || y > g_hot_zone.max.z) {
-						height = 5 + RandomInt(height) + RandomInt(height);
+					if (x < g_hot_zone.min.x || x > g_hot_zone.max.x || y < g_hot_zone.min.z || y > g_hot_zone.max.z)
+                    {
+						height = 5 + RandomIntR(height) + RandomIntR(height);
 						new CBuilding (BUILDING_SIMPLE, x + 1, y + 1, height, width - 2, depth - 2, RandomInt(), building_color);
-					} else { //use fancy buildings.
-						height = 15 + RandomInt(15);
+					}
+                    else
+                    { //use fancy buildings.
+						height = 15 + RandomIntR(15);
 						width -=2;
 						depth -=2;
 						new CBuilding((COIN_FLIP() ? BUILDING_TOWER : BUILDING_BLOCKY), x + 1, y + 1, height, width, depth, RandomInt(), building_color);

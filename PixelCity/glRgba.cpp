@@ -308,7 +308,7 @@ GLrgba GLrgba::colorWithAlpha(float newAlpha) const { return GLrgba(red(), green
 GLrgba RANDOM_COLOR(void)
 {
     //was #define RANDOM_COLOR (glRgbaFromHsl(float(RandomVal(255))/255.0f, 1.0f, 0.75f))
-    return glRgbaFromHsl(float(RandomInt(255))/255.0f, 1.0f, 0.75f);
+    return glRgbaFromHsl(float(RandomIntR(255))/255.0f, 1.0f, 0.75f);
 }
 
 void glColor4(const GLrgba &color)

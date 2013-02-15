@@ -59,6 +59,10 @@ void pwPopMatrix(void);
 
     // If OpenGL had errors, report them. Where indicates where the first error was found.
 void glReportError(const char* where);
+void pwColor3f(GLfloat r, GLfloat g, GLfloat b);
+void pwCallList(GLuint list);
+void pwVertex2f(GLfloat x, GLfloat y);
+void pwTexCoord2f(GLfloat x, GLfloat y);
 
 #ifdef __cplusplus
 }

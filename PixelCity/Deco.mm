@@ -124,26 +124,27 @@ void CDeco::CreateRadioTower (GLvector pos, float height)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CDeco::CreateLogo (GLvector2 start, GLvector2 end, float bottom, int seed, GLrgba color)
+void CDeco::CreateLogo(const GLvector2 &start, const GLvector2 &end, float bottom, int seed, const GLrgba &color)
 {
 
   _use_alpha = true;
   _color = color;
-  int logo_index = seed % LOGO_ROWS;
-  GLvector to = glVectorNormalize (glVector(start.x, 0.0f, start.y) - glVector(end.x, 0.0f, end.y));
-  GLvector out = glVectorCrossProduct (glVector(0.0f, 1.0f, 0.0f), to) * LOGO_OFFSET;
+//  int logo_index = seed % LOGO_ROWS;
+  
+  GLvector to = glVectorNormalize(glVector(start.x, 0.0f, start.y) - glVector(end.x, 0.0f, end.y));
+  GLvector out = glVectorCrossProduct(glVector(0.0f, 1.0f, 0.0f), to) * LOGO_OFFSET;
   GLvector2 center2d = (start + end) / 2;
   _center = glVector(center2d.x, bottom, center2d.y);
   
-  float height = (glVectorLength(start - end) / 8.0f) * 1.5f;
+  float height = ((start - end) / 8.0f).Length() * 1.5f;
   float top = bottom + height;
-  float u1 = 0.0f, u2 = 0.5f;                   //We actually only use the left half of the texture
-  float v1 = (float)logo_index / LOGO_ROWS, v2 = v1 + (1.0f / LOGO_ROWS);
+  float u1 = 0.0f, u2 = 1.0f;   // PAW was 0.5f;                   //We actually only use the left half of the texture
+  float v1 = 1.0f, v2 = 0.0f;   // PAW was float v1 = (float)logo_index / LOGO_ROWS, v2 = v1 + (1.0f / LOGO_ROWS);
 
-  _mesh->VertexAdd( GLvertex(glVector(start.x, bottom, start.y) + out, glVector(u1, v1)) );
-  _mesh->VertexAdd( GLvertex(glVector(end.x  , bottom, end.y  ) + out, glVector(u2, v1)) );
-  _mesh->VertexAdd( GLvertex(glVector(end.x  , top   , end.y  ) + out, glVector(u2, v2)) );
-  _mesh->VertexAdd( GLvertex(glVector(start.x, top   , start.y) + out, glVector(u1, v2)) );
+  _mesh->VertexAdd( GLvertex(glVector(start.x, bottom, start.y) + out, glVector(u1, v1), _color) );
+  _mesh->VertexAdd( GLvertex(glVector(end.x  , bottom, end.y  ) + out, glVector(u2, v1), _color) );
+  _mesh->VertexAdd( GLvertex(glVector(end.x  , top   , end.y  ) + out, glVector(u2, v2), _color) );
+  _mesh->VertexAdd( GLvertex(glVector(start.x, top   , start.y) + out, glVector(u1, v2), _color) );
   
   quad_strip qs;
   qs.index_list.push_back(0);
@@ -152,7 +153,7 @@ void CDeco::CreateLogo (GLvector2 start, GLvector2 end, float bottom, int seed, 
   qs.index_list.push_back(2);
   _mesh->QuadStripAdd (qs);
   
-  _texture = TextureId (TEXTURE_LOGOS);
+  _texture = TextureRandomLogo(); // TextureId (TEXTURE_LOGOS);
 }
 
 /*-----------------------------------------------------------------------------
@@ -214,8 +215,8 @@ void CDeco::CreateLightTrim (GLvector* chain, int count, float height, unsigned 
   _center = glVector (0.0f, 0.0f, 0.0f);
   qs.index_list.reserve(count * 2 + 2);
   for (i = 0; i < count; i++) 
-    _center += chain[i];
-  _center /= (float)count;
+      _center = _center + chain[i];
+  _center = _center / (float)count;
   row = (float)(seed % TRIM_ROWS);
   v1 = row * TRIM_SIZE;
   v2 = (row + 1.0f) * TRIM_SIZE;
@@ -223,7 +224,7 @@ void CDeco::CreateLightTrim (GLvector* chain, int count, float height, unsigned 
   u = 0.0f;
   for (i = 0; i < count + 1; i++) {
     if (i)
-      u += glVectorLength (chain[i % count] - p.position) * 0.1f;
+      u += (chain[i % count] - p.position).Length() * 0.1f;
     //Add the bottom point      
     prev = i - 1;
     if (prev < 0)

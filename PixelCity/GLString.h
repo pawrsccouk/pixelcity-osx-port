@@ -128,5 +128,10 @@
     // This ignores the texture already set up, if one exists.
 -(void) drawIntoTexture:(GLuint)textureId x:(int)x y:(int)y width:(GLuint)texWidth height:(GLuint)texHeight;
 
+    // Create a new texture which shows the provided text.
+    // The size of the texture is determined by the amount of text we need to draw.
+    // Returns the ID of the texture on success, or 0 on failure.
+-(GLuint) makeTexture;
+
 @end
 

@@ -222,7 +222,7 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
     
         //See if this building is special and worthy of fancy roof decorations.
     if (bottom > 35.0f)
-        addon = RandomInt(ADDON_COUNT);
+        addon = RandomIntR(ADDON_COUNT);
     
         //Build the roof slab
     ConstructCube (left, right, front, back, bottom, bottom + height);
@@ -253,7 +253,7 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
                 end   = glVector (left - logo_offset, back );
                 break;
         }
-        d->CreateLogo (start, end, bottom, WorldLogoIndex (), _trim_color);
+        d->CreateLogo(start, end, bottom, WorldLogoIndex(), _trim_color);
         _have_logo = true;
     } else if (addon == ADDON_TRIM) {
         CDeco *d = new CDeco;
@@ -261,7 +261,7 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
         vector_buffer[1] = glVector (left, bottom, front);
         vector_buffer[2] = glVector (right, bottom, front);
         vector_buffer[3] = glVector (right, bottom, back);
-        d->CreateLightTrim (vector_buffer, 4, (float)RandomInt (2) + 1.0f, _seed, _trim_color);
+        d->CreateLightTrim (vector_buffer, 4, (float)RandomIntR(2) + 1.0f, _seed, _trim_color);
     } else if (addon == ADDON_LIGHTS && !_have_lights) {
         addLight(glVector (left , (float)(bottom + 2), front), _trim_color, LIGHT_SIZE);
         addLight(glVector (right, (float)(bottom + 2), front), _trim_color, LIGHT_SIZE);
@@ -278,10 +278,10 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
         //1 air conditioner block for every 15 floors sounds reasonble
     air_conditioners = _height / 15;
     for (i = 0; i < air_conditioners; i++) {
-        float ac_size = (float)(10 + RandomInt (30)) / 10;
-        float ac_height = (float)RandomInt (20) / 10 + 1.0f;
-        float ac_x = left + (float)RandomInt (width);
-        float ac_y = front + (float)RandomInt (depth);
+        float ac_size = (float)(10 + RandomIntR(30)) / 10;
+        float ac_height = (float)RandomIntR(20) / 10 + 1.0f;
+        float ac_x = left + (float)RandomIntR(width);
+        float ac_y = front + (float)RandomIntR(depth);
             //make sure the unit doesn't hang off the right edge of the building
         if (ac_x + ac_size > (float)right)
             ac_x = (float)right - ac_size;
@@ -345,71 +345,56 @@ void CBuilding::ConstructSpike (int left, int right, int front, int back, int bo
 float CBuilding::ConstructWall (int start_x, int start_y, int start_z,
                                 int direction, int length, int height, unsigned long window_groups, float uv_start, bool blank_corners)
 {
-
-  int         x, z;
-  int         step_x, step_z;
-  int         i;
-  quad_strip  qs;
-  int         column;
-  int         mid;
-  int         odd;
-  GLvertex    v;
-  bool        blank;
-  bool        last_blank;
-
-  qs.index_list.reserve(100);
-
-  switch (direction) {
-  case NORTH:
-    step_z = 1; step_x = 0; break;
-  case WEST:
-    step_z = 0; step_x = -1; break;
-  case SOUTH:
-    step_z = -1; step_x = 0; break;
-  case EAST:
-    step_z = 0; step_x = 1; break;
-  }
-  x = start_x;;
-  z = start_z;
-  mid = (length / 2) - 1;
-  odd = 1 - (length % 2);
-  if (length % 2) 
-    mid++;
-  //mid = (length / 2);
-  v.uv.x = (float)(x + z) / SEGMENTS_PER_TEXTURE;
-  v.uv.x = uv_start;
-  blank = false;
-  for (i = 0; i <= length; i++) {
-    //column counts up to the mid point, then back down, to make it symetrical
-    if (i <= mid)
-      column = i - odd;
-    else 
-      column = (mid) - (i - (mid));
-    last_blank = blank;
-    blank = (column % window_groups) > window_groups / 2;
-    if (blank_corners && i == 0)
-      blank = true;
-    if (blank_corners && i == (length - 1))
-      blank = true;
-    if (last_blank != blank || i == 0 || i == length) {
-      v.position = glVector ((float)x, (float)start_y, (float)z);
-      v.uv.y = (float)start_y / SEGMENTS_PER_TEXTURE;
-      _mesh->VertexAdd (v);
-      qs.index_list.push_back(_mesh->VertexCount () - 1);
-      v.position.y = (float)(start_y + height);
-      v.uv.y = (float)(start_y + height) / SEGMENTS_PER_TEXTURE;;
-      _mesh->VertexAdd (v);
-      qs.index_list.push_back(_mesh->VertexCount () - 1);
+    int step_x, step_z;
+    switch (direction) {
+        case NORTH:   step_z =  1; step_x =  0; break;
+        case WEST:    step_z =  0; step_x = -1; break;
+        case SOUTH:   step_z = -1; step_x =  0; break;
+        case EAST:    step_z =  0; step_x =  1; break;
     }
-    //if (!blank && i != 0 && i != (length - 1))
-    if (!blank && i != length)
-      v.uv.x += 1.0f / SEGMENTS_PER_TEXTURE;
-    x += step_x;
-    z += step_z;
-  }
-  _mesh->QuadStripAdd (qs);  
-  return v.uv.x;
-
+    
+    int x = start_x, z = start_z, mid = (length / 2) - 1, odd = 1 - (length % 2);
+    if (length % 2)
+        mid++;
+        //mid = (length / 2);
+    
+    GLvertex    v;
+    quad_strip  qs;
+    qs.index_list.reserve(100);
+    v.uv.x = (float)(x + z) / SEGMENTS_PER_TEXTURE;
+    v.uv.x = uv_start;
+    bool blank = false;
+    for (int i = 0; i <= length; i++)
+    {
+            //column counts up to the mid point, then back down, to make it symetrical
+        int column = (i <= mid) ? i - odd : (mid) - (i - (mid));
+        
+        bool last_blank = blank;
+        blank = (column % window_groups) > window_groups / 2;
+        if( (blank_corners && i == 0) || (blank_corners && i == (length - 1)) )
+            blank = true;
+        
+        if (last_blank != blank || i == 0 || i == length)
+        {
+            v.position = glVector ((float)x, (float)start_y, (float)z);
+            v.uv.y = (float)start_y / SEGMENTS_PER_TEXTURE;
+            _mesh->VertexAdd (v);
+            qs.index_list.push_back(_mesh->VertexCount () - 1);
+            
+            v.position.y = (float)(start_y + height);
+            v.uv.y = (float)(start_y + height) / SEGMENTS_PER_TEXTURE;;
+            _mesh->VertexAdd (v);
+            qs.index_list.push_back(_mesh->VertexCount () - 1);
+        }
+            //if (!blank && i != 0 && i != (length - 1))
+        if (!blank && i != length)
+            v.uv.x += 1.0f / SEGMENTS_PER_TEXTURE;
+        
+        x += step_x;
+        z += step_z;
+    }
+    _mesh->QuadStripAdd (qs);  
+    return v.uv.x;
 }
 
 /*-----------------------------------------------------------------------------
@@ -438,11 +423,11 @@ void CBuilding::CreateBlocky ()
   //Choose if the corners of the building are to be windowless.
   blank_corners = COIN_FLIP();
   //Choose a random column on our texture;
-  uv_start = (float)RandomInt (SEGMENTS_PER_TEXTURE) / SEGMENTS_PER_TEXTURE;
+  uv_start = (float)RandomIntR(SEGMENTS_PER_TEXTURE) / SEGMENTS_PER_TEXTURE;
   //Choose how the windows are grouped
-  grouping = 2 + RandomInt (4);
+  grouping = 2 + RandomIntR(4);
   //Choose how tall the lid should be on top of each section
-  lid_height = (float)(RandomInt (3) + 1);
+  lid_height = (float)(RandomIntR(3) + 1);
   //find the center of the building.
   mid_x = _x + _width / 2;
   mid_z = _y + _depth / 2;
@@ -535,8 +520,8 @@ void CBuilding::CreateSimple ()
     float y1 = 0.0f       , y2 = float(_height);
     float z2 = float(_y)  , z1 = float(_y + _depth);
     
-    float u  = float(RandomInt (SEGMENTS_PER_TEXTURE)) / SEGMENTS_PER_TEXTURE;
-    float v1 = float(RandomInt (SEGMENTS_PER_TEXTURE)) / SEGMENTS_PER_TEXTURE;
+    float u  = float(RandomIntR(SEGMENTS_PER_TEXTURE)) / SEGMENTS_PER_TEXTURE;
+    float v1 = float(RandomIntR(SEGMENTS_PER_TEXTURE)) / SEGMENTS_PER_TEXTURE;
     float v2 = v1 + float(_height) * ONE_SEGMENT;
     
     addToMesh(x1, y1, z1, u, v1, *_mesh);
@@ -563,8 +548,8 @@ void CBuilding::CreateSimple ()
         qs.index_list.push_back(i);
     _mesh->QuadStripAdd (qs);
     
-    float cap_height = float(1 + RandomInt(4));  //How tall the flat-color roof is
-    float ledge = float(RandomInt(10)) / 30.0f;  //how much the ledge sticks out
+    float cap_height = float(1 + RandomIntR(4));  //How tall the flat-color roof is
+    float ledge = float(RandomIntR(10)) / 30.0f;  //how much the ledge sticks out
     ConstructCube (x1 - ledge, x2 + ledge, z2 - ledge, z1 + ledge, (float)_height, (float)_height + cap_height);
 
     _mesh->Compile ();
@@ -604,13 +589,13 @@ void CBuilding::CreateModern ()
 
   logo_done = false;
   //How tall the windowless section on top will be.
-  cap_height = 1 + RandomInt (5);
+  cap_height = 1 + RandomIntR(5);
   //How many 10-degree segments to build before the next skip.
-  skip_interval = 1 + RandomInt (8);
+  skip_interval = 1 + RandomIntR(8);
   //When a skip happens, how many degrees should be skipped
-  skip_delta = (1 + RandomInt (2)) * 30; //30 60 or 90
+  skip_delta = (1 + RandomIntR(2)) * 30; //30 60 or 90
   //See if this is eligible for fancy lighting trim on top
-  if (_height > 48 && RandomInt (3) == 0)
+  if (_height > 48 && RandomIntR(3) == 0)
     do_trim = true;
   else
     do_trim = false;
@@ -678,7 +663,7 @@ void CBuilding::CreateModern ()
   p.position.z = _center.z;
   _mesh_flat->VertexAdd (p);
   _mesh_flat->FanAdd (f);
-  radius /= 2.0f;
+  radius = radius / 2.0f;
   //ConstructRoof ((int)(_center.x - radius), (int)(_center.x + radius), (int)(_center.z - radius), (int)(_center.z + radius), _height + cap_height);
   _mesh->Compile ();
   _mesh_flat->Compile ();
@@ -691,14 +676,14 @@ void CBuilding::CreateModern ()
 
 void CBuilding::CreateTower ()
 {
-    float ledge         = (float)RandomInt (3) * 0.25f;    //How much ledges protrude from the building
-    unsigned long ledge_height  = RandomInt (4) + 1;               //How tall the ledges are, in stories
-    unsigned long   grouping      = RandomInt (3) + 2;               //How the windows are grouped
-    bool  blank_corners = RandomInt (4) > 0;               //if the corners of the building have no windows
-    //  bool roof_spike = RandomInt (3) == 0;              //if the roof is pointed or has infrastructure on it
-    unsigned tier_fraction = 2 + RandomInt (4);               //What fraction of the remaining height should be given to each tier
-    unsigned long narrowing_interval = 1 + RandomInt (10);           //How often (in tiers) does the building get narrower?
-    unsigned long foundation = 2 + RandomInt (3);               //The height of the windowsless slab at the bottom
+    float ledge = (float)RandomIntR(3) * 0.25f;        //How much ledges protrude from the building
+    unsigned long ledge_height = RandomIntR(4) + 1;               //How tall the ledges are, in stories
+    unsigned long grouping = RandomIntR(3) + 2;               //How the windows are grouped
+    bool  blank_corners = RandomIntR(4) > 0;               //if the corners of the building have no windows
+    //  bool roof_spike = RandomIntR(3) == 0;              //if the roof is pointed or has infrastructure on it
+    unsigned tier_fraction = 2 + RandomIntR(4);               //What fraction of the remaining height should be given to each tier
+    unsigned long narrowing_interval = 1 + RandomIntR(10);           //How often (in tiers) does the building get narrower?
+    unsigned long foundation = 2 + RandomIntR(3);               //The height of the windowsless slab at the bottom
     //  bool tower = RandomInt (5) != 0 && _height > 40;   //The odds that we'll have a big fancy spikey top
 
         //set our initial parameters
@@ -714,7 +699,7 @@ void CBuilding::CreateTower ()
         int section_width = right - left, section_height = (remaining_height < 10) ? remaining_height : std::max(remaining_height / tier_fraction, 2u);
     
             //Build the four walls
-        float uv_start = (float)RandomInt (SEGMENTS_PER_TEXTURE) / SEGMENTS_PER_TEXTURE;
+        float uv_start = (float)RandomIntR(SEGMENTS_PER_TEXTURE) / SEGMENTS_PER_TEXTURE;
         uv_start = ConstructWall (left , bottom, back , SOUTH, section_depth, section_height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
         uv_start = ConstructWall (left , bottom, front, EAST , section_width, section_height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
         uv_start = ConstructWall (right, bottom, front, NORTH, section_depth, section_height, grouping, uv_start, blank_corners) - ONE_SEGMENT;

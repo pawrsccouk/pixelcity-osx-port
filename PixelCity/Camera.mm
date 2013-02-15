@@ -94,72 +94,72 @@ static GLvector flycam_position (unsigned long t)
 
 static void do_auto_cam ()
 {
-
-  float     dist;
-  unsigned  t;
-  unsigned long  now, elapsed;
-  int       behavior; 
-  GLvector  target;
-
-  now = GetTickCount ();
-  elapsed = now - last_update;
-  elapsed = std::min(elapsed, 50ul); //limit to 1/20th second worth of time
-  if (elapsed == 0)
-    return;
-  last_update = now;
-  t = time (NULL) % CAMERA_CYCLE_LENGTH;
+    unsigned long now = GetTickCount ();
+    unsigned long elapsed = now - last_update;
+    elapsed = std::min(elapsed, 50ul); //limit to 1/20th second worth of time
+    if (elapsed == 0)
+        return;
+    
+    last_update = now;
+    
 #if SCREENSAVER
-  behavior = t / CAMERA_CHANGE_INTERVAL;
+    int behavior = (time(NULL) % CAMERA_CYCLE_LENGTH) / CAMERA_CHANGE_INTERVAL;
 #else
-  behavior = camera_behavior;
+    int behavior = camera_behavior;
 #endif
-  tracker += (float)elapsed / 300.0f;
-  //behavior = CAMERA_FLYCAM1; 
-  switch (behavior) {
-  case CAMERA_ORBIT_INWARD:
-    auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 150.0f;
-    auto_position.y = 60.0f;
-    auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 150.0f;
-    target = glVector (WORLD_HALF, 40, WORLD_HALF);
-    break;
-  case CAMERA_ORBIT_OUTWARD:
-    auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 250.0f;
-    auto_position.y = 60.0f;
-    auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 250.0f;
-    target = glVector (WORLD_HALF, 30, WORLD_HALF);
-    break;
-  case CAMERA_ORBIT_ELLIPTICAL:
-    dist = 150.0f + sinf (tracker * DEGREES_TO_RADIANS / 1.1f) * 50;
-    auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * dist;
-    auto_position.y = 60.0f;
-    auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * dist;
-    target = glVector (WORLD_HALF, 50, WORLD_HALF);
-    break;
-  case CAMERA_FLYCAM1:
-  case CAMERA_FLYCAM2:
-  case CAMERA_FLYCAM3:
-    auto_position = (flycam_position (now) + flycam_position (now + 4000)) / 2.0f;
-    target = flycam_position (now + FLYCAM_CIRCUT_HALF - ONE_SECOND * 3);
-    break;
-  case CAMERA_SPEED:
-    auto_position = (flycam_position (now) + flycam_position (now + 500)) / 2.0f;
-    target = flycam_position (now + ONE_SECOND * 5);
-    auto_position.y /= 2;
-    target.y /= 2;
-    break;
-  case CAMERA_SPIN:
-  default:  
-    target.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 300.0f;
-    target.y = 30.0f;
-    target.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 300.0f;
-    auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 50.0f;
-    auto_position.y = 60.0f;
-    auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 50.0f;
-  }
-  dist = MathDistance (auto_position.x, auto_position.z, target.x, target.z);
-  auto_angle.y = MathAngle1 (-MathAngle2 (auto_position.x, auto_position.z, target.x, target.z));
-  auto_angle.x = 90.0f + MathAngle2 (0, auto_position.y, dist, target.y);
 
+    tracker += (float)elapsed / 300.0f;
+    GLvector  target;
+    switch (behavior) {
+        case CAMERA_ORBIT_INWARD:
+            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 150.0f;
+            auto_position.y = 60.0f;
+            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 150.0f;
+            target = glVector (WORLD_HALF, 40, WORLD_HALF);
+            break;
+            
+        case CAMERA_ORBIT_OUTWARD:
+            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 250.0f;
+            auto_position.y = 60.0f;
+            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 250.0f;
+            target = glVector (WORLD_HALF, 30, WORLD_HALF);
+            break;
+            
+        case CAMERA_ORBIT_ELLIPTICAL: {
+            float dist = 150.0f + sinf (tracker * DEGREES_TO_RADIANS / 1.1f) * 50;
+            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * dist;
+            auto_position.y = 60.0f;
+            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * dist;
+            target = glVector (WORLD_HALF, 50, WORLD_HALF);
+        }
+            break;
+            
+        case CAMERA_FLYCAM1:
+        case CAMERA_FLYCAM2:
+        case CAMERA_FLYCAM3:
+            auto_position = (flycam_position (now) + flycam_position (now + 4000)) / 2.0f;
+            target = flycam_position (now + FLYCAM_CIRCUT_HALF - ONE_SECOND * 3);
+            break;
+            
+        case CAMERA_SPEED:
+            auto_position = (flycam_position (now) + flycam_position (now + 500)) / 2.0f;
+            target = flycam_position (now + ONE_SECOND * 5);
+            auto_position.y /= 2;
+            target.y /= 2;
+            break;
+            
+        case CAMERA_SPIN:
+        default:
+            target.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 300.0f;
+            target.y = 30.0f;
+            target.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 300.0f;
+            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 50.0f;
+            auto_position.y = 60.0f;
+            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 50.0f;
+    }
+    float dist = MathDistance (auto_position.x, auto_position.z, target.x, target.z);
+    auto_angle.y = MathAngle1 (-MathAngle2 (auto_position.x, auto_position.z, target.x, target.z));
+    auto_angle.x = 90.0f + MathAngle2 (0, auto_position.y, dist, target.y);
 }
 
 
@@ -316,7 +316,7 @@ void CameraUpdate (void)
     CameraPan (movement.x);
     CameraForward (movement.z);
     position.y += movement.y / 10.0f;
-    movement *= (GetTickCount () - last_move > 1000) ? 0.9f : 0.99f;
+    movement = movement * ((GetTickCount () - last_move > 1000) ? 0.9f : 0.99f);
 
     if (SCREENSAVER)
         cam_auto = true;

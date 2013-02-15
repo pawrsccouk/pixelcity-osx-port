@@ -14,6 +14,7 @@
 #import "ini.h"
 #import "RenderAPI.h"
 #import "PWGL.h"
+#import "Random.h"
 
 // ==================================
 
@@ -319,6 +320,7 @@ void glReportError (const char* strLocation)
 		[self drawRect:[self bounds]]; // redraw now instead dirty to enable updates during live resize
 }
 
+static const int MAX_CACHED_GL_STRINGS = 100;
 
 -(void)drawOverlayText:(NSString*)overlayText
 {
@@ -330,8 +332,8 @@ void glReportError (const char* strLocation)
     if(!cachedStrings) cachedStrings = [NSMutableDictionary dictionary];
     if(lastSize.width <= 0 || lastSize.height <= 0) lastSize = bounds.size;
     
-        // Clear the cache if the image size has changed.
-    if( ! CGSizeEqualToSize(lastSize, bounds.size) ) {
+        // Clear the cache if the image size has changed or if the cache has gotten too large.
+    if( (! CGSizeEqualToSize(lastSize, bounds.size)) || (cachedStrings.count > MAX_CACHED_GL_STRINGS) ) {
         [cachedStrings removeAllObjects];
         lastSize = bounds.size;
     }
@@ -340,7 +342,10 @@ void glReportError (const char* strLocation)
     if(! glString) {
         glString = [[GLString alloc] initWithString:overlayText attributes:@{
                     NSForegroundColorAttributeName : [NSColor whiteColor],
-                    NSFontAttributeName            : [NSFont fontWithName: @"Helvetica-Bold" size: 12.0f] }];
+                    NSFontAttributeName            : [NSFont fontWithName: @"Helvetica-Bold" size: 12.0f] }
+                                          textColor:[NSColor whiteColor]
+                                           boxColor:[NSColor clearColor]
+                                        borderColor:[NSColor clearColor]];
         
         [glString useDynamicFrame];
         cachedStrings[overlayText] = glString;
@@ -578,16 +583,19 @@ void RenderPrintOverlayText(int line, const char *fmt, ...)
     [theOpenGLView drawOverlayText:text];
 }
 
+
+
+
 static NSArray *getFontAttributes()
 {
     static NSMutableArray *fontAttribs;
     if(!fontAttribs) {
-        NSString *fontNames[] = { @"Helvetica", @"Courier New", @"Arial Black", @"Impact", @"Chalkboard", @"Baskerville" };
+        NSString *fontNames[] = { @"Helvetica-Bold", @"Courier-Bold", @"Times-Bold", @"Impact", @"Chalkboard-Bold", @"Baskerville-Bold" };
         int arraySize = sizeof(fontNames) / sizeof(fontNames[0]);
         fontAttribs = [NSMutableArray arrayWithCapacity:6];
         
         for(NSUInteger i = 0; i < arraySize; i++) {
-            NSFont *font = [NSFont fontWithName:fontNames[i] size:18];
+            NSFont *font = [NSFont fontWithName:fontNames[i] size:32];
             if(font)
                 [fontAttribs addObject:@{
                   NSFontAttributeName            : font,
@@ -604,7 +612,7 @@ int RenderGetNumFonts()
 }
 
 void RenderPrintIntoTexture(GLuint textureId, int x, int y, int texWidth, int texHeight,
-                            int font, float red, float green, float blue, float alpha,
+                            int font, NSColor *textColor,
                             const char *fmt, ...)
 {
     NSString *text, *fmtText = [NSString stringWithUTF8String:fmt];
@@ -613,13 +621,145 @@ void RenderPrintIntoTexture(GLuint textureId, int x, int y, int texWidth, int te
     @try { text = [[NSString alloc] initWithFormat:fmtText arguments:args]; }
     @finally {  va_end(args); }
     
-    NSDictionary *stringAttrs = getFontAttributes()[font];
+    NSMutableDictionary *stringAttrs = [NSMutableDictionary dictionaryWithDictionary:getFontAttributes()[font]];
+    stringAttrs[NSForegroundColorAttributeName] = textColor;
     assert(stringAttrs[NSFontAttributeName]);
     GLString *glString = [[GLString alloc] initWithString:text
                                                attributes:stringAttrs
-                                                textColor:[NSColor whiteColor]
+                                                textColor:textColor
                                                  boxColor:[NSColor redColor]
                                               borderColor:[NSColor greenColor]];
     [glString drawIntoTexture:textureId x:x y:y width:texWidth height:texHeight];
+}
+
+static NSArray *makeLogos()
+{
+    NSArray* prefix =
+    @[
+	@"i"     ,
+	@"Green ",
+	@"Mega"  ,
+	@"Super ",
+	@"Omni"  ,
+	@"e"     ,
+	@"Hyper" ,
+	@"Global ",
+	@"Vital" ,
+	@"Next " ,
+	@"Pacific ",
+	@"Metro" ,
+	@"Unity ",
+	@"G-"    ,
+	@"Trans" ,
+	@"Infinity ",
+	@"Superior ",
+	@"Monolith ",
+	@"Best " ,
+	@"Atlantic ",
+	@"First ",
+	@"Union ",
+	@"National ",
+    ];
+
+    NSArray* name =
+    @[
+	@"Biotic",
+	@"Info",
+	@"Data",
+	@"Solar",
+	@"Aerospace",
+	@"Motors",
+	@"Nano",
+	@"Online",
+	@"Circuits",
+	@"Energy",
+	@"Med",
+	@"Robotic",
+	@"Exports",
+	@"Security",
+	@"Systems",
+	@"Financial",
+	@"Industrial",
+	@"Media",
+	@"Materials",
+	@"Foods",
+	@"Networks",
+	@"Shipping",
+	@"Tools",
+	@"Medical",
+	@"Publishing",
+	@"Enterprises",
+	@"Audio",
+	@"Health",
+	@"Bank",
+	@"Imports",
+	@"Apparel",
+	@"Petroleum",
+	@"Studios",
+    ];
+
+    NSArray* suffix =
+    @[
+	@"Corp",
+	@" Inc.",
+	@"Co",
+	@"World",
+	@".Com",
+	@" USA",
+	@" Ltd.",
+	@"Net",
+	@" Tech",
+	@" Labs",
+	@" Mfg.",
+	@" UK",
+	@" Unlimited",
+	@" One",
+	@" LLC"
+    ];
+
+    pwDepthMask(GL_FALSE);
+    pwDisable(GL_BLEND);
+    
+    static const int NUM_LOGOS = 20;
+    int name_num = RandomIntR((int)name.count), prefix_num = RandomIntR((int)prefix.count), suffix_num = RandomIntR((int)suffix.count);
+    int font = RandomIntR(RenderGetNumFonts());
+    
+    NSMutableArray *textures = [NSMutableArray array];
+    
+    for(int i = 0; i < NUM_LOGOS; i++) {
+        
+        NSMutableDictionary *logoAttributes = [NSMutableDictionary dictionaryWithDictionary:getFontAttributes()[font]];
+        logoAttributes[NSForegroundColorAttributeName] = [NSColor whiteColor];
+        assert(logoAttributes[NSFontAttributeName]);
+
+        NSString *logoText = COIN_FLIP() ? [NSString stringWithFormat:@"%@%@", prefix[prefix_num], name[name_num]    ]
+                                         : [NSString stringWithFormat:@"%@%@", name[name_num]    , suffix[suffix_num]];
+
+        GLString *s = [[GLString alloc] initWithString:logoText
+                                            attributes:logoAttributes
+                                             textColor:[NSColor whiteColor]
+                                              boxColor:[NSColor clearColor]
+                                           borderColor:[NSColor clearColor]];
+        
+        GLuint textureId = [s makeTexture];
+        assert(textureId);
+        if(textureId)
+            [textures addObject:[NSNumber numberWithInt:textureId]];
+        
+        name_num   = (name_num   + 1) % name.count  ;
+        prefix_num = (prefix_num + 1) % prefix.count;
+        suffix_num = (suffix_num + 1) % suffix.count;
+    }
+    return textures;
+}
+
+
+GLuint TextureRandomLogo()
+{
+    static NSArray *textures = nil;
+    if(!textures)
+        textures = makeLogos();
+    
+    return [textures[RandomIntR(textures.count)] intValue];
 }
 

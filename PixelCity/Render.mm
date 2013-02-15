@@ -239,15 +239,25 @@ static void updateProgress(float fade)
     GLrgba color(0.5f);
     do_progress ((float)g_render_width / 2, (float)g_render_height / 2, (float)radius, fade, EntityProgress ());
     RenderPrintIntoTexture (0, g_render_width / 2 - LOGO_PIXELS, g_render_height / 2 + LOGO_PIXELS,
-                            g_render_width, g_render_height,
-                            0, color.red(), color.green(), color.blue(), color.alpha(),
+                            g_render_width, g_render_height, 0,
+                            [NSColor colorWithDeviceRed:color.red() green:color.green() blue:color.blue() alpha:color.alpha()],
                             "%1.2f%%", EntityProgress () * 100.0f);
     RenderPrintOverlayText (1, "%s v%d.%d.%03d", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 }
 
 static void drawDebugEffect()
 {
-    pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_LOGOS));
+    const size_t TICK_INTERVAL = 2 * 1000;  // seconds to millis.
+    static size_t lastCheck = 0;
+    static GLuint lastLogoTex = 0;
+    
+        // Change the logo every couple of seconds.
+    if(GetTickCount() > lastCheck + TICK_INTERVAL) {
+        lastCheck = GetTickCount();
+        lastLogoTex = TextureRandomLogo();
+    }
+//    pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_LOGOS));
+    pwBindTexture(GL_TEXTURE_2D, lastLogoTex);
     pwDisable (GL_BLEND);
     pwBegin(GL_QUADS);
     @try {

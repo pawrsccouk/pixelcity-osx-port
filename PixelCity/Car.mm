@@ -173,8 +173,8 @@ void CCar::Update()
     if (!m_ready) {
 
             //if the car isn't ready, we need to place it somewhere on the map
-        m_row = DEAD_ZONE + RandomInt(WORLD_SIZE - DEAD_ZONE * 2);
-        m_col = DEAD_ZONE + RandomInt(WORLD_SIZE - DEAD_ZONE * 2);
+        m_row = DEAD_ZONE + RandomIntR(WORLD_SIZE - DEAD_ZONE * 2);
+        m_col = DEAD_ZONE + RandomIntR(WORLD_SIZE - DEAD_ZONE * 2);
             //if there is already a car here, forget it.
         if (carmap[m_row][m_col] > 0)
             return;
@@ -195,7 +195,7 @@ void CCar::Update()
         if (WorldCell (m_row, m_col) & MAP_ROAD_WEST)   m_direction = WEST;
         
             m_drive_angle = dangles[m_direction];
-            m_max_speed = (float)(4 + RandomLong (6)) / 10.0f;
+            m_max_speed = (float)(4 + RandomLongR(6)) / 10.0f;
             m_speed = 0.0f;
             m_change = 3;
             m_stuck = 0;
@@ -208,7 +208,7 @@ void CCar::Update()
     old_pos = m_position;
     m_speed += m_max_speed * 0.05f;
     m_speed = MIN(m_speed, m_max_speed);
-    m_position += direction[m_direction] * MOVEMENT_SPEED * m_speed;
+    m_position = m_position + (direction[m_direction] * MOVEMENT_SPEED * m_speed);
     
         //If the car has moved out of view, there's no need to keep simulating it.
         //if the car is far away, remove it.  We use manhattan units because buildings almost always block views of cars on the diagonal.
@@ -267,7 +267,7 @@ void CCar::Render()
 	angle %= 360;
 	int turn = (int)MathAngleDifference ((float)m_drive_angle, (float)angle);
 	m_drive_angle += SIGN (turn);
-	pos += glVector (0.5f, 0.0f, 0.5f);
+	pos = pos + glVector (0.5f, 0.0f, 0.5f);
 		
 	float top = m_front ? CAR_SIZE : 0.0f;
     glBegin(GL_QUADS);

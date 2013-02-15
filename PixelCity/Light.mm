@@ -141,7 +141,7 @@ void CLight::Blink ()
 {
   _blink = true;
         //we don't want blinkers to be in sync, so have them blink at slightly different rates. (Milliseconds)
-  _blink_interval = 1500 + RandomInt(500);
+  _blink_interval = 1500 + RandomIntR(500);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/

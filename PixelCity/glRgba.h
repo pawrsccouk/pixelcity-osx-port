@@ -9,7 +9,6 @@
 #ifndef PixelCity_glRGBA_h
 #define PixelCity_glRGBA_h
 
-#import "GLrgba.h"
 #import <ostream>
 
 class GLrgba
@@ -50,6 +49,10 @@ public:
 
         // Return a colour which is a copy of this one, but with the specified alpha value. Defaults to fully opaque.
     GLrgba colorWithAlpha(float newAlpha = 1.0f) const;
+    
+        // Set the current color to this color
+    void glColor3f();   // R, G, B
+    void glColor4f();   // R, G, B, A
 };
 
 inline std::ostream &operator<<(std::ostream &os, const GLrgba &v) { return v.operator<<(os); }

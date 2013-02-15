@@ -68,11 +68,9 @@ GLvector3 glVectorInterpolate (GLvector3 v1, GLvector3 v2, float scalar)
                            
 -----------------------------------------------------------------------------*/
 
-float glVectorLength (GLvector3 v)
+float GLvector3::Length() const
 {
-
-  return (float)sqrt (v.x * v.x + v.y * v.y + v.z * v.z);
-
+  return (float)sqrt (x * x + y * y + z * z);
 }
 
 /*-----------------------------------------------------------------------------
@@ -136,14 +134,8 @@ GLvector3 glVectorScale (GLvector3 v, float scale)
 
 GLvector3 glVectorNormalize (GLvector3 v)
 {
-
-  float length;
-
-  length = glVectorLength (v);
-  if (length < 0.000001f)
-    return v;
-  return glVectorScale (v, 1.0f / length);
-
+  float length = v.Length();
+  return (length < 0.000001f) ? v : glVectorScale(v, 1.0f / length);
 }
 
 /*-----------------------------------------------------------------------------
@@ -160,105 +152,104 @@ std::ostream &GLvector::operator<<(std::ostream &os) const
     return os << "[GLvector X=" << x << ", Y=" << y << ", Z=" << z << "]";
 }
 
-GLvector GLvector::operator+ (const GLvector& c)
+GLvector GLvector::operator+ (const GLvector& c) const
 {
   return glVector (x + c.x, y + c.y, z + c.z);
 }
 
-GLvector GLvector::operator+ (const float& c)
+GLvector GLvector::operator+ (const float& c) const
 {
   return glVector (x + c, y + c, z + c);
 }
 
-void GLvector::operator+= (const GLvector& c)
-{
-  x += c.x;
-  y += c.y;
-  z += c.z;
-}
+//void GLvector::operator+= (const GLvector& c)
+//{
+//  x += c.x;
+//  y += c.y;
+//  z += c.z;
+//}
+//
+//void GLvector::operator+= (const float& c)
+//{
+//  x += c;
+//  y += c;
+//  z += c;
+//}
 
-void GLvector::operator+= (const float& c)
-{
-  x += c;
-  y += c;
-  z += c;
-}
-
-GLvector GLvector::operator- (const GLvector& c)
+GLvector GLvector::operator- (const GLvector& c) const
 {
   return glVector (x - c.x, y - c.y, z - c.z);
 }
 
-GLvector GLvector::operator- (const float& c)
+GLvector GLvector::operator- (const float& c) const
 {
   return glVector (x - c, y - c, z - c);
 }
 
-void GLvector::operator-= (const GLvector& c)
-{
-  x -= c.x;
-  y -= c.y;
-  z -= c.z;
-}
+//void GLvector::operator-= (const GLvector& c)
+//{
+//  x -= c.x;
+//  y -= c.y;
+//  z -= c.z;
+//}
+//
+//void GLvector::operator-= (const float& c)
+//{
+//  x -= c;
+//  y -= c;
+//  z -= c;
+//}
 
-void GLvector::operator-= (const float& c)
-{
-  x -= c;
-  y -= c;
-  z -= c;
-}
-
-GLvector GLvector::operator* (const GLvector& c)
+GLvector GLvector::operator* (const GLvector& c) const
 {
   return glVector (x * c.x, y * c.y, z * c.z);
 }
 
-GLvector GLvector::operator* (const float& c)
+GLvector GLvector::operator* (const float& c) const
 {
   return glVector (x * c, y * c, z * c);
 }
 
-void GLvector::operator*= (const GLvector& c)
-{
-  x *= c.x;
-  y *= c.y;
-  z *= c.z;
-}
+//void GLvector::operator*= (const GLvector& c)
+//{
+//  x *= c.x;
+//  y *= c.y;
+//  z *= c.z;
+//}
+//
+//void GLvector::operator*= (const float& c)
+//{
+//  x *= c;
+//  y *= c;
+//  z *= c;
+//}
 
-void GLvector::operator*= (const float& c)
-{
-  x *= c;
-  y *= c;
-  z *= c;
-}
-
-GLvector GLvector::operator/ (const GLvector& c)
+GLvector GLvector::operator/ (const GLvector& c) const
 {
   return glVector (x / c.x, y / c.y, z / c.z);
 }
 
-GLvector GLvector::operator/ (const float& c)
+GLvector GLvector::operator/ (const float& c) const
 {
   return glVector (x / c, y / c, z / c);
 }
 
-void GLvector::operator/= (const GLvector& c)
+//void GLvector::operator/= (const GLvector& c)
+//{
+//  x /= c.x;
+//  y /= c.y;
+//  z /= c.z;
+//}
+//
+//void GLvector::operator/= (const float& c)
+//{
+//  x /= c;
+//  y /= c;
+//  z /= c;
+//}
+
+bool GLvector::operator== (const GLvector& c) const
 {
-  x /= c.x;
-  y /= c.y;
-  z /= c.z;
+  return (x == c.x && y == c.y && z == c.z);
 }
 
-void GLvector::operator/= (const float& c)
-{
-  x /= c;
-  y /= c;
-  z /= c;
-}
-
-bool GLvector::operator== (const GLvector& c)
-{
-  if (x == c.x && y == c.y && z == c.z)
-    return true;
-  return false;
-}

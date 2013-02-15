@@ -239,15 +239,15 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 	if((_cgl_ctx = CGLGetCurrentContext())) { // if we successfully retrieve a current context (required)
         pwPushAttrib(GL_TEXTURE_BIT);
         @try {
-            pwBindTexture(GL_TEXTURE_RECTANGLE_EXT, _textureId);
+            pwBindTexture(GL_TEXTURE_2D, _textureId);
             if (NSEqualSizes(previousSize, _texSize)) {
-                pwTexSubImage2D(GL_TEXTURE_RECTANGLE_EXT,
+                pwTexSubImage2D(GL_TEXTURE_2D,
                                 0, 0, 0,_texSize.width, _texSize.height,
                                 [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
             } else {
-                pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                pwTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _texSize.width, _texSize.height, 0,
+                pwTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                pwTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                pwTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _texSize.width, _texSize.height, 0,
                              [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
             }
         }
@@ -262,10 +262,18 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 {
     glReportError("drawIntoTexture BEGIN");
 
-    _staticFrame = YES;
-    _frameSize = CGSizeMake(texWidth, texHeight);
-    _texSize   = _frameSize;
+//    _staticFrame = YES;
+//    _frameSize = CGSizeMake(texWidth, texHeight);
+//    _texSize   = _frameSize;
+
+    _staticFrame = NO;
+    _texSize = CGSizeMake(texWidth, texHeight);
     _marginSize = CGSizeZero;
+	if ((NO == _staticFrame) && (0.0f == _frameSize.width) && (0.0f == _frameSize.height)) { // find frame size if we have not already found it
+		_frameSize = [_string size]; // current string size
+		_frameSize.width += _marginSize.width * 2.0f; // add padding
+		_frameSize.height += _marginSize.height * 2.0f;
+	}
 
 	if((_cgl_ctx = CGLGetCurrentContext())) {
         NSBitmapImageRep *bitmap = makeBitmap(_string, _frameSize, _marginSize, _boxColor, _borderColor, _textColor, _antialias, _cRadius);
@@ -273,9 +281,7 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
         @try {
             pwBindTexture(GL_TEXTURE_2D, textureId);
             NSAssert(bitmap.hasAlpha, @"Bitmap needs an alpha channel for RGBA textures");
-            pwTexSubImage2D(GL_TEXTURE_2D,
-                            0, x, y, _texSize.width, _texSize.height,
-                            /*[bitmap hasAlpha] ?*/ GL_RGBA /*: GL_RGB*/, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
+            pwTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _frameSize.width, _frameSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
         }
         @finally { pwPopAttrib(); }
     }
@@ -285,6 +291,14 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
     glReportError("drawIntoTexture END");
 }
 
+-(GLuint)makeTexture
+{
+    [self genTexture];
+    GLuint texId = self.textureId;
+    _textureId      = 0;    // Free the ID so the string doesn't delete it on exist
+    _requiresUpdate = YES;  // Since the texture has been deleted, prompt to regenerate one if it is used again.
+    return texId;
+}
 
 #pragma mark Accessors
 
@@ -384,25 +398,25 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 	if (_textureId) {
 		pwPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT); // GL_COLOR_BUFFER_BIT for glBlendFunc, GL_ENABLE_BIT for glEnable / glDisable
 		
-		glDisable (GL_DEPTH_TEST); // ensure text is not remove by depth buffer test.
-		glEnable (GL_BLEND); // for text fading
-		glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // ditto
-		glEnable (GL_TEXTURE_RECTANGLE_EXT);	
+		pwDisable (GL_DEPTH_TEST); // ensure text is not remove by depth buffer test.
+		pwEnable (GL_BLEND); // for text fading
+		pwBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // ditto
+		pwEnable (GL_TEXTURE_2D);
 		
-		glBindTexture (GL_TEXTURE_RECTANGLE_EXT, _textureId);
-		glBegin (GL_QUADS);
-			glTexCoord2f (0.0f, 0.0f); // draw upper left in world coordinates
-			glVertex2f (bounds.origin.x, bounds.origin.y);
+		pwBindTexture (GL_TEXTURE_2D, _textureId);
+		pwBegin (GL_QUADS);
+			pwTexCoord2f (0.0f, 0.0f); // draw upper left in world coordinates
+			pwVertex2f (bounds.origin.x, bounds.origin.y);
 	
-			glTexCoord2f (0.0f, _texSize.height); // draw lower left in world coordinates
-			glVertex2f (bounds.origin.x, bounds.origin.y + bounds.size.height);
+			pwTexCoord2f (0.0f, _texSize.height); // draw lower left in world coordinates
+			pwVertex2f (bounds.origin.x, bounds.origin.y + bounds.size.height);
 	
-			glTexCoord2f (_texSize.width, _texSize.height); // draw upper right in world coordinates
-			glVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y + bounds.size.height);
+			pwTexCoord2f (_texSize.width, _texSize.height); // draw upper right in world coordinates
+			pwVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y + bounds.size.height);
 	
-			glTexCoord2f (_texSize.width, 0.0f); // draw lower right in world coordinates
-			glVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y);
-		glEnd ();
+			pwTexCoord2f (_texSize.width, 0.0f); // draw lower right in world coordinates
+			pwVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y);
+		pwEnd ();
 		
 		pwPopAttrib();
 	}

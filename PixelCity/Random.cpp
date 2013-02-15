@@ -30,6 +30,9 @@ static unsigned long    ptgfsr[N];
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+int COIN_FLIP(void) { return RandomIntR(2) == 0; }
+
+
 unsigned long RandomLong(void)
 {
   int		     kk;
@@ -58,7 +61,7 @@ unsigned long RandomLong(void)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-unsigned long RandomLong(long range)
+unsigned long RandomLongR(long range)
 {
   return range ? (RandomLong() % range) : 0;
 }
@@ -73,9 +76,9 @@ void RandomInit (unsigned long seed)
   k = 1;
 }
 
-unsigned int RandomInt(int range)
+unsigned int RandomIntR(int range)
 {
-    return unsigned(RandomLong(range));
+    return unsigned(RandomLongR(range));
 }
 
 unsigned int RandomInt(void)

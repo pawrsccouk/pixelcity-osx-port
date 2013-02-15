@@ -15,9 +15,9 @@
  
  -----------------------------------------------------------------------------*/
 
-#define RANDOM_COLOR_SHIFT  ((float)(RandomLong (10)) / 50.0f)
-#define RANDOM_COLOR_VAL    ((float)(RandomLong (256)) / 256.0f)
-#define RANDOM_COLOR_LIGHT  ((float)(200 + RandomLong (56)) / 256.0f)
+#define RANDOM_COLOR_SHIFT  ((float)(RandomLongR(10)) / 50.0f)
+#define RANDOM_COLOR_VAL    ((float)(RandomLongR(256)) / 256.0f)
+#define RANDOM_COLOR_LIGHT  ((float)(200 + RandomLongR(56)) / 256.0f)
 #define SKY_BANDS           (sizeof (sky_pos) / sizeof (int))
 #define PREFIX_COUNT        (sizeof (prefix) / sizeof (char*))
 #define SUFFIX_COUNT        (sizeof (suffix) / sizeof (char*))
@@ -48,88 +48,88 @@ using std::vector;
 #import "RenderAPI.h"
 #import "Mathx.h"
 
-static const char* prefix[] = 
-{
-	"i", 
-	"Green ",
-	"Mega",
-	"Super ",
-	"Omni",
-	"e",
-	"Hyper",
-	"Global ",
-	"Vital", 
-	"Next ",
-	"Pacific ",
-	"Metro",
-	"Unity ",
-	"G-",
-	"Trans",
-	"Infinity ", 
-	"Superior ",
-	"Monolith ",
-	"Best ",
-	"Atlantic ",
-	"First ",
-	"Union ",
-	"National ",
-};
-
-static const char* name[] = 
-{
-	"Biotic",
-	"Info",
-	"Data",
-	"Solar",
-	"Aerospace",
-	"Motors",
-	"Nano",
-	"Online",
-	"Circuits",
-	"Energy",
-	"Med",
-	"Robotic",
-	"Exports",
-	"Security",
-	"Systems",
-	"Financial",
-	"Industrial",
-	"Media",
-	"Materials",
-	"Foods",
-	"Networks",
-	"Shipping",
-	"Tools",
-	"Medical",
-	"Publishing",
-	"Enterprises",
-	"Audio",
-	"Health",
-	"Bank",
-	"Imports",
-	"Apparel",
-	"Petroleum", 
-	"Studios",
-};
-
-static const char* suffix[] = 
-{
-	"Corp",
-	" Inc.",
-	"Co",
-	"World",
-	".Com",
-	" USA",
-	" Ltd.",
-	"Net",
-	" Tech",
-	" Labs",
-	" Mfg.",
-	" UK",
-	" Unlimited",
-	" One",
-	" LLC"
-};
+//static const char* prefix[] = 
+//{
+//	"i", 
+//	"Green ",
+//	"Mega",
+//	"Super ",
+//	"Omni",
+//	"e",
+//	"Hyper",
+//	"Global ",
+//	"Vital", 
+//	"Next ",
+//	"Pacific ",
+//	"Metro",
+//	"Unity ",
+//	"G-",
+//	"Trans",
+//	"Infinity ", 
+//	"Superior ",
+//	"Monolith ",
+//	"Best ",
+//	"Atlantic ",
+//	"First ",
+//	"Union ",
+//	"National ",
+//};
+//
+//static const char* name[] = 
+//{
+//	"Biotic",
+//	"Info",
+//	"Data",
+//	"Solar",
+//	"Aerospace",
+//	"Motors",
+//	"Nano",
+//	"Online",
+//	"Circuits",
+//	"Energy",
+//	"Med",
+//	"Robotic",
+//	"Exports",
+//	"Security",
+//	"Systems",
+//	"Financial",
+//	"Industrial",
+//	"Media",
+//	"Materials",
+//	"Foods",
+//	"Networks",
+//	"Shipping",
+//	"Tools",
+//	"Medical",
+//	"Publishing",
+//	"Enterprises",
+//	"Audio",
+//	"Health",
+//	"Bank",
+//	"Imports",
+//	"Apparel",
+//	"Petroleum", 
+//	"Studios",
+//};
+//
+//static const char* suffix[] = 
+//{
+//	"Corp",
+//	" Inc.",
+//	"Co",
+//	"World",
+//	".Com",
+//	" USA",
+//	" Ltd.",
+//	"Net",
+//	" Tech",
+//	" Labs",
+//	" Mfg.",
+//	" UK",
+//	" Unlimited",
+//	" One",
+//	" LLC"
+//};
 
 class CTexture
 {
@@ -156,9 +156,9 @@ public:
 
 static CTexture*    head = NULL;
 static bool         textures_done = false;
-static bool         prefix_used[PREFIX_COUNT];
-static bool         name_used  [NAME_COUNT];
-static bool         suffix_used[SUFFIX_COUNT];
+//static bool         prefix_used[PREFIX_COUNT];
+//static bool         name_used  [NAME_COUNT];
+//static bool         suffix_used[SUFFIX_COUNT];
 static int          build_time = 0;
 
 /*-----------------------------------------------------------------------------
@@ -247,30 +247,30 @@ void drawrect (int left, int top, int right, int bottom, GLrgba color)
 			{	MakePrimitive mp(GL_POINTS);
 				for(int i = left + 1; i < right - 1; i++) {
 					for(int j = top + 1; j < bottom - 1; j++) {
-						glColor4i(255, 0, RandomInt(potential), 255);
-						float hue = 0.2f + (float)RandomLong (100) / 300.0f + (float)RandomLong (100) / 300.0f + (float)RandomLong (100) / 300.0f;
-						GLrgba color_noise = glRgbaFromHsl(hue, 0.3f, 0.5f).colorWithAlpha(float(RandomLong(potential)) / 144.0f);
-						glColor4f(RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, float(RandomLong(potential)) / 144.0f);
+						glColor4i(255, 0, RandomIntR(potential), 255);
+						float hue = 0.2f + (float)RandomLongR(100) / 300.0f + (float)RandomLongR(100) / 300.0f + (float)RandomLongR(100) / 300.0f;
+						GLrgba color_noise = glRgbaFromHsl(hue, 0.3f, 0.5f).colorWithAlpha(float(RandomLongR(potential)) / 144.0f);
+						glColor4f(RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, float(RandomLongR(potential)) / 144.0f);
 						glColor4(color_noise);
 						glVertex2i(i, j);
 					}
 				}
 			}
 		}
-		int hght = (bottom - top) + (RandomInt(3) - 1) + (RandomInt(3) - 1);
+		int hght = (bottom - top) + (RandomIntR(3) - 1) + (RandomIntR(3) - 1);
 		for (int i = left; i < right; i++) {
-			if (RandomLong(6) == 0) {
+			if (RandomLongR(6) == 0) {
 				hght = bottom - top;
-				hght = RandomInt(hght);
-				hght = RandomInt(hght);
-				hght = RandomInt(hght);
+				hght = RandomIntR(hght);
+				hght = RandomIntR(hght);
+				hght = RandomIntR(hght);
 				hght = ((bottom - top) + hght) / 2;
 			}
 			for (int j = 0; j < 1; j++) {
                 MakePrimitive mp(GL_LINES);
-                glColor4f(0, 0, 0, (float)RandomLong(256) / 256.0f);
+                glColor4f(0, 0, 0, (float)RandomLongR(256) / 256.0f);
                 glVertex2i(i, bottom - hght);
-                glColor4f(0, 0, 0, (float)RandomLong(256) / 256.0f);
+                glColor4f(0, 0, 0, (float)RandomLongR(256) / 256.0f);
                 glVertex2i(i, bottom);
 			}
 		}
@@ -297,7 +297,7 @@ static void window (int x, int y, int size, TextureType tt, GLrgba color)
 			break;
 		case TEXTURE_BUILDING4: //windows with blinds
 			drawrect (x + 1, y + 1, x + size - 1, y + size - 1, color);
-			i = RandomInt(size - 2);
+			i = RandomIntR(size - 2);
 			drawrect (x + 1, y + 1, x + size - 1, y + i + 1, color * 0.3f);
 			break;
 		case TEXTURE_BUILDING5: //vert stripes
@@ -397,20 +397,20 @@ void CTexture::DrawWindows ()
 		//Every few floors we change the behavior
 		if (!(y % 8)) {
 			run = 0;
-			run_length = RandomInt(9) + 2;
-			lit_density = 2 + RandomInt(2) + RandomInt(2);
+			run_length = RandomIntR(9) + 2;
+			lit_density = 2 + RandomIntR(2) + RandomIntR(2);
 			lit = false;
 		}
 		for (x = 0; x < SEGMENTS_PER_TEXTURE; x++) {
 			//if this run is over reroll lit and start a new one
 			if (run < 1) {
-				run = RandomInt(run_length);
-				lit = RandomLong(lit_density) == 0;
+				run = RandomIntR(run_length);
+				lit = RandomLongR(lit_density) == 0;
 				//if (lit)
 				//color = GLrgba (0.5f + (float)(RandomLong () % 128) / 256.0f) + GLrgba (RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT);
 			}
 			if (lit) 
-				color = GLrgba (0.5f + (float)(RandomLong () % 128) / 256.0f) + GLrgba (RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT);
+				color = GLrgba(0.5f + (float)(RandomLong() % 128) / 256.0f) + GLrgba(RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT);
 			else 
 				color = GLrgba ((float)(RandomLong () % 40) / 256.0f);
 			window (x * _segment_size, y * _segment_size, _segment_size, _texType, color);
@@ -458,13 +458,13 @@ void CTexture::DrawSky ()
 	
 	//Draw a bunch of little faux-buildings on the horizon.
 	for (int i = 0; i < _size; i += 5)
-		drawrect (i, _size - RandomInt(8) - RandomInt(8) - RandomInt(8), i + RandomInt(9), _size, GLrgba (0.0f));
+		drawrect (i, _size - RandomIntR(8) - RandomIntR(8) - RandomIntR(8), i + RandomIntR(9), _size, GLrgba(0.0f));
 	
 	//Draw the clouds
 	for (int i = _size - 30; i > 5; i -= 2) {
-		int x     = RandomInt(_size), y = i;
+		int x     = RandomIntR(_size), y = i;
 		int scale = 1.0f - (float(y) / float(_size));
-		int width = RandomInt(_half / 2) + int(float(_half) * scale) / 2;
+		int width = RandomIntR(_half / 2) + int(float(_half) * scale) / 2;
 		int hght  = std::max(int(float(width) * scale), 4);
 		
 		pwEnable (GL_BLEND);
@@ -589,31 +589,30 @@ static void makeLight(GLint halfSize)
 }
 
 
-static void makeLogos(GLuint textureId, GLint size)
-{
-    pwDepthMask(GL_FALSE);
-    pwDisable(GL_BLEND);
-    int name_num = RandomInt(NAME_COUNT), prefix_num = RandomInt(PREFIX_COUNT), suffix_num = RandomInt(SUFFIX_COUNT);
-    glColor3f (1,1,1);
-    GLrgba white(1.0f);
-    for (int i = 0; i < size; i += LOGO_PIXELS) {
-        GLint x = 2, y = size - i - LOGO_PIXELS / 4, numFonts = RenderGetNumFonts();
-            //randomly use a prefix OR suffix, but not both.  Too verbose.
-        if (COIN_FLIP())
-            RenderPrintIntoTexture(textureId, x, y, size, size,
-                                   RandomInt(numFonts),
-                                   white.red(), white.green(), white.blue(), white.alpha(),
-                                   "%s%s", prefix[prefix_num], name[name_num]);
-        else
-            RenderPrintIntoTexture(textureId, x, y, size, size,
-                                   RandomInt(numFonts),
-                                   white.red(), white.green(), white.blue(), white.alpha(),
-                                   "%s%s", name[name_num]    , suffix[suffix_num]);
-        name_num   = (name_num   + 1) % NAME_COUNT  ;
-        prefix_num = (prefix_num + 1) % PREFIX_COUNT;
-        suffix_num = (suffix_num + 1) % SUFFIX_COUNT;
-    }
-}
+//static void makeLogos(GLuint textureId, GLint size)
+//{
+//    pwDepthMask(GL_FALSE);
+//    pwDisable(GL_BLEND);
+//    int name_num = RandomInt(NAME_COUNT), prefix_num = RandomInt(PREFIX_COUNT), suffix_num = RandomInt(SUFFIX_COUNT);
+//    glColor3f (1,1,1);
+//    for (int i = 0; i < size; i += LOGO_PIXELS) {
+//        GLint x = 2, y = size - i - LOGO_PIXELS / 4, numFonts = RenderGetNumFonts();
+//            //randomly use a prefix OR suffix, but not both.  Too verbose.
+//        if (COIN_FLIP())
+//            RenderPrintIntoTexture(textureId, x, y, size, size,
+//                                   RandomInt(numFonts),
+//                                   [NSColor colorWithDeviceWhite:1.0f alpha:1.0f],
+//                                   "%s%s", prefix[prefix_num], name[name_num]);
+//        else
+//            RenderPrintIntoTexture(textureId, x, y, size, size,
+//                                   RandomInt(numFonts),
+//                                   [NSColor colorWithDeviceWhite:1.0f alpha:1.0f],
+//                                   "%s%s", name[name_num]    , suffix[suffix_num]);
+//        name_num   = (name_num   + 1) % NAME_COUNT  ;
+//        prefix_num = (prefix_num + 1) % PREFIX_COUNT;
+//        suffix_num = (suffix_num + 1) % SUFFIX_COUNT;
+//    }
+//}
 
 static void makeTrim(GLint size)
 {
@@ -677,7 +676,7 @@ void CTexture::Rebuild ()
             case TEXTURE_SOFT_CIRCLE: makeSoftCircle(_half)  ; break;
             case TEXTURE_LIGHT      : makeLight(_half)       ; break;
             case TEXTURE_HEADLIGHT  : DrawHeadlight ()       ; break;
-            case TEXTURE_LOGOS      : makeLogos(_glid, _size); break;
+//            case TEXTURE_LOGOS      : makeLogos(_glid, _size); break;
             case TEXTURE_TRIM       : makeTrim(_size)        ; break;
             case TEXTURE_SKY        : DrawSky ()             ; break;
             default                 : DrawWindows()          ; break; //building textures
@@ -730,9 +729,9 @@ void TextureReset (void)
 	build_time = 0;
 	for (CTexture* t = head; t; t = t->_next)
 		t->Clear ();
-	memset(prefix_used, 0, sizeof(prefix_used));
-	memset(name_used  , 0, sizeof(name_used  ));
-	memset(suffix_used, 0, sizeof(suffix_used));	
+//	memset(prefix_used, 0, sizeof(prefix_used));
+//	memset(name_used  , 0, sizeof(name_used  ));
+//	memset(suffix_used, 0, sizeof(suffix_used));	
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
