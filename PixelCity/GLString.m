@@ -221,8 +221,10 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 	@finally { pwPopAttrib(); }
 }
 
-- (void) genTexture; // generates the texture without drawing texture to current context
-{	
+- (void) genTexture:(GLuint) textureType ; // generates the texture without drawing texture to current context
+{
+    NSAssert(textureType == GL_TEXTURE_2D || textureType == GL_TEXTURE_RECTANGLE_EXT, @"Unknown texture type %d", textureType);
+
 	if ((NO == _staticFrame) && (0.0f == _frameSize.width) && (0.0f == _frameSize.height)) { // find frame size if we have not already found it
 		_frameSize = [_string size]; // current string size
 		_frameSize.width += _marginSize.width * 2.0f; // add padding
@@ -239,15 +241,15 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 	if((_cgl_ctx = CGLGetCurrentContext())) { // if we successfully retrieve a current context (required)
         pwPushAttrib(GL_TEXTURE_BIT);
         @try {
-            pwBindTexture(GL_TEXTURE_2D, _textureId);
+            pwBindTexture(textureType, _textureId);
             if (NSEqualSizes(previousSize, _texSize)) {
-                pwTexSubImage2D(GL_TEXTURE_2D,
+                pwTexSubImage2D(textureType,
                                 0, 0, 0,_texSize.width, _texSize.height,
                                 [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
             } else {
-                pwTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                pwTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                pwTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _texSize.width, _texSize.height, 0,
+                pwTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                pwTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                pwTexImage2D(textureType, 0, GL_RGBA, _texSize.width, _texSize.height, 0,
                              [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
             }
         }
@@ -258,42 +260,42 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 	_requiresUpdate = NO;
 }
 
--(void)drawIntoTexture:(GLuint)textureId x:(int)x y:(int)y width:(GLuint)texWidth height:(GLuint)texHeight
-{
-    glReportError("drawIntoTexture BEGIN");
-
-//    _staticFrame = YES;
-//    _frameSize = CGSizeMake(texWidth, texHeight);
-//    _texSize   = _frameSize;
-
-    _staticFrame = NO;
-    _texSize = CGSizeMake(texWidth, texHeight);
-    _marginSize = CGSizeZero;
-	if ((NO == _staticFrame) && (0.0f == _frameSize.width) && (0.0f == _frameSize.height)) { // find frame size if we have not already found it
-		_frameSize = [_string size]; // current string size
-		_frameSize.width += _marginSize.width * 2.0f; // add padding
-		_frameSize.height += _marginSize.height * 2.0f;
-	}
-
-	if((_cgl_ctx = CGLGetCurrentContext())) {
-        NSBitmapImageRep *bitmap = makeBitmap(_string, _frameSize, _marginSize, _boxColor, _borderColor, _textColor, _antialias, _cRadius);
-        pwPushAttrib(GL_TEXTURE_BIT);
-        @try {
-            pwBindTexture(GL_TEXTURE_2D, textureId);
-            NSAssert(bitmap.hasAlpha, @"Bitmap needs an alpha channel for RGBA textures");
-            pwTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _frameSize.width, _frameSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
-        }
-        @finally { pwPopAttrib(); }
-    }
-	else
-		NSLog (@"StringTexture -genTexture: Failure to get current OpenGL context\n");
-    
-    glReportError("drawIntoTexture END");
-}
+//-(void)drawIntoTexture:(GLuint)textureId x:(int)x y:(int)y width:(GLuint)texWidth height:(GLuint)texHeight
+//{
+//    glReportError("drawIntoTexture BEGIN");
+//
+////    _staticFrame = YES;
+////    _frameSize = CGSizeMake(texWidth, texHeight);
+////    _texSize   = _frameSize;
+//
+//    _staticFrame = NO;
+//    _texSize = CGSizeMake(texWidth, texHeight);
+//    _marginSize = CGSizeZero;
+//	if ((NO == _staticFrame) && (0.0f == _frameSize.width) && (0.0f == _frameSize.height)) { // find frame size if we have not already found it
+//		_frameSize = [_string size]; // current string size
+//		_frameSize.width += _marginSize.width * 2.0f; // add padding
+//		_frameSize.height += _marginSize.height * 2.0f;
+//	}
+//
+//	if((_cgl_ctx = CGLGetCurrentContext())) {
+//        NSBitmapImageRep *bitmap = makeBitmap(_string, _frameSize, _marginSize, _boxColor, _borderColor, _textColor, _antialias, _cRadius);
+//        pwPushAttrib(GL_TEXTURE_BIT);
+//        @try {
+//            pwBindTexture(GL_TEXTURE_2D, textureId);
+//            NSAssert(bitmap.hasAlpha, @"Bitmap needs an alpha channel for RGBA textures");
+//            pwTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _frameSize.width, _frameSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
+//        }
+//        @finally { pwPopAttrib(); }
+//    }
+//	else
+//		NSLog (@"StringTexture -genTexture: Failure to get current OpenGL context\n");
+//    
+//    glReportError("drawIntoTexture END");
+//}
 
 -(GLuint)makeTexture
 {
-    [self genTexture];
+    [self genTexture:GL_TEXTURE_2D];
     GLuint texId = self.textureId;
     _textureId      = 0;    // Free the ID so the string doesn't delete it on exist
     _requiresUpdate = YES;  // Since the texture has been deleted, prompt to regenerate one if it is used again.
@@ -394,16 +396,16 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 - (void) drawWithBounds:(NSRect)bounds
 {
 	if (_requiresUpdate)
-		[self genTexture];
+		[self genTexture:GL_TEXTURE_RECTANGLE_EXT];
 	if (_textureId) {
 		pwPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT); // GL_COLOR_BUFFER_BIT for glBlendFunc, GL_ENABLE_BIT for glEnable / glDisable
 		
 		pwDisable (GL_DEPTH_TEST); // ensure text is not remove by depth buffer test.
 		pwEnable (GL_BLEND); // for text fading
 		pwBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // ditto
-		pwEnable (GL_TEXTURE_2D);
+		pwEnable (GL_TEXTURE_RECTANGLE_EXT);
 		
-		pwBindTexture (GL_TEXTURE_2D, _textureId);
+		pwBindTexture (GL_TEXTURE_RECTANGLE_EXT, _textureId);
 		pwBegin (GL_QUADS);
 			pwTexCoord2f (0.0f, 0.0f); // draw upper left in world coordinates
 			pwVertex2f (bounds.origin.x, bounds.origin.y);
@@ -425,7 +427,7 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 - (void) drawAtPoint:(NSPoint)point
 {
 	if (_requiresUpdate)
-		[self genTexture]; // ensure size is calculated for bounds
+		[self genTexture:GL_TEXTURE_RECTANGLE_EXT]; // ensure size is calculated for bounds
 
 	if (_textureId) // if successful
 		[self drawWithBounds:NSMakeRect (point.x, point.y, _texSize.width, _texSize.height)];

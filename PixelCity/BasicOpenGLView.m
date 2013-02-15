@@ -325,8 +325,9 @@ static const int MAX_CACHED_GL_STRINGS = 100;
 -(void)drawOverlayText:(NSString*)overlayText
 {
     CGRect bounds = self.bounds;
-        // TODO: If this is slow, try cacheing the glString objects by the text, so they don't need to be regenerated each time.
+        // Cache the glString objects by the text, so they don't need to be regenerated each time.
         // The text is mostly boilerplate and there isn't that much of it.
+        // May need to revisit this if we start displaying a lot of arbitrary text.
     static NSMutableDictionary *cachedStrings;
     static CGSize lastSize = { 0, 0 };
     if(!cachedStrings) cachedStrings = [NSMutableDictionary dictionary];
@@ -342,7 +343,7 @@ static const int MAX_CACHED_GL_STRINGS = 100;
     if(! glString) {
         glString = [[GLString alloc] initWithString:overlayText attributes:@{
                     NSForegroundColorAttributeName : [NSColor whiteColor],
-                    NSFontAttributeName            : [NSFont fontWithName: @"Helvetica-Bold" size: 12.0f] }
+                    NSFontAttributeName            : [NSFont fontWithName: @"Helvetica-Bold" size: 14.0f] }
                                           textColor:[NSColor whiteColor]
                                            boxColor:[NSColor clearColor]
                                         borderColor:[NSColor clearColor]];
@@ -611,26 +612,26 @@ int RenderGetNumFonts()
     return (int)getFontAttributes().count;
 }
 
-void RenderPrintIntoTexture(GLuint textureId, int x, int y, int texWidth, int texHeight,
-                            int font, NSColor *textColor,
-                            const char *fmt, ...)
-{
-    NSString *text, *fmtText = [NSString stringWithUTF8String:fmt];
-    va_list args;
-    va_start(args, fmt);
-    @try { text = [[NSString alloc] initWithFormat:fmtText arguments:args]; }
-    @finally {  va_end(args); }
-    
-    NSMutableDictionary *stringAttrs = [NSMutableDictionary dictionaryWithDictionary:getFontAttributes()[font]];
-    stringAttrs[NSForegroundColorAttributeName] = textColor;
-    assert(stringAttrs[NSFontAttributeName]);
-    GLString *glString = [[GLString alloc] initWithString:text
-                                               attributes:stringAttrs
-                                                textColor:textColor
-                                                 boxColor:[NSColor redColor]
-                                              borderColor:[NSColor greenColor]];
-    [glString drawIntoTexture:textureId x:x y:y width:texWidth height:texHeight];
-}
+//void RenderPrintIntoTexture(GLuint textureId, int x, int y, int texWidth, int texHeight,
+//                            int font, NSColor *textColor,
+//                            const char *fmt, ...)
+//{
+//    NSString *text, *fmtText = [NSString stringWithUTF8String:fmt];
+//    va_list args;
+//    va_start(args, fmt);
+//    @try { text = [[NSString alloc] initWithFormat:fmtText arguments:args]; }
+//    @finally {  va_end(args); }
+//    
+//    NSMutableDictionary *stringAttrs = [NSMutableDictionary dictionaryWithDictionary:getFontAttributes()[font]];
+//    stringAttrs[NSForegroundColorAttributeName] = textColor;
+//    assert(stringAttrs[NSFontAttributeName]);
+//    GLString *glString = [[GLString alloc] initWithString:text
+//                                               attributes:stringAttrs
+//                                                textColor:textColor
+//                                                 boxColor:[NSColor redColor]
+//                                              borderColor:[NSColor greenColor]];
+//    [glString drawIntoTexture:textureId x:x y:y width:texWidth height:texHeight];
+//}
 
 static NSArray *makeLogos()
 {

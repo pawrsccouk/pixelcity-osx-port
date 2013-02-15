@@ -107,9 +107,9 @@
 
 #pragma mark - Methods
 
-- (void) genTexture;                    // generates the texture without drawing texture to current context.
-- (void) drawWithBounds:(NSRect)bounds; // will update the texture if required due to change in settings
-                                        // (note context should be setup to be orthographic scaled to per pixel scale)
+- (void) genTexture:(GLuint)textureType; // generates the texture without drawing texture to current context.
+- (void) drawWithBounds:(NSRect)bounds;  // will update the texture if required due to change in settings
+                                         // (note context should be setup to be orthographic scaled to per pixel scale)
 - (void) drawAtPoint:(NSPoint)point;
 
     // these will force the texture to be regenerated at the next draw
@@ -126,7 +126,7 @@
 
     // Draw into an already-created texture, whose ID, width and height are provided.
     // This ignores the texture already set up, if one exists.
--(void) drawIntoTexture:(GLuint)textureId x:(int)x y:(int)y width:(GLuint)texWidth height:(GLuint)texHeight;
+//-(void) drawIntoTexture:(GLuint)textureId x:(int)x y:(int)y width:(GLuint)texWidth height:(GLuint)texHeight;
 
     // Create a new texture which shows the provided text.
     // The size of the texture is determined by the amount of text we need to draw.

@@ -238,11 +238,11 @@ static void updateProgress(float fade)
     int radius = g_render_width / 16;
     GLrgba color(0.5f);
     do_progress ((float)g_render_width / 2, (float)g_render_height / 2, (float)radius, fade, EntityProgress ());
-    RenderPrintIntoTexture (0, g_render_width / 2 - LOGO_PIXELS, g_render_height / 2 + LOGO_PIXELS,
-                            g_render_width, g_render_height, 0,
-                            [NSColor colorWithDeviceRed:color.red() green:color.green() blue:color.blue() alpha:color.alpha()],
-                            "%1.2f%%", EntityProgress () * 100.0f);
-    RenderPrintOverlayText (1, "%s v%d.%d.%03d", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+//    RenderPrintIntoTexture (0, g_render_width / 2 - LOGO_PIXELS, g_render_height / 2 + LOGO_PIXELS,
+//                            g_render_width, g_render_height, 0,
+//                            [NSColor colorWithDeviceRed:color.red() green:color.green() blue:color.blue() alpha:color.alpha()],
+//                            "%1.2f%%", EntityProgress () * 100.0f);
+    RenderPrintOverlayText (1, "%s v%d.%d.%03d\n%1.2f%%", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, EntityProgress () * 100.0f);
 }
 
 static void drawDebugEffect()
@@ -257,20 +257,16 @@ static void drawDebugEffect()
         lastLogoTex = TextureRandomLogo();
     }
 //    pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_LOGOS));
+    float blockHeight = g_render_height / 4.0f, blockWidth = g_render_width / 2.0f;
     pwBindTexture(GL_TEXTURE_2D, lastLogoTex);
     pwDisable (GL_BLEND);
     pwBegin(GL_QUADS);
     @try {
         glColor3f (1.0f, 1.0f, 1.0f);
-        glTexCoord2f (0.0f, 0.0f);  glVertex2i (0, g_render_height / 4);
-        glTexCoord2f (0.0f, 1.0f);  glVertex2i (0, 0);
-        glTexCoord2f (1.0f, 1.0f);  glVertex2i (g_render_width / 4, 0);
-        glTexCoord2f (1.0f, 0.0f);  glVertex2i (g_render_width / 4, g_render_height / 4);
-        
-        glTexCoord2f (0.0f, 0.0f);  glVertex2i (0, 512);
-        glTexCoord2f (0.0f, 1.0f);  glVertex2i (0, 0);
-        glTexCoord2f (1.0f, 1.0f);  glVertex2i (512, 0);
-        glTexCoord2f (1.0f, 0.0f);  glVertex2i (512, 512);
+        glTexCoord2f (0.0f, 0.0f);  glVertex2i (0, 0);
+        glTexCoord2f (0.0f, 1.0f);  glVertex2i (0, blockHeight);
+        glTexCoord2f (1.0f, 1.0f);  glVertex2i (blockWidth, blockHeight);
+        glTexCoord2f (1.0f, 0.0f);  glVertex2i (blockWidth, 0);
     }
     @finally { pwEnd(); }
 }
