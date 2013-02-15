@@ -188,8 +188,8 @@ static void drawFog()
     pwEnable (GL_FOG);
     pwFogf (GL_FOG_START, g_fog_distance - 100);
     pwFogf (GL_FOG_END  , g_fog_distance);
-    float red = GLrgba(0.0f).red();
-    pwFogfv(GL_FOG_COLOR, &red);
+    float color[4] = { 0.15f, 0.15f, 0.15f, 0.15f };
+    pwFogfv(GL_FOG_COLOR, color);
 }
 
 static void setupGlassCityEffect(const GLvector &pos)

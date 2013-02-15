@@ -59,6 +59,8 @@ struct GLbbox
   GLvector3   max;
 };
 
+GLbbox bboxWithCorners(const GLvector &topLeftFront, const GLvector &bottomRightBack);
+
 struct GLmatrix
 {
   float elements[4][4];

@@ -36,9 +36,10 @@ public:
     CBuilding (BuildingType type, int x, int y, int height, int width, int depth, int seed, GLrgba color);
     ~CBuilding ();
     void     Render (void);
-    unsigned long  PolyCount ();
     void     RenderFlat (bool colored);
-    GLuint   Texture ();
+
+    unsigned long PolyCount () const;
+    GLuint        Texture() const;
 
     virtual std::ostream &operator<<(std::ostream &os) const;
 };

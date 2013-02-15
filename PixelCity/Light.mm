@@ -50,9 +50,7 @@ static GLvector2      angles[5][360];
 std::vector<CLight*>  all_lights;
 static bool           angles_done;
 
-void LightAdd(const GLvector &position,
-              const GLrgba &color,
-              int size, bool blink)
+void LightAdd(const GLvector &position, const GLrgba &color, int size, bool blink)
 {
     CLight *newLight = new CLight(position, color, size);
     all_lights.push_back(newLight);
@@ -62,21 +60,15 @@ void LightAdd(const GLvector &position,
 
 static const short MAX_SIZE = 5;
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-static void DeleteLight(CLight *l) { delete l; }
-
 void LightClear ()
 {
-    std::for_each(all_lights.begin(), all_lights.end(), DeleteLight);
+    std::for_each( all_lights.begin(), all_lights.end(), [](CLight* l){ delete l; } );
     all_lights.resize(0);
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 unsigned long LightCount () {  return all_lights.size();  }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
 void LightRender ()
@@ -93,6 +85,7 @@ void LightRender ()
 		}
 	}
 
+    pwDisable(GL_FOG);      // Allow the lights to peek out of the fog.
 	pwDepthMask (GL_FALSE);
 	pwEnable (GL_BLEND);
 	pwDisable (GL_CULL_FACE);

@@ -49,6 +49,12 @@ GLbbox glBboxContainPoint (GLbbox box, GLvector point)
   
 }
 
+// Create a new Bbox big enough to contain these two corner points.
+GLbbox bboxWithCorners(const GLvector &topLeftFront, const GLvector &bottomRightBack)
+{
+    return glBboxContainPoint(glBboxContainPoint(glBboxClear(), topLeftFront), bottomRightBack);
+}
+
 /*-----------------------------------------------------------------------------
 This will invalidate the bbox. 
 -----------------------------------------------------------------------------*/

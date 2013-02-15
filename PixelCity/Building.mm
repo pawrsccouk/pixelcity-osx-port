@@ -71,7 +71,7 @@ CBuilding::~CBuilding ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-GLuint CBuilding::Texture ()
+GLuint CBuilding::Texture () const
 {
   return TextureRandomBuilding (_texture_type);
 }
@@ -79,7 +79,7 @@ GLuint CBuilding::Texture ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-unsigned long CBuilding::PolyCount ()
+unsigned long CBuilding::PolyCount () const
 {
   return _mesh->PolyCount () + _mesh_flat->PolyCount ();
 }

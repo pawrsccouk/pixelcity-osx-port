@@ -342,11 +342,9 @@ void EntityClear ()
 
 -----------------------------------------------------------------------------*/
 
-int EntityCount ()
+size_t EntityCount ()
 {
-
   return entity_count;
-
 }
 
 /*-----------------------------------------------------------------------------
@@ -355,7 +353,6 @@ int EntityCount ()
 
 void EntityInit (void)
 {
-
 }
 
 /*-----------------------------------------------------------------------------
@@ -364,7 +361,6 @@ void EntityInit (void)
 
 int EntityPolyCount (void)
 {
-
   if (!sorted)
     return 0;
   if (polycount)
@@ -372,7 +368,6 @@ int EntityPolyCount (void)
   for (int i = 0; i < entity_count; i++) 
     polycount += entity_list[i].object->PolyCount ();
   return polycount;
-
 }
 
 

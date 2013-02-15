@@ -54,9 +54,9 @@ void CDeco::Render ()
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CDeco::RenderFlat(bool colored) { }
-bool CDeco::Alpha () { return _use_alpha; }
-unsigned long CDeco::PolyCount () { return _mesh->PolyCount (); }
-GLuint CDeco::Texture () { return _texture; }
+bool CDeco::Alpha () const { return _use_alpha; }
+unsigned long CDeco::PolyCount () const { return _mesh->PolyCount (); }
+GLuint CDeco::Texture () const { return _texture; }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 

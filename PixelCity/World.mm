@@ -345,32 +345,54 @@ static int build_light_strip (int x1, int z1, int direction)
  
  -----------------------------------------------------------------------------*/
 
-static void do_reset (void)
-{	
-	int       attempts;
-	GLrgba    light_color;
-	GLrgba    building_color;
-	float     west_street, north_street, east_street, south_street;
-	glReportError("do_reset BEGIN");
-	//Re-init Random to make the same city each time. Helpful when running tests.
-	RandomInit (6);
-	g_reset_needed = false;
-	bool broadway_done = false;
-	g_skyscrapers = 0;
-	g_logo_index = 0;
-	g_scene_begin = 0;
-	g_tower_count = g_blocky_count = g_modern_count = 0;
-	g_hot_zone = glBboxClear ();
-	EntityClear ();
-	LightClear ();
-	CarClear ();
-	TextureReset ();
-	glReportError("do_reset after clearing Entities, Lights, Cars & Textures.");
-	
-	//Pick a tint for the bloom 
-	g_bloom_color = get_light_color(0.5f + (float)RandomLongR(10) / 20.0f, 0.75f);
-	light_color = glRgbaFromHsl (0.11f, 1.0f, 0.65f);
-	memset(g_world, 0, WORLD_SIZE * WORLD_SIZE);
+static void buildStreetlights()
+{
+	//Scan for places to put runs of streetlights on the north & south side of the road
+	for (int x = 1; x < WORLD_SIZE - 1; x++)
+    {
+		for (int y = 0; y < WORLD_SIZE; y++)
+        {
+			if((!(g_world[x][y] & CLAIM_WALK))   //if this isn't a bit of sidewalk, then keep looking
+            || ( (g_world[x][y] & CLAIM_ROAD)) ) //also if it's used as a road, skip it.
+				continue;
+            
+			bool road_left  = (g_world[x + 1][y] & CLAIM_ROAD) != 0;
+			bool road_right = (g_world[x - 1][y] & CLAIM_ROAD) != 0;
+            
+			if((!road_left && !road_right)	//if the cells to our east and west are not road, then we're not on a corner.
+            ||  (road_left &&  road_right))	//if the cell to our east AND west is road, then we're on a median. skip it
+				continue;
+            
+			y += build_light_strip (x, y, road_right ? SOUTH : NORTH);
+		}
+	}
+
+        //Scan for places to put runs of streetlights on the north & south side of the road
+    for (int y = 1; y < WORLD_SIZE - 1; y++) {
+        for (int x = 1; x < WORLD_SIZE - 1; x++) {
+            
+            if((!(g_world[x][y] & CLAIM_WALK))   //if this isn't a bit of sidewalk, then keep looking
+            || ( (g_world[x][y] & CLAIM_ROAD)))   //If it's used as a road, skip it.
+                continue;
+            
+            bool road_left  = (g_world[x][y + 1] & CLAIM_ROAD) != 0;
+            bool road_right = (g_world[x][y - 1] & CLAIM_ROAD) != 0;
+            
+            if(( road_left &&  road_right)    //if the cell to our east AND west is road, then we're on a median. skip it
+            || (!road_left && !road_right))    //if the cells to our north and south are not road, then we're not on a corner.
+                continue;
+            
+            x += build_light_strip (x, y, road_right ? EAST : WEST);
+        }
+    }
+}
+
+
+    // Builds all the roads needed. Returns a bounding box enclosing the roadmap just built
+static GLbbox buildRoads()
+{
+    float west_street, north_street, east_street, south_street;
+    bool broadway_done = false;
 	for (int y = WORLD_EDGE; y < WORLD_SIZE - WORLD_EDGE; y += RandomLongR(25) + 25) {
 		if (!broadway_done && y > WORLD_HALF - 20) {
 			build_road (0, y, WORLD_SIZE, 19);
@@ -389,14 +411,12 @@ static void do_reset (void)
 	broadway_done = false;
 	for (int x = WORLD_EDGE; x < WORLD_SIZE - WORLD_EDGE; x += RandomLongR(25) + 25)
     {
-		if (!broadway_done && x > WORLD_HALF - 20)
-        {
+		if (!broadway_done && x > WORLD_HALF - 20) {
 			build_road (x, 0, 19, WORLD_SIZE);
 			x += 20;
 			broadway_done = true;
 		}
-        else
-        {
+        else {
 			unsigned int width = 6 + RandomIntR(6);
 			if (x <= WORLD_HALF / 2)
 				west_street = (float)(x + width / 2);
@@ -405,71 +425,15 @@ static void do_reset (void)
 			build_road (x, 0, width, WORLD_SIZE);
 		}
 	}
-	//We kept track of the positions of streets that will outline the high-detail hot zone 
-	//in the middle of the world.  Save this in a bounding box so that later we can 
-	//have the camera fly around without clipping through buildings.
-	g_hot_zone = glBboxContainPoint (g_hot_zone, glVector (west_street, 0.0f, north_street)); 
-	g_hot_zone = glBboxContainPoint (g_hot_zone, glVector (east_street, 0.0f, south_street));
-	
-	//Scan for places to put runs of streetlights on the east & west side of the road
-	for (int x = 1; x < WORLD_SIZE - 1; x++)
-    {
-		for (int y = 0; y < WORLD_SIZE; y++)
-        {
-			//if this isn't a bit of sidewalk, then keep looking
-			if (!(g_world[x][y] & CLAIM_WALK))
-				continue;
-			//If it's used as a road, skip it.
-			if ((g_world[x][y] & CLAIM_ROAD))
-				continue;
-			bool road_left = (g_world[x + 1][y] & CLAIM_ROAD) != 0;
-			bool road_right = (g_world[x - 1][y] & CLAIM_ROAD) != 0;
-			//if the cells to our east and west are not road, then we're not on a corner. 
-			if (!road_left && !road_right)
-				continue;
-			//if the cell to our east AND west is road, then we're on a median. skip it
-			if (road_left && road_right)
-				continue;
-			y += build_light_strip (x, y, road_right ? SOUTH : NORTH);
-		}
-	}
-	
-	//Scan for places to put runs of streetlights on the north & south side of the road
-	for (int y = 1; y < WORLD_SIZE - 1; y++) {
-		for (int x = 1; x < WORLD_SIZE - 1; x++) {
-			//if this isn't a bit of sidewalk, then keep looking
-			if (!(g_world[x][y] & CLAIM_WALK))
-				continue;
-			//If it's used as a road, skip it.
-			if ((g_world[x][y] & CLAIM_ROAD))
-				continue;
-			bool road_left = (g_world[x][y + 1] & CLAIM_ROAD) != 0;
-			bool road_right = (g_world[x][y - 1] & CLAIM_ROAD) != 0;
-			//if the cell to our east AND west is road, then we're on a median. skip it
-			if (road_left && road_right)
-				continue;
-			//if the cells to our north and south are not road, then we're not on a corner. 
-			if (!road_left && !road_right)
-				continue;
-			x += build_light_strip (x, y, road_right ? EAST : WEST);
-		}
-	}
-  	glReportError("do_reset After Streetlights");
-	
-	//Scan over the center area of the map and place the big buildings 
-	attempts = 0;
-	while (g_skyscrapers < 50 && attempts < 350) {
-		int sx = (WORLD_HALF / 2) + (RandomLong () % WORLD_HALF);
-		int sy = (WORLD_HALF / 2) + (RandomLong () % WORLD_HALF);
-		if (!claimed (sx, sy, 1,1)) {
-			do_building (find_plot (sx, sy));
-			g_skyscrapers++;
-		}
-		attempts++;
-	}
-  	glReportError("do_reset After big buildings");
+        //We kept track of the positions of streets that will outline the high-detail hot zone in the middle of the world.
+        //Save this in a bounding box so that later we can have the camera fly around without clipping through buildings.
+    return bboxWithCorners(glVector(west_street, 0.0f, north_street),
+                           glVector(east_street, 0.0f, south_street));
+}
 
-	//now blanket the rest of the world with lesser buildings
+static void addSmallBuildings()
+{
+        //now blanket the rest of the world with lesser buildings
 	for (int x = 0; x < WORLD_SIZE; x ++)
     {
 		for (int y = 0; y < WORLD_SIZE; y ++)
@@ -477,19 +441,18 @@ static void do_reset (void)
 			if (g_world[CLAMP (x,0,WORLD_SIZE)][CLAMP (y,0,WORLD_SIZE)])
 				continue;
             
-			unsigned int width = 12 + RandomIntR(20);
-			unsigned int depth = 12 + RandomIntR(20);
-			unsigned int height = std::min(width, depth);
+			unsigned int width = 12 + RandomIntR(20), depth = 12 + RandomIntR(20), height = std::min(width, depth);
 			if (x < 30 || y < 30 || x > WORLD_SIZE - 30 || y > WORLD_SIZE - 30)
 				height = RandomIntR(15) + 20;
 			else if (x < WORLD_HALF / 2)
 				height /= 2;
+            
 			while (width > 8 && depth > 8)
             {
 				if (!claimed (x, y, width, depth))
                 {
 					claim(x, y, width, depth, CLAIM_BUILDING);
-					building_color = WorldLightColor (RandomInt());
+					GLrgba building_color = WorldLightColor (RandomInt());
                         //if we're out of the hot zone, use simple buildings
 					if (x < g_hot_zone.min.x || x > g_hot_zone.max.x || y < g_hot_zone.min.z || y > g_hot_zone.max.z)
                     {
@@ -509,20 +472,57 @@ static void do_reset (void)
 				depth--;
 			}
                 //leave big gaps near the edge of the map, no need to pack detail there.
-			if (y < WORLD_EDGE || y > WORLD_SIZE - WORLD_EDGE) 
+			if (y < WORLD_EDGE || y > WORLD_SIZE - WORLD_EDGE)
 				y += 32;
 		}
             //leave big gaps near the edge of the map
-		if (x < WORLD_EDGE || x > WORLD_SIZE - WORLD_EDGE) 
+		if (x < WORLD_EDGE || x > WORLD_SIZE - WORLD_EDGE)
 			x += 28;
 	}
 }
 
+static void addBigBuildings()
+{
+	//Scan over the center area of the map and place the big buildings 
+	int attempts = 0;
+	while (g_skyscrapers < 50 && attempts < 350) {
+		int sx = (WORLD_HALF / 2) + (RandomLong() % WORLD_HALF);
+		int sy = (WORLD_HALF / 2) + (RandomLong() % WORLD_HALF);
+		if (!claimed (sx, sy, 1,1)) {
+			do_building (find_plot (sx, sy));
+			g_skyscrapers++;
+		}
+		attempts++;
+	}
+}
+
+static void doReset (void)
+{	
+//	//Re-init Random to make the same city each time. Helpful when running tests.
+//	RandomInit (6);
+	g_reset_needed = false;
+	g_skyscrapers = g_logo_index   = g_scene_begin  = 0;
+	g_tower_count = g_blocky_count = g_modern_count = 0;
+	EntityClear ();
+	LightClear ();
+	CarClear ();
+	TextureReset ();
+	
+	//Pick a tint for the bloom
+	g_bloom_color = get_light_color(0.5f + float(RandomLongR(10)) / 20.0f, 0.75f);
+	memset(g_world, 0, WORLD_SIZE * WORLD_SIZE);
+
+        // Build a road network and garnish it with streetlights.
+    g_hot_zone = buildRoads();
+    buildStreetlights();
+        // Add large, detailed buildings near the center of the map, and smaller blurry buildings further away from the camera.
+    addBigBuildings();
+    addSmallBuildings();
+}
+
 /*-----------------------------------------------------------------------------
- 
  This will return a random color which is suitible for light sources, taken
  from a narrow group of hues. (Yellows, oranges, blues.)
- 
  -----------------------------------------------------------------------------*/
 
 GLrgba WorldLightColor (unsigned index)
@@ -544,20 +544,16 @@ void WorldTerm        () { }
 
 void WorldReset (void)
 {
-	//If we're already fading out, then this is the developer hammering on the 
-	//"rebuild" button.  Let's hurry things up for the nice man...
+	//If we're already fading out, then this is the developer hammering on the "rebuild" button.  Let's hurry things up for the nice person...
 	if (g_fade_state == FADE_OUT) 
-		do_reset ();
+		doReset ();
     
-	//If reset is called but the world isn't ready, then don't bother fading out.
-	//The program probably just started.
+	//If reset is called but the world isn't ready, then don't bother fading out. The program probably just started.
 	g_fade_state = FADE_OUT;
 	g_fade_start = GetTickCount ();
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void WorldRender ()
 {
@@ -601,7 +597,7 @@ void WorldUpdate (void)
 {	
 	unsigned long now = GetTickCount ();
 	if (g_reset_needed) {
-		do_reset (); //Now we've faded out the scene, rebuild it
+		doReset (); //Now we've faded out the scene, rebuild it
 	}
 	if (g_fade_state != FADE_IDLE) {
 		if (g_fade_state == FADE_WAIT && TextureReady () && EntityReady ()) {
@@ -640,9 +636,7 @@ void WorldUpdate (void)
 		WorldReset ();
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void WorldInit (void)
 {
@@ -663,7 +657,6 @@ int MakeDisplayList::nestCount = 0;
 
 MakePrimitive::MakePrimitive(GLenum type)
 {
-	//DebugLog("MakePrimitive::MakePrimitive");
 	assert(nestCount == 0);
 	pwBegin(type);
 	++nestCount;
@@ -671,7 +664,6 @@ MakePrimitive::MakePrimitive(GLenum type)
 
 MakePrimitive::~MakePrimitive()
 {
-	//DebugLog("MakePrimitive::~MakePrimitive");
 	assert(nestCount == 1);
 	pwEnd();
 	--nestCount;

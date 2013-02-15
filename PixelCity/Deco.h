@@ -18,7 +18,8 @@ public:
   void          CreateRadioTower (GLvector pos, float height);
   void          Render (void);
   void          RenderFlat (bool colored);
-  bool          Alpha ();
-  unsigned long PolyCount ();
-  GLuint        Texture ();
+  
+  bool          Alpha () const;
+  unsigned long PolyCount () const;
+  GLuint        Texture () const;
 };
