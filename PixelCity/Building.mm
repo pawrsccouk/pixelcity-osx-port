@@ -206,7 +206,7 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
         //See if this building is special and worthy of fancy roof decorations.
     if (bottom > 35.0f)
         addon = RandomIntR(ADDON_COUNT);
-    
+ 
         //Build the roof slab
     ConstructCube (left, right, front, back, bottom, bottom + height);
     
@@ -240,10 +240,10 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
         _have_logo = true;
     } else if (addon == ADDON_TRIM) {
         CDeco *d = new CDeco;
-        vector_buffer[0] = glVector (left, bottom, back);
-        vector_buffer[1] = glVector (left, bottom, front);
-        vector_buffer[2] = glVector (right, bottom, front);
-        vector_buffer[3] = glVector (right, bottom, back);
+        vector_buffer[0] = glVector (left  - logo_offset, bottom, back  + logo_offset);
+        vector_buffer[1] = glVector (left  - logo_offset, bottom, front - logo_offset);
+        vector_buffer[2] = glVector (right + logo_offset, bottom, front - logo_offset);
+        vector_buffer[3] = glVector (right + logo_offset, bottom, back  + logo_offset);
         d->CreateLightTrim (vector_buffer, 4, (float)RandomIntR(2) + 1.0f, _seed, _trim_color);
     } else if (addon == ADDON_LIGHTS && !_have_lights) {
         LightAdd(glVector (left , (float)(bottom + 2), front), _trim_color, LIGHT_SIZE, false);
@@ -539,11 +539,9 @@ void CBuilding::CreateSimple ()
 }
 
 
-/*-----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+//  This makes a deformed cylinder building.  
 
-  This makes a deformed cylinder building.  
-
------------------------------------------------------------------------------*/
 
 void CBuilding::CreateModern ()
 {
@@ -653,9 +651,7 @@ void CBuilding::CreateModern ()
 
 }
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void CBuilding::CreateTower ()
 {
@@ -671,7 +667,6 @@ void CBuilding::CreateTower ()
 
         //set our initial parameters
     int left  = _x, right = _x + _width, front = _y, back  = _y + _depth, bottom = 0, tiers = 0;
-    
         //build the foundations.
     ConstructCube ((float)left - ledge, (float)right + ledge, (float)front - ledge, (float)back + ledge, (float)bottom, (float)foundation);
     bottom += foundation;
@@ -709,6 +704,7 @@ void CBuilding::CreateTower ()
             }
         }
     }
+
     ConstructRoof(float(left), float(right), float(front), float(back), float(bottom));
     _mesh->Compile();
     _mesh_flat->Compile();

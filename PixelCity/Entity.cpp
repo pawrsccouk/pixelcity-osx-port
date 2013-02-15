@@ -256,9 +256,7 @@ void EntityDump(void)
 
 void EntityRender (bool showFlat)
 {
-	glReportError("EntityRender: Begin");
-	
-	//Draw all textured objects
+    //Draw all textured objects
 	int       polymode[2];
 	glGetIntegerv (GL_POLYGON_MODE, &polymode[0]);
 	bool wireframe = polymode[0] != GL_FILL;
@@ -280,8 +278,6 @@ void EntityRender (bool showFlat)
 			if( Visible(x,y) && (cell_list[x][y].list_textured > 0) )
                 pwCallList (cell_list[x][y].list_textured);
 
-	glReportError("EntityRender: After glCallList 1");
-	
         //draw all flat colored objects
 	pwBindTexture(GL_TEXTURE_2D, 0);
 	pwColor3f (0, 0, 0);
@@ -294,8 +290,7 @@ void EntityRender (bool showFlat)
 					if(cell_list[x][y].list_flat           > 0) { pwCallList(cell_list[x][y].list_flat          ); }
 				}
 			}
-		
-    glReportError("EntityRender: After glCallList 2");
+
     
         //draw all alpha-blended objects
     pwBindTexture(GL_TEXTURE_2D, 0);
@@ -305,8 +300,6 @@ void EntityRender (bool showFlat)
         for (int y = 0; y < GRID_SIZE; y++)
             if( Visible(x, y) && (cell_list[x][y].list_alpha > 0) )
                 pwCallList(cell_list[x][y].list_alpha);
-    
-    glReportError("EntityRender: End");
 }
 
 /*-----------------------------------------------------------------------------
