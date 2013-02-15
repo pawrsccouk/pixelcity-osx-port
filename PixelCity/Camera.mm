@@ -12,27 +12,11 @@
 
 -----------------------------------------------------------------------------*/
 
-#define EYE_HEIGHT              2.0f
-#define MAX_PITCH               85
-#define FLYCAM_CIRCUT           60000
-#define FLYCAM_CIRCUT_HALF      (FLYCAM_CIRCUT / 2)
-#define FLYCAM_LEG              (FLYCAM_CIRCUT / 4)
-#define ONE_SECOND              1000
-#define CAMERA_CHANGE_INTERVAL  15
-#define CAMERA_CYCLE_LENGTH     (CAMERA_MODES*CAMERA_CHANGE_INTERVAL)
-
-#import <math.h>
-#import <time.h>
-#import <stdio.h>
-
-#import "glTypes.h"
+#import "Model.h"
 #import "ini.h"
-#import "macro.h"
-#import "mathx.h"
 #import "world.h"
 #import "win.h"
 #import "Camera.h"
-
 
 enum
 {
@@ -46,6 +30,15 @@ enum
   CAMERA_FLYCAM3,
   CAMERA_MODES
 };
+
+static const float EYE_HEIGHT  = 2.0f;
+static const int MAX_PITCH     = 85,
+                 FLYCAM_CIRCUT = 60000,
+                 FLYCAM_CIRCUT_HALF     = (FLYCAM_CIRCUT / 2),
+                 FLYCAM_LEG             = (FLYCAM_CIRCUT / 4),
+                 ONE_SECOND = 1000,
+                 CAMERA_CHANGE_INTERVAL = 15,
+                 CAMERA_CYCLE_LENGTH    = (CAMERA_MODES * CAMERA_CHANGE_INTERVAL);
 
 static GLvector angle, position, auto_angle, auto_position;
 //static float    distance;
@@ -258,17 +251,16 @@ void CameraMedial (float val)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-Vector *CameraPosition (void)
+GLvector CameraPosition (void)
 {
-    GLvector &pos = cam_auto ? auto_position : position;
-    return [Vector vectorWithX:pos.x Y:pos.y Z:pos.z];
+    return cam_auto ? auto_position : position;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraPositionSet (Vector *new_pos)
+void CameraPositionSet (const GLvector &new_pos)
 {
-  position = GLvector(new_pos.x, new_pos.y, new_pos.z);
+  position = new_pos;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -286,17 +278,16 @@ void CameraReset ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-Vector *CameraAngle (void)
+GLvector CameraAngle (void)
 {
-  GLvector &a = cam_auto ? auto_angle : angle;
-  return [Vector vectorWithX:a.x Y:a.y Z:a.z];
+  return cam_auto ? auto_angle : angle;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraAngleSet (Vector *newAngle)
+void CameraAngleSet (const GLvector &newAngle)
 {
-  angle = GLvector(newAngle.x, newAngle.y, newAngle.z);
+  angle = newAngle;
   angle.x = CLAMP(angle.x, -80.0f, 80.0f);
 }
 

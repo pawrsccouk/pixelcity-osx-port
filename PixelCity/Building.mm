@@ -12,17 +12,11 @@
 
 static const int MAX_VBUFFER = 256;
 
-#import <math.h>
-#import "glTypes.h"
-#import "glTypesObjC.h"
+#import "Model.h"
 #import "light.h"
-
 #import "building.h"
 #import "deco.h"
 #import "mesh.h"
-#import "macro.h"
-#import "mathx.h"
-#import "random.h"
 #import "texture.h"
 #import "world.h"
 #import "win.h"
@@ -122,20 +116,15 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
 
 void CBuilding::ConstructCube (int left, int right, int front, int back, int bottom, int top)
 {
-
-  GLvertex    p[10];
-  int         i;
-  cube        c;
-  unsigned long  base_index;
   float x1 = float(left  ), x2 = float(right);
   float y1 = float(bottom), y2 = float(top  );
   float z1 = float(front ), z2 = float(back );
-  base_index = _mesh->VertexCount ();
 
   float mapping = float(SEGMENTS_PER_TEXTURE);
   float u = float(RandomInt () % SEGMENTS_PER_TEXTURE) / float(SEGMENTS_PER_TEXTURE);
   float v1 = float(bottom) / float(mapping), v2 = float(top) / float(mapping);
 
+  GLvertex    p[10];
   p[0] = GLvertexMake(x1, y1, z1, u, v1);
   p[1] = GLvertexMake(x1, y2, z1, u, v2);
   u += float(_width) / mapping;
@@ -155,7 +144,9 @@ void CBuilding::ConstructCube (int left, int right, int front, int back, int bot
   p[8] = GLvertexMake(x1, y1, z1, u, v1);
   p[9] = GLvertexMake(x1, y2, z1, u, v2);
 
-  for (i = 0; i < 10; i++) {
+  unsigned long  base_index = _mesh->VertexCount ();
+  cube c;
+  for (int i = 0; i < 10; i++) {
     p[i].uv.x = (p[i].position.x + p[i].position.z) / (float)SEGMENTS_PER_TEXTURE;
     _mesh->VertexAdd (p[i]);
     c.index_list.push_back(base_index + i);
@@ -167,38 +158,30 @@ void CBuilding::ConstructCube (int left, int right, int front, int back, int bot
 
 void CBuilding::ConstructCube (float left, float right, float front, float back, float bottom, float top)
 {
-  float x1 = left  , x2 = right;
-  float y1 = bottom, y2 = top;
-  float z1 = front , z2 = back;
-
-  GLvertex p[10];
-  p[0] = GLvertexMake(x1, y1, z1, 0.0f, 0.0f);
-  p[1] = GLvertexMake(x1, y2, z1, 0.0f, 0.0f);
-  p[2] = GLvertexMake(x2, y1, z1, 0.0f, 0.0f);
-  p[3] = GLvertexMake(x2, y2, z1, 0.0f, 0.0f);
-  p[4] = GLvertexMake(x2, y1, z2, 0.0f, 0.0f);
-  p[5] = GLvertexMake(x2, y2, z2, 0.0f, 0.0f);
-  p[6] = GLvertexMake(x1, y1, z2, 0.0f, 0.0f);
-  p[7] = GLvertexMake(x1, y2, z2, 0.0f, 0.0f);
-  p[8] = GLvertexMake(x1, y1, z1, 0.0f, 0.0f);
-  p[9] = GLvertexMake(x1, y2, z1, 0.0f, 0.0f);  
-  
-  cube  c;
-  unsigned long base_index = _mesh_flat->VertexCount ();
-  for (int i = 0; i < 10; i++) {
-    p[i].uv.x = (p[i].position.x + p[i].position.z) / (float)SEGMENTS_PER_TEXTURE;
-    _mesh_flat->VertexAdd (p[i]);
-    c.index_list.push_back(base_index + i);
-  }
-  _mesh_flat->CubeAdd (c);
-
-}
-
-static void addLight(const GLvector &position, const GLrgba &color, int size)
-{
-    LightAdd([Vector vectorWithX:position.x Y:position.y Z:position.z],
-             [NSColor colorWithDeviceRed:color.red() green:color.green() blue:color.blue() alpha:color.alpha()], 
-             size,  NO);
+    float x1 = left  , x2 = right;
+    float y1 = bottom, y2 = top;
+    float z1 = front , z2 = back;
+    
+    GLvertex p[10];
+    p[0] = GLvertexMake(x1, y1, z1, 0.0f, 0.0f);
+    p[1] = GLvertexMake(x1, y2, z1, 0.0f, 0.0f);
+    p[2] = GLvertexMake(x2, y1, z1, 0.0f, 0.0f);
+    p[3] = GLvertexMake(x2, y2, z1, 0.0f, 0.0f);
+    p[4] = GLvertexMake(x2, y1, z2, 0.0f, 0.0f);
+    p[5] = GLvertexMake(x2, y2, z2, 0.0f, 0.0f);
+    p[6] = GLvertexMake(x1, y1, z2, 0.0f, 0.0f);
+    p[7] = GLvertexMake(x1, y2, z2, 0.0f, 0.0f);
+    p[8] = GLvertexMake(x1, y1, z1, 0.0f, 0.0f);
+    p[9] = GLvertexMake(x1, y2, z1, 0.0f, 0.0f);
+    
+    cube  c;
+    unsigned long base_index = _mesh_flat->VertexCount ();
+    for (int i = 0; i < 10; i++) {
+        p[i].uv.x = (p[i].position.x + p[i].position.z) / (float)SEGMENTS_PER_TEXTURE;
+        _mesh_flat->VertexAdd (p[i]);
+        c.index_list.push_back(base_index + i);
+    }
+    _mesh_flat->CubeAdd (c);
 }
 
 /*-----------------------------------------------------------------------------
@@ -263,10 +246,10 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
         vector_buffer[3] = glVector (right, bottom, back);
         d->CreateLightTrim (vector_buffer, 4, (float)RandomIntR(2) + 1.0f, _seed, _trim_color);
     } else if (addon == ADDON_LIGHTS && !_have_lights) {
-        addLight(glVector (left , (float)(bottom + 2), front), _trim_color, LIGHT_SIZE);
-        addLight(glVector (right, (float)(bottom + 2), front), _trim_color, LIGHT_SIZE);
-        addLight(glVector (right, (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE);
-        addLight(glVector (left , (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE);
+        LightAdd(glVector (left , (float)(bottom + 2), front), _trim_color, LIGHT_SIZE, false);
+        LightAdd(glVector (right, (float)(bottom + 2), front), _trim_color, LIGHT_SIZE, false);
+        LightAdd(glVector (right, (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE, false);
+        LightAdd(glVector (left , (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE, false);
         _have_lights = true;
     }
     bottom += (float)height;

@@ -10,13 +10,7 @@
 
 -----------------------------------------------------------------------------*/
 
-#import <float.h>
-#import <math.h>
-#import <OpenGL/gl.h>
-
-#import "glTypes.h"
-#import "mathx.h"
-#import "macro.h"
+#import "Model.h"
 
 /*-----------------------------------------------------------------------------
                            
@@ -35,6 +29,11 @@ GLvector2 glVectorNormalize (const GLvector2 &v)
 float GLvector2::Length() const
 {
     return (float)sqrt (x * x + y * y);
+}
+
+void GLvector2::glTexCoord2() const
+{
+    pwTexCoord2f(x, y);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/

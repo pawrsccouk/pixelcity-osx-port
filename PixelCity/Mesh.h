@@ -2,8 +2,13 @@
 #import <vector>
 #import "glVertex.h"
 
+    // Terminator for list of ints in cube constructor.
+static const int LIST_TERM = -1;
+
 struct cube
 {
+    cube() {}
+    cube(int first, ...);
     std::vector<unsigned long> index_list;   // probably always .size() == 10...
     std::ostream &operator<<(std::ostream &os) const;
 };
@@ -11,6 +16,8 @@ inline std::ostream &operator<<(std::ostream &os, const cube &c) { return c.oper
 
 struct quad_strip
 {
+    quad_strip() {}
+    quad_strip(int first, ...);
     std::vector<unsigned long> index_list;
     std::ostream &operator<<(std::ostream &os) const;
 };
@@ -18,6 +25,8 @@ inline std::ostream &operator<<(std::ostream &os, const quad_strip &s) { return 
 
 struct fan
 {
+    fan() {}
+    fan(int first, ...);
     std::vector<unsigned long> index_list;
     std::ostream &operator<<(std::ostream &os) const;
 };

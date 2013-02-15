@@ -10,12 +10,7 @@
 
 -----------------------------------------------------------------------------*/
 
-#import <float.h>
-#import <math.h>
-#import <OpenGL/gl.h>
-
-#import "mathx.h"
-#import "glTypes.h"
+#import "Model.h"
 
 enum QuatPart {X, Y, Z, W};
 

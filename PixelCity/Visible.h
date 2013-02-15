@@ -1,10 +1,10 @@
-#define GRID_RESOLUTION   32
-#define GRID_CELL         (GRID_RESOLUTION / 2)
+static const int GRID_RESOLUTION = 32
+               , GRID_CELL       = (GRID_RESOLUTION / 2);
+
 #define GRID_SIZE         (WORLD_SIZE / GRID_RESOLUTION)
-#define WORLD_TO_GRID(x)  (int)(x / GRID_RESOLUTION)
-#define GRID_TO_WORLD(x)  ((float)x * GRID_RESOLUTION)
 
-
+inline int WORLD_TO_GRID(float x) { return (int)(x / GRID_RESOLUTION); }
+inline float GRID_TO_WORLD(int x) { return ((float)x * GRID_RESOLUTION); }
 
 void VisibleUpdate (void);
 bool Visible (GLvector pos);

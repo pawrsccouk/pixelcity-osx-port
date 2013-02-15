@@ -5,8 +5,7 @@
 //  Created by Patrick Wallace on 09/02/2013.
 //
 //
-#import <iostream>
-#import "glVertex.h"
+#import "Model.h"
 
 GLvertex::GLvertex()
 : position(glVector(0.0f, 0.0f, 0.0f)), uv(glVector(0.0f, 0.0f)), color(GLrgba()), bone(0)

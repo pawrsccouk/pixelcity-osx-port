@@ -15,13 +15,9 @@
 -----------------------------------------------------------------------------*/
 
 
-#import <math.h>
-#import <memory.h>
 
-#import "glTypes.h"
+#import "Model.h"
 #import "camera.h"
-#import "macro.h"
-#import "mathx.h"
 #import "visible.h"
 #import "world.h"
 #import "win.h"
@@ -63,8 +59,7 @@ void VisibleUpdate (void)
     memset(vis_grid, 0, sizeof (vis_grid));
     
         //Calculate which cell the camera is in
-    Vector *angle = CameraAngle ();
-    Vector *position = CameraPosition ();
+    GLvector angle = CameraAngle(), position = CameraPosition();
     int grid_x = WORLD_TO_GRID(position.x), grid_z = WORLD_TO_GRID(position.z);
     
         //Cells directly adjactent to the camera might technically fall out of the fov,

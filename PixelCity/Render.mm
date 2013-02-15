@@ -12,31 +12,16 @@
  
  -----------------------------------------------------------------------------*/
 
-
-#import <stdio.h>
-#import <stdlib.h>
-#import <time.h>
-#import <stdarg.h>
-#import <math.h>
-#import <string.h> 
-#import <iostream>
-
-#import <OpenGL/gl.h>
-#import <OpenGL/glu.h>
-
-#import "gltypes.h"
+#import "Model.h"
 #import "entity.h"
 #import "car.h"
 #import "camera.h"
 #import "ini.h"
 #import "light.h"
-#import "Mathx.h"
-#import "math.h"
 #import "render.h"
 #import "sky.h"
 #import "texture.h"
 #import "world.h"
-#import "PWGL.h"
 #import "win.h"
 #import "RenderAPI.h"
 
@@ -660,8 +645,6 @@ void RenderTerminate()
 
 #pragma mark -
 
-static GLvector VectorToGLvector(Vector *v) { return GLvector(v.x, v.y, v.z); }
-
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void RenderUpdate (int width, int height)		
@@ -709,8 +692,7 @@ void RenderUpdate (int width, int height)
 	pwLoadIdentity();
     
 	pwLineWidth (1.0f);
-	GLvector pos   = VectorToGLvector(CameraPosition());
-	GLvector angle = VectorToGLvector(CameraAngle());
+	GLvector pos = CameraPosition(), angle = CameraAngle();
 	pwRotatef (angle.x, 1.0f, 0.0f, 0.0f);
 	pwRotatef (angle.y, 0.0f, 1.0f, 0.0f);
 	pwRotatef (angle.z, 0.0f, 0.0f, 1.0f);

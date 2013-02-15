@@ -66,4 +66,5 @@ void pwTexSubImage2D (GLenum target, GLint level, GLint xoffset, GLint yoffset, 
 void pwColor3f(GLfloat r, GLfloat g, GLfloat b) { glColor3f(r, g, b); }
 void pwCallList(GLuint list) { glCallList(list); }
 void pwVertex2f(GLfloat x, GLfloat y) { glVertex2f(x, y); }
+void pwVertex3f(GLfloat x, GLfloat y, GLfloat z) { glVertex3f(x, y, z); }
 void pwTexCoord2f(GLfloat s, GLfloat t) { glTexCoord2f(s, t); }

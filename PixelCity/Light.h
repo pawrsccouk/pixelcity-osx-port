@@ -6,16 +6,13 @@ extern "C" {
 #endif
 
     void  LightRender (void);
-    
     void  LightClear (void);
-    
-    unsigned long   LightCount (void);
-    
-    void LightAdd(Vector *position, NSColor *color, int size, BOOL blink);
+    unsigned long LightCount (void);
 
 #if defined(__cplusplus)
 }
 #endif
 
+void LightAdd(const GLvector &position, const GLrgba &color, int size, bool blink);
 
 #endif // _LIGHT_H_

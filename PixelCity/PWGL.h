@@ -62,6 +62,7 @@ void glReportError(const char* where);
 void pwColor3f(GLfloat r, GLfloat g, GLfloat b);
 void pwCallList(GLuint list);
 void pwVertex2f(GLfloat x, GLfloat y);
+void pwVertex3f(GLfloat x, GLfloat y, GLfloat z);
 void pwTexCoord2f(GLfloat x, GLfloat y);
 
 #ifdef __cplusplus

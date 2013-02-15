@@ -1,18 +1,18 @@
-#import "glTypesObjC.h"
+
+GLvector CameraAngle (void);
+void  CameraAngleSet (const GLvector &new_angle);
+GLvector CameraPosition (void);
+void  CameraPositionSet (const GLvector &new_pos);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-Vector *CameraAngle (void);
-void  CameraAngleSet (Vector *new_angle);
 void  CameraAutoToggle ();
 float CameraDistance (void);
 void  CameraDistanceSet (float new_distance);
 void  CameraInit (void);
 void  CameraNextBehavior (void);
-Vector *CameraPosition (void);
-void  CameraPositionSet (Vector *new_pos);
 void  CameraReset ();
 void  CameraUpdate (void);	
 void  CameraTerm (void);

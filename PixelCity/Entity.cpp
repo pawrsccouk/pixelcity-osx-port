@@ -14,18 +14,12 @@
 
 -----------------------------------------------------------------------------*/
 
-#import <math.h>
-#import <stdlib.h>
-
+#import "Model.h"
 #import "entity.h"
-#import "macro.h"
-#import "mathx.h"
 #import "render.h"
 #import "texture.h"
-#import "PWGL.h"
 #import "visible.h"
 #import "win.h"
-#import <iostream>
 #import "World.h"
 
 struct entity

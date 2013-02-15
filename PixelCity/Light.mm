@@ -14,25 +14,15 @@
 
 -----------------------------------------------------------------------------*/
 
-#import "glTypesObjC.h"
+#import "Model.h"
 #import "light.h"
-#import "glRGBA.h"
-#import "glTypes.h"
-#import <math.h>
 #import "camera.h"
 #import "entity.h"
-#import "macro.h"
-#import "mathx.h"
-#import "random.h"
 #import "render.h"
 #import "texture.h"
 #import "visible.h"
 #import "win.h"
-#import "PWGL.h"
 #import "World.h"
-#import <vector>
-#import <algorithm>
-#import <functional>
 
 static void addLight(float x, float y, float z, float r, float g, float b, float a, int size, bool blinks);
 
@@ -60,17 +50,11 @@ static GLvector2      angles[5][360];
 std::vector<CLight*>  all_lights;
 static bool           angles_done;
 
-// PAW: Don't know why this is necessary, but the light.h isn't always marking this as a "C" function.
-//extern "C" void LightAdd(Vector*, NSColor *, int, BOOL);
-
-void LightAdd(Vector *position,
-              NSColor *color,
-              int size, BOOL blink)
+void LightAdd(const GLvector &position,
+              const GLrgba &color,
+              int size, bool blink)
 {
-    CGFloat red = 1.0f, green = 1.0f, blue = 1.0f, alpha = 1.0f;
-    [color getRed:&red green:&green blue:&blue alpha:&alpha];
-
-    CLight *newLight = new CLight(GLvector(position.x, position.y, position.z), GLrgba(red, green, blue, alpha), size);
+    CLight *newLight = new CLight(position, color, size);
     all_lights.push_back(newLight);
     if(blink)
         newLight->Blink();
@@ -146,14 +130,12 @@ void CLight::Blink ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static GLvector VectorToGLvector(Vector *v) { return GLvector(v.x, v.y, v.z); }
 
 void CLight::Render ()
 {
 	if (!Visible (_cell_x, _cell_z))
 		return;
-	GLvector camera = VectorToGLvector(CameraAngle());
-	GLvector camera_position = VectorToGLvector(CameraPosition());
+	GLvector camera = CameraAngle(), camera_position = CameraPosition();
     
 	if( (fabs (camera_position.x - _position.x) > RenderFogDistance ())
 	||  (fabs (camera_position.z - _position.z) > RenderFogDistance ())

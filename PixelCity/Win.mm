@@ -10,29 +10,21 @@
 
 -----------------------------------------------------------------------------*/
 
-#define MOUSE_MOVEMENT          0.5f
+static const float MOUSE_MOVEMENT = 0.5f;
 
-#import <math.h>
-#import <stdarg.h>
-#import <string.h>
-#import <stdio.h>
-#import <time.h>
-#import <sys/time.h>
+#import "Model.h"
 
 #import "camera.h"
 #import "car.h"
 #import "entity.h"
-#import "glTypes.h"
 #import "ini.h"
-#import "macro.h"
-#import "random.h"
 #import "render.h"
 #import "texture.h"
 #import "win.h"
 #import "world.h"
 #import "visible.h"
-#import "PWGL.h"
 #import "RenderAPI.h"
+#import <sys/time.h>
 
 /*
 #pragma comment(lib, "opengl32.lib")

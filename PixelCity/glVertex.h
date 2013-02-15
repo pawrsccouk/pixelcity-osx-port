@@ -9,8 +9,6 @@
 #ifndef PixelCity_glVertex_h
 #define PixelCity_glVertex_h
 
-#import "glTypes.h"
-#import "GLrgba.h"
 
 struct GLvertex
 {
@@ -23,7 +21,14 @@ struct GLvertex
     GLrgba      color;
     int         bone;
     std::ostream &operator<<(std::ostream &os) const;
+    
+    
+    void glVertex3() const;   // Call glVertex3f with the current position.
+    void glTexCoord2() const;   // Call glTexCoord3f with the current uv.
 };
 inline std::ostream &operator<<(std::ostream &os, const GLvertex &v) { return v.operator<<(os); }
+
+inline void GLvertex::glVertex3() const { position.glVertex3(); }
+inline void GLvertex::glTexCoord2() const { uv.glTexCoord2(); }
 
 #endif

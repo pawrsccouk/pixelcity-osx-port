@@ -30,9 +30,6 @@ static unsigned long    ptgfsr[N];
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-int COIN_FLIP(void) { return RandomIntR(2) == 0; }
-
-
 unsigned long RandomLong(void)
 {
   int		     kk;

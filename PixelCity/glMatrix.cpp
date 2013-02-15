@@ -10,6 +10,8 @@
 
 -----------------------------------------------------------------------------*/
 
+#import "Model.h"
+#import <float.h>
 
 #define M(e,x,y)                (e.elements[x][y])
 
@@ -74,12 +76,6 @@
 #define EulOrdXYZr    EulOrd(Z,EulParOdd,EulRepNo,EulFrmR)
 #define EulOrdZYZr    EulOrd(Z,EulParOdd,EulRepYes,EulFrmR)
 
-#import <math.h>
-#import <float.h>
-
-#import "macro.h"
-#import "glTypes.h"
-#import "Mathx.h"
 
 static float      identity[4][4] = 
 {

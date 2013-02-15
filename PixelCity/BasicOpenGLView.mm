@@ -15,6 +15,7 @@
 #import "RenderAPI.h"
 #import "PWGL.h"
 #import "Random.h"
+#import "texture.h"
 
 // ==================================
 
@@ -564,7 +565,7 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), bool *pFlag)
 
 -(void)windowWillClose:(NSNotification *)notification
 {
-    NSAssert(notification.object == self.window, @"The object %@ is not our window.", notification.object);
+//    NSAssert(notification.object == self.window, @"The object %@ is not our window.", notification.object);
     RenderTerminate();  // Stop any OpenGL renders and wait for the window to be closed.
 }
 
@@ -755,7 +756,7 @@ static NSArray *makeLogos()
 }
 
 
-GLuint TextureRandomLogo()
+GLuint TextureRandomLogo(void)
 {
     static NSArray *textures = nil;
     if(!textures)

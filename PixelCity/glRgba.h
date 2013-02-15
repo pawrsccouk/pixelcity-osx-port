@@ -9,8 +9,6 @@
 #ifndef PixelCity_glRGBA_h
 #define PixelCity_glRGBA_h
 
-#import <ostream>
-
 class GLrgba
 {
     float _red, _green, _blue, _alpha;

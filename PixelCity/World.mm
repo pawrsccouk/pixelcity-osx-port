@@ -12,8 +12,6 @@
  
  -----------------------------------------------------------------------------*/
 
-#define HUE_COUNT         (sizeof(hue_list)/sizeof(float))
-#define LIGHT_COLOR_COUNT (sizeof(light_colors)/sizeof(HSL))
 
 #import <math.h>
 #import <time.h>
@@ -21,7 +19,6 @@
 #import <assert.h>
 
 #import "glTypes.h"
-#import "glTypesObjC.h"
 #import "building.h"
 #import "car.h"
 #import "deco.h"
@@ -78,7 +75,7 @@ public:
 	
 };
 
-static HSL            light_colors[] = 
+static HSL light_colors[] = 
 { 
 	0.04f,  0.9f,  0.93f,   //Amber / pink
 	0.055f, 0.95f, 0.93f,   //Slightly brighter amber 
@@ -96,6 +93,7 @@ static HSL            light_colors[] =
 	0.65f,  0.0f,  0.8f,    //Dimmer white.
 	0.65f,  0.0f,  0.6f,    //Dimmest white.
 }; 
+static const size_t LIGHT_COLOR_COUNT = (sizeof(light_colors)/sizeof(HSL));
 
 static GLrgba         g_bloom_color;
 static long           g_last_update;
@@ -107,6 +105,7 @@ static int            g_fade_state = 0, g_modern_count = 0, g_tower_count = 0, g
 static bool           g_reset_needed = false;
 static GLbbox         g_hot_zone;
 static time_t         g_start_time = 0;
+
 
 /*-----------------------------------------------------------------------------
  
@@ -532,70 +531,28 @@ GLrgba WorldLightColor (unsigned index)
 	return glRgbaFromHsl (light_colors[index].hue, light_colors[index].sat, light_colors[index].lum);	
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
 
 char WorldCell (int x, int y)
 {
 	return g_world[CLAMP (x, 0,WORLD_SIZE - 1)][CLAMP (y, 0, WORLD_SIZE - 1)];	
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
-
-GLrgba WorldBloomColor ()
-{	
-	return g_bloom_color;	
-}
-
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
-
-int WorldLogoIndex ()
-{
-	return g_logo_index++;	
-}
-
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
-
-GLbbox WorldHotZone ()
-{
-	
-	return g_hot_zone;
-	
-}
-
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
-
-void WorldTerm (void)
-{
-	
-	
-}
-
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+GLrgba WorldBloomColor() { return g_bloom_color;  }
+int WorldLogoIndex    () { return g_logo_index++; }
+GLbbox WorldHotZone   () { return g_hot_zone;     }
+void WorldTerm        () { }
 
 void WorldReset (void)
 {
-	
 	//If we're already fading out, then this is the developer hammering on the 
 	//"rebuild" button.  Let's hurry things up for the nice man...
 	if (g_fade_state == FADE_OUT) 
 		do_reset ();
+    
 	//If reset is called but the world isn't ready, then don't bother fading out.
 	//The program probably just started.
 	g_fade_state = FADE_OUT;
 	g_fade_start = GetTickCount ();
-	
 }
 
 /*-----------------------------------------------------------------------------
@@ -625,19 +582,8 @@ void WorldRender ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-float WorldFade (void)
-{
-	
-	return g_fade_current;
-	
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-unsigned long WorldSceneBegin()
-{
-	return g_scene_begin;
-}
+float WorldFade (void) { return g_fade_current; }
+unsigned long WorldSceneBegin() { return g_scene_begin; }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 

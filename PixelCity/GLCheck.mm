@@ -162,7 +162,7 @@ unsigned char HaveOpenGLCapsChanged (GLCaps aDisplayCaps[],
       CGLRendererInfoObj info;
 	  GLint j;
 	  GLint numRenderers = 0, rv = 0, deviceVRAM /* video memory in bytes*/, rendererID; // renderer ID
-      CGLError theErr = 0;
+      CGLError theErr = kCGLNoError;
       
       theErr = CGLQueryRendererInfo (aDisplayCaps[i].cglDisplayMask, 
                                   &info, &numRenderers);
@@ -269,7 +269,7 @@ void CheckOpenGLCaps (CGDisplayCount maxDspys,
     { // get renderer info based on gDevice
       CGLRendererInfoObj info;
       GLint j, numRenderers = 0, rv = 0;
-      CGLError theErr2 = 0;
+      CGLError theErr2 = kCGLNoError;
       
       theErr2 = CGLQueryRendererInfo (dCaps[i].cglDisplayMask, 
                                   &info, 
@@ -301,7 +301,7 @@ void CheckOpenGLCaps (CGDisplayCount maxDspys,
 
     { // build context and context specific info
       CGLPixelFormatAttribute attribs[] = { kCGLPFADisplayMask,
-                                            dCaps[i].cglDisplayMask, 
+                                            (CGLPixelFormatAttribute)dCaps[i].cglDisplayMask,
                                             (CGLPixelFormatAttribute)0 };
       CGLPixelFormatObj pixelFormat = NULL;
       GLint numPixelFormats = 0;

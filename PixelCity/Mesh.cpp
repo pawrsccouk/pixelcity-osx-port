@@ -15,16 +15,11 @@
 
 -----------------------------------------------------------------------------*/
 
-#import <OpenGL/gl.h>
-#import <OpenGL/glu.h>
-
-#import <vector>
+#import "Model.h"
 #import <assert.h>
-#import "glTypes.h"
 #import "Mesh.h"
 #import "World.h"
 #import "Win.h"
-#import <iterator>
 
 /*-----------------------------------------------------------------------------
 
@@ -92,48 +87,43 @@ void CMesh::FanAdd (const fan& f)
 }
 
 
-/*-----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
------------------------------------------------------------------------------*/
 
 void CMesh::Render ()
 {
-	std::vector<quad_strip>::iterator qsi;
-	std::vector<cube>::iterator ci;
-	std::vector<fan>::iterator fi;
-	std::vector<unsigned long>::iterator n;
-	
-	if (_compiled) {
+	auto drawAtIndex = [this](int i) {
+        _vertex[i].glTexCoord2();
+        _vertex[i].glVertex3();
+    };
+    
+	if (_compiled)
+    {
 		glCallList (_list);
 		return;
 	}
-	for (qsi = _quad_strip.begin(); qsi < _quad_strip.end(); ++qsi) {
+    
+	for (std::vector<quad_strip>::iterator qsi = _quad_strip.begin(); qsi < _quad_strip.end(); ++qsi)
+    {
 		MakePrimitive mp(GL_QUAD_STRIP);
-		for (n = qsi->index_list.begin(); n < qsi->index_list.end(); ++n) {
-		//	if(size_t(*n) < _vertex.size()) {  // PAW TEMP TEST
-				glTexCoord2fv(&_vertex[*n].uv.x);
-				glVertex3fv(&_vertex[*n].position.x);
-		//	} // PAW
-		}
+        std::for_each(qsi->index_list.cbegin(), qsi->index_list.cend(), drawAtIndex);
 	}
 	
-	for (ci = _cube.begin(); ci < _cube.end(); ++ci) {
+	for (std::vector<cube>::iterator ci = _cube.begin(); ci < _cube.end(); ++ci)
+    {
 		{	MakePrimitive mp(GL_QUAD_STRIP);
-			for (n = ci->index_list.begin(); n < ci->index_list.end(); ++n) {
-				glTexCoord2fv (&_vertex[*n].uv.x);
-				glVertex3fv (&_vertex[*n].position.x);
-			}
+            std::for_each(ci->index_list.begin(), ci->index_list.end(), drawAtIndex);
 		}
 		
 		{	MakePrimitive mp(GL_QUADS);
-			glTexCoord2fv(&_vertex[ci->index_list[7]].uv.x);
-			glVertex3fv  (&_vertex[ci->index_list[7]].position.x);
-			glVertex3fv  (&_vertex[ci->index_list[5]].position.x);
-			glVertex3fv  (&_vertex[ci->index_list[3]].position.x);
-			glVertex3fv  (&_vertex[ci->index_list[1]].position.x);
+			_vertex[ci->index_list[7]].glTexCoord2();
+			_vertex[ci->index_list[7]].glVertex3();
+			_vertex[ci->index_list[5]].glVertex3();
+			_vertex[ci->index_list[3]].glVertex3();
+			_vertex[ci->index_list[1]].glVertex3();
 		}
 		
-		{ MakePrimitive mp(GL_QUADS);
+		{   MakePrimitive mp(GL_QUADS);
 			glTexCoord2fv(&_vertex[ci->index_list[6]].uv.x);
 			glVertex3fv  (&_vertex[ci->index_list[0]].position.x);
 			glVertex3fv  (&_vertex[ci->index_list[2]].position.x);
@@ -142,12 +132,10 @@ void CMesh::Render ()
 		}
 	}
 
-	for (fi = _fan.begin(); fi < _fan.end(); ++fi) {
+	for (std::vector<fan>::iterator fi = _fan.begin(); fi < _fan.end(); ++fi)
+    {
 		MakePrimitive mp(GL_TRIANGLE_FAN);
-		for (n = fi->index_list.begin(); n < fi->index_list.end(); ++n) {
-			glTexCoord2fv(&_vertex[*n].uv.x);
-			glVertex3fv  (&_vertex[*n].position.x);
-		}
+        std::for_each(fi->index_list.cbegin(), fi->index_list.cend(), drawAtIndex);
 	}
 }
 
@@ -190,6 +178,36 @@ std::ostream &CMesh::operator<<(std::ostream &os) const
 std::ostream &quad_strip::operator<<(std::ostream &os) const { return streamVector<unsigned long>(os, index_list, "INDEX_LIST", ", "); }
 std::ostream &fan::operator<<       (std::ostream &os) const { return streamVector<unsigned long>(os, index_list, "INDEX_LIST", ", "); }
 std::ostream &cube::operator<<      (std::ostream &os) const { return streamVector<unsigned long>(os, index_list, "INDEX_LIST", ", "); }
+
+cube::cube(int first, ...)
+{
+    index_list.push_back(first);
+    va_list args;
+    va_start(args, first);
+    int i = 0;
+    while( (i = va_arg(args, int)) != LIST_TERM)
+        index_list.push_back(i);
+}
+
+fan::fan(int first, ...)
+{
+    index_list.push_back(first);
+    va_list args;
+    va_start(args, first);
+    int i = 0;
+    while( (i = va_arg(args, int)) != LIST_TERM)
+        index_list.push_back(i);
+}
+
+quad_strip::quad_strip(int first, ...)
+{
+    index_list.push_back(first);
+    va_list args;
+    va_start(args, first);
+    int i = 0;
+    while( (i = va_arg(args, int)) != LIST_TERM)
+        index_list.push_back(i);
+}
 
 
 

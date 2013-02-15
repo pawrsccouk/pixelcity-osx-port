@@ -15,13 +15,6 @@
  
  -----------------------------------------------------------------------------*/
 
-#define RANDOM_COLOR_SHIFT  ((float)(RandomLongR(10)) / 50.0f)
-#define RANDOM_COLOR_VAL    ((float)(RandomLongR(256)) / 256.0f)
-#define RANDOM_COLOR_LIGHT  ((float)(200 + RandomLongR(56)) / 256.0f)
-#define SKY_BANDS           (sizeof (sky_pos) / sizeof (int))
-#define PREFIX_COUNT        (sizeof (prefix) / sizeof (char*))
-#define SUFFIX_COUNT        (sizeof (suffix) / sizeof (char*))
-#define NAME_COUNT          (sizeof (name) / sizeof (char*))
 
 #import <stdlib.h>
 #import <stdio.h>
@@ -48,88 +41,8 @@ using std::vector;
 #import "RenderAPI.h"
 #import "Mathx.h"
 
-//static const char* prefix[] = 
-//{
-//	"i", 
-//	"Green ",
-//	"Mega",
-//	"Super ",
-//	"Omni",
-//	"e",
-//	"Hyper",
-//	"Global ",
-//	"Vital", 
-//	"Next ",
-//	"Pacific ",
-//	"Metro",
-//	"Unity ",
-//	"G-",
-//	"Trans",
-//	"Infinity ", 
-//	"Superior ",
-//	"Monolith ",
-//	"Best ",
-//	"Atlantic ",
-//	"First ",
-//	"Union ",
-//	"National ",
-//};
-//
-//static const char* name[] = 
-//{
-//	"Biotic",
-//	"Info",
-//	"Data",
-//	"Solar",
-//	"Aerospace",
-//	"Motors",
-//	"Nano",
-//	"Online",
-//	"Circuits",
-//	"Energy",
-//	"Med",
-//	"Robotic",
-//	"Exports",
-//	"Security",
-//	"Systems",
-//	"Financial",
-//	"Industrial",
-//	"Media",
-//	"Materials",
-//	"Foods",
-//	"Networks",
-//	"Shipping",
-//	"Tools",
-//	"Medical",
-//	"Publishing",
-//	"Enterprises",
-//	"Audio",
-//	"Health",
-//	"Bank",
-//	"Imports",
-//	"Apparel",
-//	"Petroleum", 
-//	"Studios",
-//};
-//
-//static const char* suffix[] = 
-//{
-//	"Corp",
-//	" Inc.",
-//	"Co",
-//	"World",
-//	".Com",
-//	" USA",
-//	" Ltd.",
-//	"Net",
-//	" Tech",
-//	" Labs",
-//	" Mfg.",
-//	" UK",
-//	" Unlimited",
-//	" One",
-//	" LLC"
-//};
+inline float randomColorShift(void) { return ((float)(RandomLongR(10)) / 50.0f); }
+inline float randomColorVal(void)   { return ((float)(RandomLongR(256)) / 256.0f); }
 
 class CTexture
 {
@@ -156,9 +69,6 @@ public:
 
 static CTexture*    head = NULL;
 static bool         textures_done = false;
-//static bool         prefix_used[PREFIX_COUNT];
-//static bool         name_used  [NAME_COUNT];
-//static bool         suffix_used[SUFFIX_COUNT];
 static int          build_time = 0;
 
 /*-----------------------------------------------------------------------------
@@ -250,7 +160,7 @@ void drawrect (int left, int top, int right, int bottom, GLrgba color)
 						glColor4i(255, 0, RandomIntR(potential), 255);
 						float hue = 0.2f + (float)RandomLongR(100) / 300.0f + (float)RandomLongR(100) / 300.0f + (float)RandomLongR(100) / 300.0f;
 						GLrgba color_noise = glRgbaFromHsl(hue, 0.3f, 0.5f).colorWithAlpha(float(RandomLongR(potential)) / 144.0f);
-						glColor4f(RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, RANDOM_COLOR_VAL, float(RandomLongR(potential)) / 144.0f);
+						glColor4f(randomColorVal(), randomColorVal(), randomColorVal(), float(RandomLongR(potential)) / 144.0f);
 						glColor4(color_noise);
 						glVertex2i(i, j);
 					}
@@ -410,7 +320,7 @@ void CTexture::DrawWindows ()
 				//color = GLrgba (0.5f + (float)(RandomLong () % 128) / 256.0f) + GLrgba (RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT);
 			}
 			if (lit) 
-				color = GLrgba(0.5f + (float)(RandomLong() % 128) / 256.0f) + GLrgba(RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT, RANDOM_COLOR_SHIFT);
+				color = GLrgba(0.5f + (float)(RandomLong() % 128) / 256.0f) + GLrgba(randomColorShift(), randomColorShift(), randomColorShift());
 			else 
 				color = GLrgba ((float)(RandomLong () % 40) / 256.0f);
 			window (x * _segment_size, y * _segment_size, _segment_size, _texType, color);

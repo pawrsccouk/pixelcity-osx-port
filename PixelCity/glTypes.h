@@ -1,11 +1,5 @@
-#ifndef glTYPES
-#define glTYPES
-
-#import <OpenGL/OpenGL.h>
-//static const int GL_CLAMP_TO_EDGE = 0x812F;
-
-#import <iostream>
-
+#ifndef PixelCity_glTYPES
+#define PixelCity_glTYPES
 
 #define OPERATORS(type)                       \
   type();                                     \
@@ -37,7 +31,11 @@ typedef struct GLvector
   float       z;
   OPERATORS(GLvector);
   GLvector(float xx, float yy, float zz) : x(xx), y(yy), z(zz) {}
+
   float Length() const;
+
+  void glVertex3() const;    // call glVertex3 on this vector.
+
 } GLvector, GLvector3;
 
 inline std::ostream &operator<<(std::ostream &os, const GLvector &v) { return v.operator<<(os); }
@@ -45,10 +43,11 @@ inline std::ostream &operator<<(std::ostream &os, const GLvector &v) { return v.
 
 struct GLvector2
 {
-  float       x;
-  float       y;
+    float       x;
+    float       y;
     GLvector2(float x, float y) : x(x), y(y) {}
     float Length() const;
+    void glTexCoord2() const;
     OPERATORS(GLvector2);
 };
 inline std::ostream &operator<<(std::ostream &os, const GLvector2 &v) { return v.operator<<(os); }

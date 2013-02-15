@@ -10,13 +10,7 @@
 
 -----------------------------------------------------------------------------*/
 
-#import <float.h>
-#import <math.h>
-#import <OpenGL/gl.h>
-
-#import "macro.h"
-#import "mathx.h"
-#import "glTypes.h"
+#import "Model.h"
 
 /*-----------------------------------------------------------------------------
                            
@@ -76,6 +70,11 @@ float GLvector3::Length() const
 /*-----------------------------------------------------------------------------
                            
 -----------------------------------------------------------------------------*/
+
+void GLvector::glVertex3() const
+{
+    ::pwVertex3f(x, y, z);
+}
 
 float glVectorDotProduct (GLvector3 v1, GLvector3 v2)
 {

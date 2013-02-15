@@ -10,28 +10,20 @@
 
 -----------------------------------------------------------------------------*/
 
-#define DEAD_ZONE       200
-#define STUCK_TIME      230
-#define UPDATE_INTERVAL 50 //milliseconds
-#define MOVEMENT_SPEED  0.61f
-#define CAR_SIZE        3.0f
 
-#import <math.h>
-#import "glTypes.h"
-#import "glTypesObjC.h"
+#import "Model.h"
 #import "car.h"
 #import "building.h"
 #import "mesh.h"
-#import "macro.h"
-#import "mathx.h"
-#import "random.h"
 #import "render.h"
 #import "texture.h"
-#import "PWGL.h"
 #import "visible.h"
 #import "win.h"
 #import "World.h"
 #import "camera.h"
+
+static const int DEAD_ZONE = 200, STUCK_TIME = 230, UPDATE_INTERVAL = 50; //milliseconds
+static const float MOVEMENT_SPEED = 0.61f,  CAR_SIZE = 3.0f;
 
 class CCar
 {
@@ -75,7 +67,6 @@ static GLvector2 angles[360];
 static bool    angles_done;
 
 std::vector<CCar*> all_cars;
-//static CCar*    head;
 
 static int     count;
 static unsigned char carmap[WORLD_SIZE][WORLD_SIZE];
@@ -164,12 +155,10 @@ void CCar::Park() { m_ready = false;}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static GLvector Vector2GLVector(Vector *v) { return GLvector(v.x, v.y, v.z); }
-
 void CCar::Update()
 {
         //If the car isn't ready, place it on the map and get it moving
-    GLvector old_pos, camera = Vector2GLVector(CameraPosition());
+    GLvector old_pos, camera = CameraPosition();
     if (!m_ready) {
 
             //if the car isn't ready, we need to place it somewhere on the map
