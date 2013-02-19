@@ -41,7 +41,7 @@ struct fan
 };
 inline std::ostream &operator<<(std::ostream &os, const fan &f) { return f.operator<<(os); }
 
-class CMesh
+@interface Mesh : NSObject
 {
     unsigned                _list;
     size_t                  _polycount;
@@ -50,20 +50,17 @@ class CMesh
     std::vector<quad_strip> _quad_strip;
     std::vector<fan>        _fan;
     bool                    _compiled;
-    
-public:
-    CMesh ();
-    ~CMesh ();
-    void        VertexAdd (const GLvertex& v);
-    size_t      VertexCount () { return _vertex.size(); }
-    size_t      PolyCount () { return _polycount; }
-    void        CubeAdd (const cube& c);
-    void        QuadStripAdd (const quad_strip& qs);
-    void        FanAdd (const fan& f);
-    void        Render ();
-    void        Compile ();
-    
-    std::ostream &operator<<(std::ostream &os) const;
-};
+}
 
-inline std::ostream &operator<<(std::ostream &os, const CMesh &m) { return m.operator<<(os); }
+@property (nonatomic, readonly) size_t vertexCount, polyCount;
+-(id)init;
+-(void) addVertex:(const GLvertex&) v;
+-(void) addCube:(const cube&) c;
+-(void) addQuadStrip:(const quad_strip&) qs;
+-(void) addFan:(const fan&) f;
+-(void) Render;
+-(void) Compile;
+
+@end
+
+

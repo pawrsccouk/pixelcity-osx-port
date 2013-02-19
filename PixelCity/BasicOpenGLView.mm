@@ -13,8 +13,8 @@
 #import "win.h"
 #import "ini.h"
 #import "RenderAPI.h"
-#import "PWGL.h"
-#import "Random.h"
+#import "Model.h"
+#import "World.h"
 #import "texture.h"
 
 // ==================================
@@ -454,7 +454,10 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), bool *pFlag)
     toggleFlag(normalizeToggleMenuItem, ^(bool b) { RenderSetNormalized(b); }, &fNormalize);
 }
 
-
+-(void)resetWorld:(id)sender
+{
+    WorldReset();
+}
 
 
 #pragma mark ---- Method Overrides ----

@@ -13,19 +13,13 @@ template <class T> float POW(T& x, T& y) { return float(pow(x,y)); }
 
 template <class T> inline int SIGN(const T& x)
 {
-    return (x > 0) ? 1
-                   : (x < 0) ? -1
-                             : 0;
+    return (x > 0) ?  1
+         : (x < 0) ? -1
+         :            0;
 }
 
-//#define SWAP(a,b)                 {int temp = a;a = b; b = temp;}
-//#define MIN(x,y)                  ((x) < (y) ? x : y)                
-//#define MAX(x,y)                  ((x) > (y) ? x : y)                
 
-typedef unsigned char  BYTE;
-typedef unsigned short WORD;
-
-inline BYTE GetRValue(unsigned long rgb) { return BYTE(rgb); }
-inline BYTE GetGValue(unsigned long rgb) { return BYTE(WORD(rgb) >> 8 ); }
-inline BYTE GetBValue(unsigned long rgb) { return BYTE(WORD(rgb) >> 16); }
+inline GLubyte GetRValue(unsigned long rgb) { return GLubyte(rgb); }
+inline GLubyte GetGValue(unsigned long rgb) { return GLubyte(GLushort(rgb) >> 8 ); }
+inline GLubyte GetBValue(unsigned long rgb) { return GLubyte(GLushort(rgb) >> 16); }
 

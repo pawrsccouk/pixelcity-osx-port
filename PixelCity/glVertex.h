@@ -22,7 +22,7 @@ struct GLvertex
     int         bone;
     std::ostream &operator<<(std::ostream &os) const;
     
-    
+    void apply() const;       // Call glTexCoord3 on uv glVertex3 on position and glColor4 on color.
     void glVertex3() const;   // Call glVertex3f with the current position.
     void glTexCoord2() const;   // Call glTexCoord3f with the current uv.
 };

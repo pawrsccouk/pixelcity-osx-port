@@ -28,55 +28,57 @@ static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the give
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-CDeco::~CDeco ()
+@implementation Deco
+
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+-(id)init
 {
-  delete _mesh;
+    self = [super init];
+    if(self) {
+        _mesh = [[Mesh alloc] init];
+        _use_alpha = false;
+    }
+    return self;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-CDeco::CDeco ()
-{
-  _mesh = new CMesh ();
-  _use_alpha = false;
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void CDeco::Render ()
+-(void) Render
 {
     float rgb[3] = {};
     _color.copyRGB(rgb);
     glColor3fv(rgb);
-    _mesh->Render ();
+    [_mesh Render];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CDeco::RenderFlat(bool colored) { }
-bool CDeco::Alpha () const { return _use_alpha; }
-unsigned long CDeco::PolyCount () const { return _mesh->PolyCount (); }
-GLuint CDeco::Texture () const { return _texture; }
+-(void)RenderFlat:(BOOL) colored { }
+-(BOOL)alpha { return _use_alpha; }
+-(unsigned long)polyCount  { return _mesh.polyCount; }
+-(GLuint) texture  { return _texture; }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 static const short LIGHT_SIZE = 3;
 
-void CDeco::CreateRadioTower (GLvector pos, float height)
+-(void) CreateRadioTowerWithPosition:(GLvector) pos height:(float) height;
 {
   float offset = height / 15.0f;
   _center = pos;
   _use_alpha = true;
   
         //Radio tower
-  _mesh->VertexAdd(GLvertex(glVector(_center.x         , _center.y + height, _center.z         ), glVector(0, 1)));
-  _mesh->VertexAdd(GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0)));
-  _mesh->VertexAdd(GLvertex(glVector(_center.x + offset, _center.y         , _center.z - offset), glVector(0, 0)));
-  _mesh->VertexAdd(GLvertex(glVector(_center.x + offset, _center.y         , _center.z + offset), glVector(1, 0)));
-  _mesh->VertexAdd(GLvertex(glVector(_center.x - offset, _center.y         , _center.z + offset), glVector(0, 0)));
-  _mesh->VertexAdd(GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0)));
+  [_mesh addVertex:GLvertex(glVector(_center.x         , _center.y + height, _center.z         ), glVector(0, 1))];
+  [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0))];
+  [_mesh addVertex:GLvertex(glVector(_center.x + offset, _center.y         , _center.z - offset), glVector(0, 0))];
+  [_mesh addVertex:GLvertex(glVector(_center.x + offset, _center.y         , _center.z + offset), glVector(1, 0))];
+  [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z + offset), glVector(0, 0))];
+  [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0))];
 
-  _mesh->FanAdd(fan(0, 1, 2, 3, 4, 5, LIST_TERM));
+  [_mesh addFan:fan(0, 1, 2, 3, 4, 5, LIST_TERM)];
   
   LightAdd(_center, GLrgba(1.0f, 192.0f/255.0f, 160.0f/255.0f, 1.0f), LIGHT_SIZE, true);
   
@@ -85,9 +87,8 @@ void CDeco::CreateRadioTower (GLvector pos, float height)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CDeco::CreateLogo(const GLvector2 &start, const GLvector2 &end, float bottom, int seed, const GLrgba &color)
+-(void) CreateLogoWithStart:(const GLvector2 &)start end:(const GLvector2 &) end base:(float) bottom seed:(int) seed color:(const GLrgba &)color;
 {
-
   _use_alpha = true;
   _color = color;
   GLvector2 center2d = (start + end) / 2;
@@ -99,19 +100,19 @@ void CDeco::CreateLogo(const GLvector2 &start, const GLvector2 &end, float botto
   float height = ((start - end) / 8.0f).Length() * 1.5f;
   float top = bottom + height, u1 = 0.0f, u2 = 1.0f, v1 = 1.0f, v2 = 0.0f;
 
-  _mesh->VertexAdd( GLvertex(glVector(start.x, bottom, start.y) + out, glVector(u1, v1), _color) );
-  _mesh->VertexAdd( GLvertex(glVector(end.x  , bottom, end.y  ) + out, glVector(u2, v1), _color) );
-  _mesh->VertexAdd( GLvertex(glVector(end.x  , top   , end.y  ) + out, glVector(u2, v2), _color) );
-  _mesh->VertexAdd( GLvertex(glVector(start.x, top   , start.y) + out, glVector(u1, v2), _color) );
+  [_mesh addVertex:GLvertex(glVector(start.x, bottom, start.y) + out, glVector(u1, v1), _color) ];
+  [_mesh addVertex:GLvertex(glVector(end.x  , bottom, end.y  ) + out, glVector(u2, v1), _color) ];
+  [_mesh addVertex:GLvertex(glVector(end.x  , top   , end.y  ) + out, glVector(u2, v2), _color) ];
+  [_mesh addVertex:GLvertex(glVector(start.x, top   , start.y) + out, glVector(u1, v2), _color) ];
   
-  _mesh->QuadStripAdd (quad_strip( 0, 1, 3, 2, LIST_TERM) );
+  [_mesh addQuadStrip:quad_strip( 0, 1, 3, 2, LIST_TERM) ];
   
   _texture = TextureRandomLogo(); // TextureId (TEXTURE_LOGOS);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CDeco::CreateLightStrip (float x, float z, float width, float depth, float height, GLrgba color)
+-(void) CreateLightStripWithX:(float) x z:(float) z width:(float) width depth:(float) depth height:(float) height color:(GLrgba) color;
 {
   _color = color;
   _use_alpha = true;
@@ -120,18 +121,18 @@ void CDeco::CreateLightStrip (float x, float z, float width, float depth, float 
   
   float u = (width < depth) ? 1.0f : float(int(width / depth));
   float v = (width < depth) ? float(int(depth / width)) : 1.0f;
-  _mesh->VertexAdd(GLvertex(glVector(x        , height, z        ), glVector(0.0f, 0.0f)));
-  _mesh->VertexAdd(GLvertex(glVector(x        , height, z + depth), glVector(0.0f, v   )));
-  _mesh->VertexAdd(GLvertex(glVector(x + width, height, z + depth), glVector(u   , v   )));
-  _mesh->VertexAdd(GLvertex(glVector(x + width, height, z        ), glVector(u   , 0.0f)));
+  [_mesh addVertex:GLvertex(glVector(x        , height, z        ), glVector(0.0f, 0.0f))];
+  [_mesh addVertex:GLvertex(glVector(x        , height, z + depth), glVector(0.0f, v   ))];
+  [_mesh addVertex:GLvertex(glVector(x + width, height, z + depth), glVector(u   , v   ))];
+  [_mesh addVertex:GLvertex(glVector(x + width, height, z        ), glVector(u   , 0.0f))];
   
-  _mesh->QuadStripAdd(quad_strip(0, 1, 3, 2, LIST_TERM));
-  _mesh->Compile ();
+  [_mesh addQuadStrip:quad_strip(0, 1, 3, 2, LIST_TERM)];
+  [_mesh Compile];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CDeco::CreateLightTrim (GLvector* chain, int count, float height, unsigned long seed, GLrgba color)
+-(void) CreateLightTrimWithChain:(GLvector*) chain count:(int) count height:(float) height seed:(unsigned long) seed color:(GLrgba) color;
 {
     _color = color;
     _center = glVector (0.0f, 0.0f, 0.0f);
@@ -161,17 +162,18 @@ void CDeco::CreateLightTrim (GLvector* chain, int count, float height, unsigned 
         GLvector to = glVectorNormalize (chain[next] - chain[prev]);
         GLvector out = glVectorCrossProduct (glVector (0.0f, 1.0f, 0.0f), to) * LOGO_OFFSET;
         p.position = chain[i % count] + out; p.uv = glVector (u, v2);
-        _mesh->VertexAdd (p);
+        [_mesh addVertex:p];
         qs.index_list.push_back(index++);
         
             //Top point
         p.position.y += height; p.uv = glVector(u, v1);
-        _mesh->VertexAdd (p);
+        [_mesh addVertex:p];
         qs.index_list.push_back(index++);
     }
     
-    _mesh->QuadStripAdd (qs);
+    [_mesh addQuadStrip:qs];
     _texture = TextureId (TEXTURE_TRIM);
-    _mesh->Compile ();
+    [_mesh Compile];
 }
 
+@end

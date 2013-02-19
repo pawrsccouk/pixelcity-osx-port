@@ -304,13 +304,13 @@ GLrgba RANDOM_COLOR(void)
     return glRgbaFromHsl(float(RandomIntR(255))/255.0f, 1.0f, 0.75f);
 }
 
-void glColor4(const GLrgba &color)
+void GLrgba::glColor4() const
 {
-    glColor4f(color.red(), color.green(), color.blue(), color.alpha());
+    glColor4f(red(), green(), blue(), alpha());
 }
 
-void glColor3(const GLrgba &color)
+void GLrgba::glColor3() const
 {
-    glColor3f(color.red(), color.green(), color.blue());
+    glColor3f(red(), green(), blue());
 }
 

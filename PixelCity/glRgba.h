@@ -49,8 +49,8 @@ public:
     GLrgba colorWithAlpha(float newAlpha = 1.0f) const;
     
         // Set the current color to this color
-    void glColor3f();   // R, G, B
-    void glColor4f();   // R, G, B, A
+    void glColor3() const;   // R, G, B
+    void glColor4() const;   // R, G, B, A
 };
 
 inline std::ostream &operator<<(std::ostream &os, const GLrgba &v) { return v.operator<<(os); }
@@ -68,7 +68,7 @@ GLrgba    glRgbaUnique (int i);
 GLrgba    glRgbaFromHsl (float h, float s, float l);
 
     // Calls glColor3fv and glColor4fv with the RGB/A values in color.
-void glColor3(const GLrgba &color);
-void glColor4(const GLrgba &color);
+//void glColor3(const GLrgba &color);
+//void glColor4(const GLrgba &color);
 
 #endif

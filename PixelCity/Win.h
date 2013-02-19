@@ -30,7 +30,7 @@ enum ClaimFlags {
 };
 
 //Used in orienting roads and cars
-enum
+enum RoadDirection
 {
   NORTH,
   EAST,

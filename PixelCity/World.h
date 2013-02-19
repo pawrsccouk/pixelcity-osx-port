@@ -1,6 +1,3 @@
-#import <OpenGL/gl.h>
-#import "glTypes.h"
-#import "glRGBA.h"
 
 GLrgba    WorldBloomColor ();
 char      WorldCell (int x, int y);

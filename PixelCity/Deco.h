@@ -1,25 +1,19 @@
 #import "entity.h"
 #import "glRGBA.h"
 
-class CDeco : CEntity
+@class Mesh;
+@interface Deco : Entity
 {
   GLrgba        _color;
-  class CMesh*  _mesh;
+  Mesh         *_mesh;
   int           _type;
   unsigned      _texture;
-  bool          _use_alpha;
+  BOOL          _use_alpha;
+}
+-(id)init;
+-(void) CreateLogoWithStart:(const GLvector2 &)start end:(const GLvector2 &) end base:(float) base seed:(int) seed color:(const GLrgba &)color;
+-(void) CreateLightStripWithX:(float) x z:(float) z width:(float) width depth:(float) depth height:(float) height color:(GLrgba) color;
+-(void) CreateLightTrimWithChain:(GLvector*) chain count:(int) count height:(float) height seed:(unsigned long) seed color:(GLrgba) color;
+-(void) CreateRadioTowerWithPosition:(GLvector) pos height:(float) height;
+@end
 
-public:
-                CDeco ();
-                ~CDeco ();
-  void          CreateLogo(const GLvector2 &start, const GLvector2 &end, float base, int seed, const GLrgba &color);
-  void          CreateLightStrip (float x, float z, float width, float depth, float height, GLrgba color);
-  void          CreateLightTrim (GLvector* chain, int count, float height, unsigned long seed, GLrgba color);
-  void          CreateRadioTower (GLvector pos, float height);
-  void          Render (void);
-  void          RenderFlat (bool colored);
-  
-  bool          Alpha () const;
-  unsigned long PolyCount () const;
-  GLuint        Texture () const;
-};

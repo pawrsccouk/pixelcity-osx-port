@@ -22,7 +22,7 @@ static const int MAX_VBUFFER = 256;
 #import "win.h"
 
 //This is used by the recursive roof builder to decide what items may be added.
-enum
+enum AddonType
 {
   ADDON_NONE,
   ADDON_LOGO,
@@ -31,47 +31,50 @@ enum
   ADDON_COUNT
 };
 
-static GLvector         vector_buffer[MAX_VBUFFER];
+static GLvector vector_buffer[MAX_VBUFFER];
 static short LIGHT_SIZE = 1;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-CBuilding::CBuilding (BuildingType type, int x, int y, int height, int width, int depth, int seed, GLrgba color)
-:    _color(color.colorWithAlpha(0.1f))
-,    _trim_color(WorldLightColor (seed))
+@implementation Building
+
++(id)buildingWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color
 {
-    _x = x;
-    _y = y;
-    _width = width;
-    _depth = depth;
-    _height = height;
-    _center = glVector (float(_x + width / 2), 0.0f, float(_y + depth / 2));
-    _seed = seed;
-    _texture_type = RandomInt();
-    _have_lights =  _have_logo = _have_trim = false;
-    _roof_tiers = 0;
-        //Pick a color for logos & roof lights
-    _mesh       = new CMesh; //The main textured mesh for the building
-    _mesh_flat  = new CMesh; //Flat-color mesh for untextured detail items.
-    switch (type) {
-        case BUILDING_SIMPLE:  CreateSimple ();   break;
-        case BUILDING_MODERN:  CreateModern ();   break;
-        case BUILDING_TOWER:   CreateTower  ();   break;
-        case BUILDING_BLOCKY:  CreateBlocky ();   break;
+    return [[Building alloc] initWithType:type x:x y:y height:height width:width depth:depth seed:seed color:color];
+}
+
+-(id)initWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color
+{
+    self = [super init];
+    if(self) {
+        _color = color.colorWithAlpha(0.1f);
+        _trim_color = WorldLightColor(seed);
+        _x = x;
+        _y = y;
+        _width = width;
+        _depth = depth;
+        _height = height;
+        _center = glVector (float(_x + width / 2), 0.0f, float(_y + depth / 2));
+        _seed = seed;
+        _texture_type = RandomInt();
+        _have_lights =  _have_logo = _have_trim = false;
+        _roof_tiers = 0;
+            //Pick a color for logos & roof lights
+        _mesh       = [[Mesh alloc] init]; //The main textured mesh for the building
+        _mesh_flat  = [[Mesh alloc] init]; //Flat-color mesh for untextured detail items.
+        switch (type) {
+            case BUILDING_SIMPLE:  [self CreateSimple];   break;
+            case BUILDING_MODERN:  [self CreateModern];   break;
+            case BUILDING_TOWER:   [self CreateTower ];   break;
+            case BUILDING_BLOCKY:  [self CreateBlocky];   break;
+        }
     }
+    return self;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-CBuilding::~CBuilding ()
-{
-    delete _mesh;
-    delete _mesh_flat;
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-GLuint CBuilding::Texture () const
+-(GLuint) texture
 {
   return TextureRandomBuilding (_texture_type);
 }
@@ -79,32 +82,32 @@ GLuint CBuilding::Texture () const
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-unsigned long CBuilding::PolyCount () const
+-(unsigned long) polyCount
 {
-  return _mesh->PolyCount () + _mesh_flat->PolyCount ();
+  return _mesh.polyCount + _mesh_flat.polyCount;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CBuilding::Render ()
+-(void) Render
 {
     float rgb[3] = {};
     _color.copyRGB(rgb);
     glColor3fv(rgb);
-    _mesh->Render();
+    [_mesh Render];
 }
 
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CBuilding::RenderFlat (bool colored)
+-(void) RenderFlat: (BOOL) colored
 { 
     if (colored) {
         float rgb[3] = {};
         _color.copyRGB(rgb);
         glColor3fv (rgb);
     }
-    _mesh_flat->Render ();
+    [_mesh_flat Render];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -114,7 +117,7 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
     return GLvertex(glVector(x, y, z), glVector(u, v), GLrgba(1.0f, 1.0f, 1.0f, 1.0f), 0);
 }
 
-void CBuilding::ConstructCube (int left, int right, int front, int back, int bottom, int top)
+-(void)ConstructCubeWithLeft:(int)  left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top
 {
   float x1 = float(left  ), x2 = float(right);
   float y1 = float(bottom), y2 = float(top  );
@@ -144,19 +147,19 @@ void CBuilding::ConstructCube (int left, int right, int front, int back, int bot
   p[8] = GLvertexMake(x1, y1, z1, u, v1);
   p[9] = GLvertexMake(x1, y2, z1, u, v2);
 
-  unsigned long  base_index = _mesh->VertexCount ();
+  unsigned long base_index = _mesh.vertexCount;
   cube c;
   for (int i = 0; i < 10; i++) {
     p[i].uv.x = (p[i].position.x + p[i].position.z) / (float)SEGMENTS_PER_TEXTURE;
-    _mesh->VertexAdd (p[i]);
+    [_mesh addVertex:p[i]];
     c.index_list.push_back(base_index + i);
   }
-  _mesh->CubeAdd (c);
+  [_mesh addCube:c];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CBuilding::ConstructCube (float left, float right, float front, float back, float bottom, float top)
+-(void)ConstructCubeWithFloatLeft:(float)  left right:(float) right front:(float) front back:(float) back bottom:(float) bottom top:(float) top
 {
     float x1 = left  , x2 = right;
     float y1 = bottom, y2 = top;
@@ -175,13 +178,13 @@ void CBuilding::ConstructCube (float left, float right, float front, float back,
     p[9] = GLvertexMake(x1, y2, z1, 0.0f, 0.0f);
     
     cube  c;
-    unsigned long base_index = _mesh_flat->VertexCount ();
+    unsigned long base_index = _mesh_flat.vertexCount;
     for (int i = 0; i < 10; i++) {
         p[i].uv.x = (p[i].position.x + p[i].position.z) / (float)SEGMENTS_PER_TEXTURE;
-        _mesh_flat->VertexAdd (p[i]);
+        [_mesh_flat addVertex:p[i]];
         c.index_list.push_back(base_index + i);
     }
-    _mesh_flat->CubeAdd (c);
+    [_mesh_flat addCube:c];
 }
 
 /*-----------------------------------------------------------------------------
@@ -189,7 +192,7 @@ void CBuilding::ConstructCube (float left, float right, float front, float back,
   air conditioners or light towers.
 -----------------------------------------------------------------------------*/
 
-void CBuilding::ConstructRoof (float left, float right, float front, float back, float bottom)
+-(void)ConstructRoofWithLeft:(float)  left right:(float) right front:(float) front back:(float) back bottom:(float) bottom
 {
     int       air_conditioners = 0, i = 0;
     int       face = 0;
@@ -208,11 +211,11 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
         addon = RandomIntR(ADDON_COUNT);
  
         //Build the roof slab
-    ConstructCube (left, right, front, back, bottom, bottom + height);
+        [self ConstructCubeWithLeft:left right:right front:front back:back bottom:bottom top:bottom + height];
     
         //Consider putting a logo on the roof, if it's tall enough
     if (addon == ADDON_LOGO && !_have_logo) {
-        CDeco *d = new CDeco;
+        Deco *d = [[Deco alloc] init];
         
         face = (width > depth) ? (COIN_FLIP() ? NORTH : SOUTH)
                                : (COIN_FLIP() ? EAST  : WEST);
@@ -236,15 +239,15 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
                 end   = glVector (left - logo_offset, back );
                 break;
         }
-        d->CreateLogo(start, end, bottom, WorldLogoIndex(), _trim_color);
+        [d CreateLogoWithStart:start end:end base:bottom seed:WorldLogoIndex() color:_trim_color];
         _have_logo = true;
     } else if (addon == ADDON_TRIM) {
-        CDeco *d = new CDeco;
+        Deco *d =  [[Deco alloc] init];
         vector_buffer[0] = glVector (left  - logo_offset, bottom, back  + logo_offset);
         vector_buffer[1] = glVector (left  - logo_offset, bottom, front - logo_offset);
         vector_buffer[2] = glVector (right + logo_offset, bottom, front - logo_offset);
         vector_buffer[3] = glVector (right + logo_offset, bottom, back  + logo_offset);
-        d->CreateLightTrim (vector_buffer, 4, (float)RandomIntR(2) + 1.0f, _seed, _trim_color);
+        [d CreateLightTrimWithChain:vector_buffer count:4 height:(float)RandomIntR(2) + 1.0f seed:_seed color:_trim_color];
     } else if (addon == ADDON_LIGHTS && !_have_lights) {
         LightAdd(glVector (left , (float)(bottom + 2), front), _trim_color, LIGHT_SIZE, false);
         LightAdd(glVector (right, (float)(bottom + 2), front), _trim_color, LIGHT_SIZE, false);
@@ -255,7 +258,7 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
     bottom += (float)height;
         //If the roof is big enough, consider making another layer
     if (width > 7 && depth > 7 && _roof_tiers < max_tiers) {
-        ConstructRoof (left + 1, right - 1, front + 1, back - 1, bottom);
+        [self ConstructRoofWithLeft:left + 1 right:right - 1 front:front + 1 back:back - 1 bottom:bottom];
         return;
     }
         //1 air conditioner block for every 15 floors sounds reasonble
@@ -273,20 +276,18 @@ void CBuilding::ConstructRoof (float left, float right, float front, float back,
             ac_y = (float)back - ac_size;
         ac_base = (float)bottom;
             //make sure it doesn't hang off the edge
-        ConstructCube (ac_x, ac_x + ac_size, ac_y, ac_y + ac_size, ac_base, ac_base + ac_height);
+        [self ConstructCubeWithFloatLeft:ac_x right:ac_x + ac_size front:ac_y back:ac_y + ac_size bottom:ac_base top:ac_base + ac_height];
     }
     
     if (_height > 45) {
-        CDeco *d = new CDeco;
-        d->CreateRadioTower (glVector ((float)(left + right) / 2.0f, (float)bottom, (float)(front + back) / 2.0f), 15.0f);
+        Deco *d = [[Deco alloc] init];
+        [d CreateRadioTowerWithPosition:glVector ((float)(left + right) / 2.0f, (float)bottom, (float)(front + back) / 2.0f) height:15.0f];
     }
 }
 
-/*-----------------------------------------------------------------------------
 
------------------------------------------------------------------------------*/
 
-void CBuilding::ConstructSpike (int left, int right, int front, int back, int bottom, int top)
+-(void)ConstructSpikeWithLeft:(int) left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top
 {
 
   GLvertex    p;
@@ -295,28 +296,27 @@ void CBuilding::ConstructSpike (int left, int right, int front, int back, int bo
   GLvector    center;
 
   for (i = 0; i < 5; i++)
-    f.index_list.push_back(_mesh_flat->VertexCount () + i);
+    f.index_list.push_back(_mesh_flat.vertexCount + i);
   f.index_list.push_back(f.index_list[1]);
   p.uv = glVector (0.0f, 0.0f);
   center.x = ((float)left + (float)right) / 2.0f;
   center.z = ((float)front + (float)back) / 2.0f;
   p.position = glVector (center.x, (float)top, center.z);
-  _mesh_flat->VertexAdd (p);
+  [_mesh_flat addVertex:p];
  
   p.position = glVector ((float)left, (float)bottom, (float)back);
-  _mesh_flat->VertexAdd (p);
+  [_mesh_flat addVertex:p];
 
   p.position = glVector ((float)right, (float)bottom, (float)back);
-  _mesh_flat->VertexAdd (p);
+  [_mesh_flat addVertex:p];
 
   p.position = glVector ((float)right, (float)bottom, (float)front);
-  _mesh_flat->VertexAdd (p);
+  [_mesh_flat addVertex:p];
   
   p.position = glVector ((float)left, (float)bottom, (float)front);
-  _mesh_flat->VertexAdd (p);
+  [_mesh_flat addVertex:p];
   
-  _mesh_flat->FanAdd (f);
-
+  [_mesh_flat addFan:f];
 }
 
 /*-----------------------------------------------------------------------------
@@ -325,8 +325,15 @@ void CBuilding::ConstructSpike (int left, int right, int front, int back, int bo
   window_groups tells it how many windows to place in a row.
 -----------------------------------------------------------------------------*/
 
-float CBuilding::ConstructWall (int start_x, int start_y, int start_z,
-                                int direction, int length, int height, unsigned long window_groups, float uv_start, bool blank_corners)
+-(float)ConstructWallWithX:(int) start_x
+Y:(int)start_y
+Z:(int) start_z
+direction:(int) direction
+length:(int) length
+height:(int) height
+windowGroups:(unsigned long) windowGroups
+UVStart:(float) uvStart
+blankCorners:(BOOL) blankCorners
 {
     int step_x, step_z;
     switch (direction) {
@@ -345,7 +352,7 @@ float CBuilding::ConstructWall (int start_x, int start_y, int start_z,
     quad_strip  qs;
     qs.index_list.reserve(100);
     v.uv.x = (float)(x + z) / SEGMENTS_PER_TEXTURE;
-    v.uv.x = uv_start;
+    v.uv.x = uvStart;
     bool blank = false;
     for (int i = 0; i <= length; i++)
     {
@@ -353,21 +360,21 @@ float CBuilding::ConstructWall (int start_x, int start_y, int start_z,
         int column = (i <= mid) ? i - odd : (mid) - (i - (mid));
         
         bool last_blank = blank;
-        blank = (column % window_groups) > window_groups / 2;
-        if( (blank_corners && i == 0) || (blank_corners && i == (length - 1)) )
+        blank = (column % windowGroups) > windowGroups / 2;
+        if( (blankCorners && i == 0) || (blankCorners && i == (length - 1)) )
             blank = true;
         
         if (last_blank != blank || i == 0 || i == length)
         {
             v.position = glVector ((float)x, (float)start_y, (float)z);
             v.uv.y = (float)start_y / SEGMENTS_PER_TEXTURE;
-            _mesh->VertexAdd (v);
-            qs.index_list.push_back(_mesh->VertexCount () - 1);
+            [_mesh addVertex:v];
+            qs.index_list.push_back(_mesh.vertexCount - 1);
             
             v.position.y = (float)(start_y + height);
             v.uv.y = (float)(start_y + height) / SEGMENTS_PER_TEXTURE;;
-            _mesh->VertexAdd (v);
-            qs.index_list.push_back(_mesh->VertexCount () - 1);
+            [_mesh addVertex:v];
+            qs.index_list.push_back(_mesh.vertexCount - 1);
         }
             //if (!blank && i != 0 && i != (length - 1))
         if (!blank && i != length)
@@ -376,7 +383,7 @@ float CBuilding::ConstructWall (int start_x, int start_y, int start_z,
         x += step_x;
         z += step_z;
     }
-    _mesh->QuadStripAdd (qs);  
+    [_mesh addQuadStrip:qs];
     return v.uv.x;
 }
 
@@ -386,9 +393,8 @@ float CBuilding::ConstructWall (int start_x, int start_y, int start_z,
 
 -----------------------------------------------------------------------------*/
 
-void CBuilding::CreateBlocky ()
+-(void)CreateBlocky
 {
-
   int         min_height;
   int         left, right, front, back;
   int         max_left, max_right, max_front, max_back;
@@ -461,23 +467,22 @@ void CBuilding::CreateBlocky ()
       max_front = std::max(front, max_front);
       max_back  = std::max(back , max_back );
             //Now build the four walls of this part
-      uv_start = ConstructWall (mid_x - left, 0, mid_z + back, SOUTH, front + back, height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
-      uv_start = ConstructWall (mid_x - left, 0, mid_z - front, EAST, right + left, height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
-      uv_start = ConstructWall (mid_x + right, 0, mid_z - front, NORTH, front + back, height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
-      uv_start = ConstructWall (mid_x + right, 0, mid_z + back, WEST, right + left, height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
+      uv_start = [self ConstructWallWithX:mid_x - left Y:0 Z:mid_z + back direction:SOUTH length:front + back height:height windowGroups:grouping UVStart:uv_start blankCorners:blank_corners] - ONE_SEGMENT;
+      uv_start = [self ConstructWallWithX:mid_x - left Y:0 Z:mid_z - front direction:EAST length:right + left height:height windowGroups:grouping UVStart:uv_start blankCorners:blank_corners] - ONE_SEGMENT;
+      uv_start = [self ConstructWallWithX:mid_x + right Y:0 Z:mid_z - front direction:NORTH length:front + back height:height windowGroups:grouping UVStart:uv_start blankCorners: blank_corners] - ONE_SEGMENT;
+      uv_start = [self ConstructWallWithX:mid_x + right Y:0 Z:mid_z + back direction:WEST length:right + left height:height windowGroups:grouping UVStart:uv_start blankCorners:blank_corners] - ONE_SEGMENT;
       if (!tiers)
-        ConstructRoof ((float)(mid_x - left), (float)(mid_x + right), (float)(mid_z - front), (float)(mid_z + back), (float)height);
+      [self ConstructRoofWithLeft:(float)(mid_x - left) right:(float)(mid_x + right) front:(float)(mid_z - front) back:(float)(mid_z + back) bottom:(float)height];
       else //add a flat-color lid onto this section
-        ConstructCube ((float)(mid_x - left), (float)(mid_x + right), (float)(mid_z - front), (float)(mid_z + back), (float)height, (float)height + lid_height);
+          [self ConstructCubeWithFloatLeft:(float)(mid_x - left) right:(float)(mid_x + right) front:(float)(mid_z - front) back:(float)(mid_z + back) bottom:(float)height top:(float)height + lid_height];
       height -= (RandomInt () % 10) + 1;
       tiers++;
     }
     height--;
   }
-  ConstructCube (mid_x - half_width, mid_x + half_width, mid_z - half_depth, mid_z + half_depth, 0, 2);
-  _mesh->Compile ();
-  _mesh_flat->Compile ();
-
+  [self ConstructCubeWithLeft:mid_x - half_width right:mid_x + half_width front:mid_z - half_depth back:mid_z + half_depth bottom:0 top:2];
+  [_mesh Compile];
+  [_mesh_flat Compile];
 }
 
 /*-----------------------------------------------------------------------------
@@ -487,17 +492,17 @@ void CBuilding::CreateBlocky ()
 
 -----------------------------------------------------------------------------*/
 
-static void addToMesh(float x, float y, float z, float u, float v, CMesh &mesh)
+static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
 {
     GLvertex p;
     p.bone     = 0;
     p.color    = GLrgba();
     p.position = glVector (x, y, z);
     p.uv       = glVector (u, v);
-    mesh.VertexAdd(p);
+    [mesh addVertex:p];
 }
 
-void CBuilding::CreateSimple ()
+-(void)CreateSimple
 {
     float x1 = float(_x)  , x2 = float(_x + _width);
     float y1 = 0.0f       , y2 = float(_height);
@@ -507,35 +512,35 @@ void CBuilding::CreateSimple ()
     float v1 = float(RandomIntR(SEGMENTS_PER_TEXTURE)) / SEGMENTS_PER_TEXTURE;
     float v2 = v1 + float(_height) * ONE_SEGMENT;
     
-    addToMesh(x1, y1, z1, u, v1, *_mesh);
-    addToMesh(x1, y2, z1, u, v2, *_mesh);
+    addToMesh(x1, y1, z1, u, v1, _mesh);
+    addToMesh(x1, y2, z1, u, v2, _mesh);
     u += (float)_depth / SEGMENTS_PER_TEXTURE;
     
-    addToMesh(x1, y1, z2, u, v1, *_mesh);
-    addToMesh(x1, y2, z2, u, v2, *_mesh);
+    addToMesh(x1, y1, z2, u, v1, _mesh);
+    addToMesh(x1, y2, z2, u, v2, _mesh);
     u += (float)_width / SEGMENTS_PER_TEXTURE;
     
-    addToMesh(x2, y1, z2, u, v1, *_mesh);
-    addToMesh(x2, y2, z2, u, v2, *_mesh);
+    addToMesh(x2, y1, z2, u, v1, _mesh);
+    addToMesh(x2, y2, z2, u, v2, _mesh);
     u += (float)_depth / SEGMENTS_PER_TEXTURE;
     
-    addToMesh(x2, y1, z1, u, v1, *_mesh);
-    addToMesh(x2, y2, z1, u, v2, *_mesh);
+    addToMesh(x2, y1, z1, u, v1, _mesh);
+    addToMesh(x2, y2, z1, u, v2, _mesh);
     u += (float)_depth / SEGMENTS_PER_TEXTURE;
     
-    addToMesh(x1, y1, z1, u, v1, *_mesh);
-    addToMesh(x1, y2, z1, u, v2, *_mesh);
+    addToMesh(x1, y1, z1, u, v1, _mesh);
+    addToMesh(x1, y2, z1, u, v2, _mesh);
     
     quad_strip  qs;
     for(int i=0; i<=10; i++)
         qs.index_list.push_back(i);
-    _mesh->QuadStripAdd (qs);
+    [_mesh addQuadStrip:qs];
     
     float cap_height = float(1 + RandomIntR(4));  //How tall the flat-color roof is
     float ledge = float(RandomIntR(10)) / 30.0f;  //how much the ledge sticks out
-    ConstructCube (x1 - ledge, x2 + ledge, z2 - ledge, z1 + ledge, (float)_height, (float)_height + cap_height);
+    [self ConstructCubeWithFloatLeft:x1 - ledge right:x2 + ledge front:z2 - ledge back:z1 + ledge bottom:(float)_height top:(float)_height + cap_height];
 
-    _mesh->Compile ();
+    [_mesh Compile];
 }
 
 
@@ -543,7 +548,7 @@ void CBuilding::CreateSimple ()
 //  This makes a deformed cylinder building.  
 
 
-void CBuilding::CreateModern ()
+-(void)CreateModern
 {
 
   GLvertex    p;
@@ -566,7 +571,7 @@ void CBuilding::CreateModern ()
   int         i;
   bool        logo_done;
   bool        do_trim;
-  CDeco*      d;
+  Deco*       d;
 
   logo_done = false;
   //How tall the windowless section on top will be.
@@ -604,8 +609,8 @@ void CBuilding::CreateModern ()
         logo_done = true;
         start = glVector (pos.x, pos.z);
         end = glVector (p.position.x, p.position.z);
-        d = new CDeco;
-        d->CreateLogo (start, end, (float)_height, WorldLogoIndex (), RANDOM_COLOR());
+        d = [[Deco alloc] init];
+        [d CreateLogoWithStart:start end:end base:(float)_height seed:WorldLogoIndex () color:RANDOM_COLOR()];
       }
     } else if (skip_counter != 1)
       windows++;
@@ -613,13 +618,13 @@ void CBuilding::CreateModern ()
     p.uv.x = (float)windows / (float)SEGMENTS_PER_TEXTURE;
     p.uv.y = 0.0f;
     p.position.y = 0.0f;
-    _mesh->VertexAdd (p);
+    [_mesh addVertex:p];
     p.position.y = (float)_height;
     p.uv.y = (float)_height / (float)SEGMENTS_PER_TEXTURE;
-    _mesh->VertexAdd (p);
-    _mesh_flat->VertexAdd (p);
+    [_mesh addVertex:p];
+    [_mesh_flat addVertex:p];
     p.position.y += (float)cap_height;
-    _mesh_flat->VertexAdd (p);
+    [_mesh_flat addVertex:p];
     vector_buffer[points / 2] = p.position;
     vector_buffer[points / 2].y = (float)_height + cap_height / 4;
     points += 2;
@@ -627,33 +632,32 @@ void CBuilding::CreateModern ()
   }
   //if this is a big building and it didn't get a logo, consider giving it a light strip
   if (!logo_done && do_trim) {
-    d = new CDeco;
-    d->CreateLightTrim (vector_buffer, (points / 2) - 2, (float)cap_height / 2, _seed, RANDOM_COLOR());
+    d = [[Deco alloc] init];
+    [d CreateLightTrimWithChain:vector_buffer count:(points / 2) - 2 height:(float)cap_height / 2 seed:_seed color:RANDOM_COLOR()];
   }
   qs.index_list.reserve(points);   
   //Add the outer walls
   for (i = 0; i < points; i++)
     qs.index_list.push_back(i);
-  _mesh->QuadStripAdd (qs);
-  _mesh_flat->QuadStripAdd (qs);
+  [_mesh addQuadStrip:qs];
+  [_mesh_flat addQuadStrip:qs];
   //add the fan to cap the top of the buildings
   f.index_list.push_back(points);
   for (i = 0; i < points / 2; i++)
     f.index_list.push_back(points - (1 + i * 2));
   p.position.x = _center.x;
   p.position.z = _center.z;
-  _mesh_flat->VertexAdd (p);
-  _mesh_flat->FanAdd (f);
+  [_mesh_flat addVertex:p];
+  [_mesh_flat addFan:f];
   radius = radius / 2.0f;
   //ConstructRoof ((int)(_center.x - radius), (int)(_center.x + radius), (int)(_center.z - radius), (int)(_center.z + radius), _height + cap_height);
-  _mesh->Compile ();
-  _mesh_flat->Compile ();
-
+  [_mesh Compile];
+  [_mesh_flat Compile];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CBuilding::CreateTower ()
+-(void)CreateTower
 {
     float ledge = (float)RandomIntR(3) * 0.25f;        //How much ledges protrude from the building
     unsigned long ledge_height = RandomIntR(4) + 1;               //How tall the ledges are, in stories
@@ -668,7 +672,7 @@ void CBuilding::CreateTower ()
         //set our initial parameters
     int left  = _x, right = _x + _width, front = _y, back  = _y + _depth, bottom = 0, tiers = 0;
         //build the foundations.
-    ConstructCube ((float)left - ledge, (float)right + ledge, (float)front - ledge, (float)back + ledge, (float)bottom, (float)foundation);
+    [self ConstructCubeWithFloatLeft:(float)left - ledge right:(float)right + ledge front:(float)front - ledge back:(float)back + ledge bottom:(float)bottom top:(float)foundation];
     bottom += foundation;
     
         //now add tiers until we reach the top
@@ -678,16 +682,16 @@ void CBuilding::CreateTower ()
     
             //Build the four walls
         float uv_start = (float)RandomIntR(SEGMENTS_PER_TEXTURE) / SEGMENTS_PER_TEXTURE;
-        uv_start = ConstructWall (left , bottom, back , SOUTH, section_depth, section_height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
-        uv_start = ConstructWall (left , bottom, front, EAST , section_width, section_height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
-        uv_start = ConstructWall (right, bottom, front, NORTH, section_depth, section_height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
-        uv_start = ConstructWall (right, bottom, back , WEST , section_width, section_height, grouping, uv_start, blank_corners) - ONE_SEGMENT;
+        uv_start = [self ConstructWallWithX:left Y:bottom Z:back direction:SOUTH length:section_depth height:section_height windowGroups:grouping UVStart:uv_start blankCorners:blank_corners] - ONE_SEGMENT;
+        uv_start = [self ConstructWallWithX:left  Y:bottom Z:front direction:EAST length:section_width height:section_height windowGroups:grouping UVStart:uv_start blankCorners:blank_corners] - ONE_SEGMENT;
+        uv_start = [self ConstructWallWithX:right Y:bottom Z:front direction:NORTH length:section_depth height:section_height windowGroups:grouping UVStart:uv_start blankCorners:blank_corners] - ONE_SEGMENT;
+        uv_start = [self ConstructWallWithX:right Y:bottom Z:back  direction:WEST length:section_width height:section_height windowGroups:grouping UVStart:uv_start blankCorners:blank_corners] - ONE_SEGMENT;
         bottom += section_height;
         
             //Build the slab / ledges to cap this section.
         if (bottom + ledge_height > _height)
             break;
-        ConstructCube ((float)left - ledge, (float)right + ledge, (float)front - ledge, (float)back + ledge, (float)bottom, (float)(bottom + ledge_height));
+        [self ConstructCubeWithFloatLeft:(float)left - ledge right:(float)right + ledge front:(float)front - ledge back:(float)back + ledge bottom:(float)bottom top:(float)(bottom + ledge_height)];
         bottom += ledge_height;
         if (bottom > _height)
             break;
@@ -705,22 +709,11 @@ void CBuilding::CreateTower ()
         }
     }
 
-    ConstructRoof(float(left), float(right), float(front), float(back), float(bottom));
-    _mesh->Compile();
-    _mesh_flat->Compile();
+    [self ConstructRoofWithLeft:float(left) right:float(right) front:float(front) back:float(back) bottom:float(bottom)];
+    [_mesh Compile];
+    [_mesh_flat Compile];
 }
 
-//virtual
-std::ostream &CBuilding::operator<<(std::ostream &os) const
-{
-    CEntity::operator<<(os);
-    os  << "[BUILDING "
-        << "X=" << _x << ", Y=" << _y << ", WIDTH=" << _width << ", DEPTH=" << _depth << ", HEIGHT=" << _height
-        << ", Tex Type="<< _texture_type << ", SEED=" << _seed << ", ROOF TIERS=" << _roof_tiers
-        << ", COLOR="   << _color        << ", TRIM_COLOR=" << _trim_color
-        << ", HAVE_LIGHTS=" << _have_lights << ", HAVE_TRIM=" << _have_trim << ", HAVE_LOGO=" << _have_logo;
-    if(_mesh     ) { os << ", MESH="      << *_mesh     ; } else { os << ", MESH=null"     ; }
-    if(_mesh_flat) { os << ", MESH_FLAT=" << *_mesh_flat; } else { os << ", MESH_FLAT=null"; }
-    return os << "]" << std::endl;
-}
 
+
+@end

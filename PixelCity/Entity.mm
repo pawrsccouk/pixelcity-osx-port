@@ -14,26 +14,14 @@
 
 -----------------------------------------------------------------------------*/
 
-#import <math.h>
-#import <stdlib.h>
-#import <OpenGL/gl.h>
+#import "Model.h"
 #import "entity.h"
-#import "macro.h"
-#import "mathx.h"
 #import "render.h"
 #import "texture.h"
-#import "PWGL.h"
 #import "visible.h"
 #import "win.h"
-#import <iostream>
-#import "RenderAPI.h"
-#import "RAII.h"
-
-struct entity
-{
-  CEntity*            object;
-};
-
+#import "World.h"
+#import "assert.h"
 
 struct cell
 {
@@ -45,138 +33,130 @@ struct cell
 };
 
 static cell           cell_list[GRID_SIZE][GRID_SIZE];
-static int            entity_count = 0;
-static entity*        entity_list = NULL;
+//std::vector<CEntity *> entity_vec;
+static NSMutableArray *allEntities = [NSMutableArray array];
 static bool           sorted = false, compiled = false;
 static int            polycount = 0, compile_x = 0, compile_y = 0, compile_count = 0;
 static unsigned long  compile_end = 0;
 
 
-static int do_compare (const void *arg1, const void *arg2 )
+/*
+static bool comparator(const CEntity *e1, const CEntity *e2)
 {
-  struct entity*  e1 = (struct entity*)arg1, *e2 = (struct entity*)arg2;
-  
-  if      ( e1->object->Alpha() && !e2->object->Alpha ()) return  1;
-  if      (!e1->object->Alpha() &&  e2->object->Alpha ()) return -1;
-  if      (e1->object->Texture() > e2->object->Texture()) return  1;
-  else if (e1->object->Texture() < e2->object->Texture()) return -1;
-  return 0;
+    if (!e1->Alpha () &&  e2->Alpha()) return true;
+    if ( e1->Alpha()  && !e2->Alpha()) return false;
+    return (e1->Texture() < e2->Texture());
 }
+*/
 
-
-void add (CEntity* b)
-{
-  entity_list = (entity*)realloc(entity_list, sizeof (entity) * (entity_count + 1));
-  entity_list[entity_count].object = b;
-  entity_count++;
-  polycount = 0;
-}
 
 
 static void do_compile ()
 {
     if (compiled)
         return;
-    
+
 	glReportError("do_compile BEGIN");
+
+	//Now group entites on the grid 
+	//make a list for the textured objects in this region
     int x = compile_x, y = compile_y;
-    
-        //Changing textures is pretty expensive, and thus sorting the entites so that they are grouped by texture used
-        // can really improve framerate.
-        //qsort (entity_list, entity_count, sizeof (struct entity), do_compare);
-        //sorted = true;
-    
-        //Now group entites on the grid - make a list for the textured objects in this region
 	if (!cell_list[x][y].list_textured)
 		cell_list[x][y].list_textured = glGenLists(1);
 	{
     	MakeDisplayList mdl(cell_list[x][y].list_textured, GL_COMPILE);
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
-		for (int i = 0; i < entity_count; i++) {
-			GLvector pos = entity_list[i].object->Center();
-			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !entity_list[i].object->Alpha ()) {
-				pwBindTexture(GL_TEXTURE_2D, entity_list[i].object->Texture ());
-				entity_list[i].object->Render();
+        for(Entity *ent in allEntities) {
+			GLvector pos = ent.center;
+			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha) {
+				pwBindTexture(GL_TEXTURE_2D, ent.texture);
+				[ent Render];
 			}
-		}
+		};
 	}
-    
-	glReportError("do_compile Textured Objects");
+	glReportError("do_compile textured entities");
 	
-        //Make a list of flat-color stuff (A/C units, ledges, roofs, etc.)
-        
+	//Make a list of flat-color stuff (A/C units, ledges, roofs, etc.)
 	if (!cell_list[x][y].list_flat)
 		cell_list[x][y].list_flat = glGenLists(1);
+    
 	{
         MakeDisplayList mdl(cell_list[x][y].list_flat, GL_COMPILE);
 		pwEnable (GL_CULL_FACE);
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
-		for (int i = 0; i < entity_count; i++) {
-			GLvector pos = entity_list[i].object->Center ();
-			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !entity_list[i].object->Alpha ()) {
-				entity_list[i].object->RenderFlat(false);
-			}
-		}
+        for(Entity *ent in allEntities) {
+			GLvector pos = ent.center;
+			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha)
+				[ent RenderFlat:NO];
+		};
 	}
-	glReportError("do_compile Flat Objects");
+	glReportError("do_compile flat entities");
 	
-        //Now a list of flat-colored stuff that will be wireframe friendly
-        
+	//Now a list of flat-colored stuff that will be wireframe friendly
 	if (!cell_list[x][y].list_flat_wireframe)
 		cell_list[x][y].list_flat_wireframe = glGenLists(1);
 	{
         MakeDisplayList mdl(cell_list[x][y].list_flat_wireframe, GL_COMPILE);
 		pwEnable (GL_CULL_FACE);
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
-		for (int i = 0; i < entity_count; i++) {
-			GLvector pos = entity_list[i].object->Center ();
-			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !entity_list[i].object->Alpha ()) {
-				entity_list[i].object->RenderFlat(true);
-			}
-		}
+        for(Entity *ent in allEntities) {
+			GLvector pos = ent.center;
+			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha)
+				[ent RenderFlat:YES];
+		};
 	}
-	glReportError("do_compile Flat + Wireframe objects");
+	glReportError("do_compile Flat wireframeable entities");
 	
-        //Now a list of stuff to be alpha-blended, and thus rendered last
-        
+	//Now a list of stuff to be alpha-blended, and thus rendered last
 	if (!cell_list[x][y].list_alpha)
 		cell_list[x][y].list_alpha = glGenLists(1);
+    
 	{
         MakeDisplayList mdl(cell_list[x][y].list_alpha, GL_COMPILE);
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
 		pwDepthMask (GL_FALSE);
 		pwEnable (GL_BLEND);
 		pwDisable (GL_CULL_FACE);
-		for (int i = 0; i < entity_count; i++) {
-			GLvector pos = entity_list[i].object->Center ();
-			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && entity_list[i].object->Alpha ()) {
-				pwBindTexture(GL_TEXTURE_2D, entity_list[i].object->Texture ());
-				entity_list[i].object->Render();
+        for(Entity *ent in allEntities) {
+			GLvector pos = ent.center;
+			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && ent.alpha)
+            {
+				pwBindTexture(GL_TEXTURE_2D, ent.texture);
+				[ent Render];
 			}
-		}
+		};
 		pwDepthMask (GL_TRUE);
-	}
-	glReportError("do_compile Alpha-Blended Objects");
+	}	
+	glReportError("do_compile Alpha-blended entities");
 	
-    
-        //now walk the grid
-    compile_x++;
-    if (compile_x == GRID_SIZE) {
-        compile_x = 0;
-        compile_y++;
-        if (compile_y == GRID_SIZE)
-            compiled = true;
-        compile_end = GetTickCount ();
-    } 
-    compile_count++;
+
+  //now walk the grid
+  compile_x++;
+  if (compile_x == GRID_SIZE) {
+    compile_x = 0;
+    compile_y++;
+    if (compile_y == GRID_SIZE)
+      compiled = true;
+    compile_end = GetTickCount ();
+  } 
+  compile_count++;
+}
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+bool EntityReady ()
+{
+  return compiled;
 }
 
 
-int EntityReady () {  return compiled;}
+float EntityProgress ()
+{
+  return (float)compile_count / (GRID_SIZE * GRID_SIZE);
+}
 
 
-float EntityProgress () {  return (float)compile_count / (GRID_SIZE * GRID_SIZE); }
-
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
 void EntityUpdate ()
@@ -186,97 +166,87 @@ void EntityUpdate ()
         return;
     }
     
+        //Changing textures is pretty expensive, and thus sorting the entites so that they are grouped by texture used can really improve framerate.
     if (!sorted) {
-        qsort (entity_list, entity_count, sizeof(struct entity), do_compare);
+        [allEntities sortUsingComparator:^NSComparisonResult(Entity *e1, Entity *e2) {
+         if ( e1.alpha && !e2.alpha)    return NSOrderedAscending;
+         if (!e1.alpha &&  e2.alpha)    return NSOrderedDescending;
+         if ( e1.texture > e2.texture)  return NSOrderedAscending;
+         if ( e1.texture < e2.texture)  return NSOrderedDescending;
+         return NSOrderedSame;
+         }];
         sorted = true;
     }
-    
+
         //We want to do several cells at once. Enough to get things done, but not so many that the program is unresponsive.
     if (LOADING_SCREEN) {  //If we're using a loading screen, we want to build as fast as possible
         unsigned long stop_time = GetTickCount () + 100;
         while (!compiled && GetTickCount () < stop_time)
-            do_compile();
+            do_compile ();
     } else //Take it slow
         do_compile ();
 }
 
+/*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void EntityDump(void)
 {
-    std::clog << "BEGIN ENTITY DUMP" << std::endl;
-    for(int i = 0; i < entity_count; ++i)
-        std::clog << "Entity " << i << " = " << *(entity_list[i].object) << std::endl;
-    std::clog << "END ENTITY_DUMP" << std::endl;
+//    std::clog << "BEGIN ENTITY DUMP" << std::endl;
+//    size_t i = 0;
+//    for(Entity *ent in allEntities) {
+//        std::clog << "Entity " << i++ << " = " << *e << std::endl;
+//    });
+//    std::clog << "END ENTITY_DUMP" << std::endl;
 }
 
+/*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
-void EntityRender (int showFlat)
+
+void EntityRender (bool showFlat)
 {
-	glReportError("EntityRender: Begin");
-	
-	//Draw all textured objects
-	int polymode[2];
+    //Draw all textured objects
+	int       polymode[2];
 	glGetIntegerv (GL_POLYGON_MODE, &polymode[0]);
 	bool wireframe = polymode[0] != GL_FILL;
 	if (showFlat)
 		pwDisable (GL_TEXTURE_2D);
-
-// PAW: I think this is a duplicate of the code in RenderUpdate
-//  long elapsed = 0;
-//	if (!LOADING_SCREEN && wireframe) {     //If we're not using a loading screen, make the wireframe fade out via fog
-//		elapsed = 6000 - WorldSceneElapsed ();
-//		if (elapsed >= 0 && elapsed <= 6000)
-//			RenderFogFX (float(elapsed) / 6000.0f);
-//		else
-//			return;
-//	}
 	
     for (int x = 0; x < GRID_SIZE; x++)
 		for (int y = 0; y < GRID_SIZE; y++)
 			if( Visible(x,y) && (cell_list[x][y].list_textured > 0) )
-                glCallList (cell_list[x][y].list_textured);
+                pwCallList (cell_list[x][y].list_textured);
 
-	glReportError("EntityRender: After glCallList 1");
-	
         //draw all flat colored objects
 	pwBindTexture(GL_TEXTURE_2D, 0);
-	glColor3f (0, 0, 0);
+	pwColor3f (0, 0, 0);
 	for (int x = 0; x < GRID_SIZE; x++) 
 		for (int y = 0; y < GRID_SIZE; y++) 
 			if (Visible (x, y)) {
 				if (wireframe) {
-					if(cell_list[x][y].list_flat_wireframe > 0) { glCallList(cell_list[x][y].list_flat_wireframe); }  
+					if(cell_list[x][y].list_flat_wireframe > 0) { pwCallList(cell_list[x][y].list_flat_wireframe); }
 				} else {
-					if(cell_list[x][y].list_flat           > 0) { glCallList(cell_list[x][y].list_flat          ); } 
+					if(cell_list[x][y].list_flat           > 0) { pwCallList(cell_list[x][y].list_flat          ); }
 				}
 			}
-		
-    glReportError("EntityRender: After glCallList 2");
-    
+
         //draw all alpha-blended objects
     pwBindTexture(GL_TEXTURE_2D, 0);
-    glColor3f (0, 0, 0);
+    pwColor3f(0.0f, 0.0f, 0.0f);
     pwEnable (GL_BLEND);
     for (int x = 0; x < GRID_SIZE; x++)
         for (int y = 0; y < GRID_SIZE; y++)
             if( Visible(x, y) && (cell_list[x][y].list_alpha > 0) )
-                glCallList (cell_list[x][y].list_alpha);
-    
-    glReportError("EntityRender: End");
+                pwCallList(cell_list[x][y].list_alpha);
 }
 
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void EntityClear ()
 {
 	glReportError("EntityClear BEGIN");
-	for (int i = 0; i < entity_count; i++) {
-		delete entity_list[i].object;
-	}
-	if (entity_list)
-		free (entity_list);
-	entity_list = NULL;
-	entity_count = compile_x = compile_y = compile_count = 0;
+    [allEntities removeAllObjects];
+	compile_x = compile_y = compile_count = 0;
 	compiled = sorted = false;
 	
 	// PAW: Only generate the list once the names have been allocated with glGenList() otherwise OpenGL errors.
@@ -293,7 +263,10 @@ void EntityClear ()
 }
 
 
-int EntityCount () { return entity_count; }
+size_t EntityCount ()
+{
+  return allEntities.count;
+}
 
 
 void EntityInit (void)
@@ -303,39 +276,47 @@ void EntityInit (void)
 
 int EntityPolyCount (void)
 {
-  if (!sorted)
-    return 0;
-  if (polycount)
+    if (!sorted)    return 0;
+    if (polycount)  return polycount;
+    
+    for(Entity *ent in allEntities)
+        polycount += ent.polyCount;
     return polycount;
-  for (int i = 0; i < entity_count; i++) 
-    polycount += entity_list[i].object->PolyCount ();
-  return polycount;
 }
 
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-CEntity::CEntity (void)
+@implementation Entity
+@synthesize center = _center;
+
+-(id)init
 {
-  add (this);
+    self = [super init];
+    if(self) {
+        [allEntities addObject:self];
+        polycount = 0;
+    }
+    return self;
 }
 
-void CEntity::Render (void)
+-(void) Render
 {
 }
 
-void CEntity::RenderFlat (bool wireframe)
+-(void) RenderFlat:(BOOL) wirefame
 {
 }
 
-void CEntity::Update (void)
+-(void) Update
 {
 }
 
-std::ostream &CEntity::operator<<(std::ostream &os) const
-{
-    return os << "[ENTITY CENTER=" << _center << "]";
-}
+-(GLuint) texture { return 0; }
+-(BOOL) alpha { return NO; }
+-(unsigned long) polyCount { return 0; }
+
+@end
 
 
 

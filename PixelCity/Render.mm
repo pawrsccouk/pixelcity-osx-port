@@ -262,7 +262,7 @@ static void drawBloomRadialEffect()
     pwEnable (GL_BLEND);
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * BLOOM_SCALING * 2;
-    glColor3(color);
+    color.glColor3();
     for (int i = 0; i <= 100; i+=10) {
         glTexCoord2f (0, 0);  glVertex2i (-i, i + g_render_height);
         glTexCoord2f (0, 1);  glVertex2i (-i, -i);
@@ -284,16 +284,16 @@ static void drawColorCycleEffect()
     pwBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
     MakePrimitive mp(GL_QUADS);
     GLrgba color = glRgbaFromHsl (hue1, 1.0f, 0.6f);
-    glColor3(color);
+    color.glColor3();
     glTexCoord2f (0, 0);  glVertex2i (0, g_render_height);
     color = glRgbaFromHsl (hue2, 1.0f, 0.6f);
-    glColor3(color);
+    color.glColor3();
     glTexCoord2f (0, 1);  glVertex2i (0, 0);
     color = glRgbaFromHsl (hue3, 1.0f, 0.6f);
-    glColor3(color);
+    color.glColor3();
     glTexCoord2f (1, 1);  glVertex2i (g_render_width, 0);
     color = glRgbaFromHsl (hue4, 1.0f, 0.6f);
-    glColor3(color);
+    color.glColor3();
     glTexCoord2f (1, 0);  glVertex2i (g_render_width, g_render_height);
 }
 
@@ -302,16 +302,16 @@ static void drawBloomEffect()
 {
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * BLOOM_SCALING;
-    glColor3(color);
+    color.glColor3();
 	int bloom_radius = 15, bloom_step  = bloom_radius / 3;
     for (int x = -bloom_radius; x <= bloom_radius; x += bloom_step) {
         for (int y = -bloom_radius; y <= bloom_radius; y += bloom_step) {
             if (abs (x) == abs(y) && x)
                 continue;
-            glTexCoord2f (0, 0);  glVertex2i (x, y + g_render_height);
-            glTexCoord2f (0, 1);  glVertex2i (x, y);
-            glTexCoord2f (1, 1);  glVertex2i (x + g_render_width, y);
-            glTexCoord2f (1, 0);  glVertex2i (x + g_render_width, y + g_render_height);
+            glTexCoord2f(0, 0);  glVertex2i(x, y + g_render_height);
+            glTexCoord2f(0, 1);  glVertex2i(x, y);
+            glTexCoord2f(1, 1);  glVertex2i(x + g_render_width, y);
+            glTexCoord2f(1, 0);  glVertex2i(x + g_render_width, y + g_render_height);
         }
     }
 }
@@ -321,13 +321,13 @@ static void drawDebugOverbloomEffect()
 {
     MakePrimitive mp(GL_QUADS);
     GLrgba color = WorldBloomColor () * 0.01f;
-    glColor3(color);
+    color.glColor3();
     for (int x = -50; x <= 50; x+=5) {
         for (int y = -50; y <= 50; y+=5) {
-            glTexCoord2f (0, 0);  glVertex2i (x, y + g_render_height);
-            glTexCoord2f (0, 1);  glVertex2i (x, y);
-            glTexCoord2f (1, 1);  glVertex2i (x + g_render_width, y);
-            glTexCoord2f (1, 0);  glVertex2i (x + g_render_width, y + g_render_height);
+            glTexCoord2f(0, 0);  glVertex2i(x, y + g_render_height);
+            glTexCoord2f(0, 1);  glVertex2i(x, y);
+            glTexCoord2f(1, 1);  glVertex2i(x + g_render_width, y);
+            glTexCoord2f(1, 0);  glVertex2i(x + g_render_width, y + g_render_height);
         }
     }
 }

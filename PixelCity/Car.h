@@ -1,7 +1,7 @@
 
 void   CarAdd();
 void   CarClear();
-int    CarCount();
+size_t CarCount();
 void   CarRender();
 void   CarUpdate();
 

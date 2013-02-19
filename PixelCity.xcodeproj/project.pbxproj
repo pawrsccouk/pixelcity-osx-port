@@ -19,7 +19,7 @@
 		5771094F16C6E08B007D32DA /* Car.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094516C6E08B007D32DA /* Car.mm */; };
 		5771095016C6E08B007D32DA /* Deco.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094716C6E08B007D32DA /* Deco.mm */; };
 		5771095116C6E08B007D32DA /* drawInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771094A16C6E08B007D32DA /* drawInfo.m */; };
-		5771096516C6E0AF007D32DA /* Entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095216C6E0AF007D32DA /* Entity.cpp */; };
+		5771096516C6E0AF007D32DA /* Entity.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095216C6E0AF007D32DA /* Entity.mm */; };
 		5771096616C6E0AF007D32DA /* glBbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095416C6E0AF007D32DA /* glBbox.cpp */; };
 		5771096716C6E0AF007D32DA /* GLCheck.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095516C6E0AF007D32DA /* GLCheck.mm */; };
 		5771096816C6E0AF007D32DA /* glMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095716C6E0AF007D32DA /* glMatrix.cpp */; };
@@ -32,7 +32,7 @@
 		5771096F16C6E0AF007D32DA /* Ini.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771096116C6E0AF007D32DA /* Ini.m */; };
 		5771097016C6E0AF007D32DA /* Light.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771096216C6E0AF007D32DA /* Light.mm */; };
 		5771097516C6E0C5007D32DA /* Mathx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771097116C6E0C5007D32DA /* Mathx.cpp */; };
-		5771097616C6E0C5007D32DA /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771097316C6E0C5007D32DA /* Mesh.cpp */; };
+		5771097616C6E0C5007D32DA /* Mesh.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097316C6E0C5007D32DA /* Mesh.mm */; };
 		5771098816C6E0D6007D32DA /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771097716C6E0D6007D32DA /* Random.cpp */; };
 		5771098916C6E0D6007D32DA /* Render.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097916C6E0D6007D32DA /* Render.mm */; };
 		5771098A16C6E0D6007D32DA /* Sky.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097C16C6E0D6007D32DA /* Sky.mm */; };
@@ -71,7 +71,7 @@
 		5771094816C6E08B007D32DA /* Deco.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = Deco.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		5771094916C6E08B007D32DA /* drawInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = drawInfo.h; sourceTree = "<group>"; };
 		5771094A16C6E08B007D32DA /* drawInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = drawInfo.m; sourceTree = "<group>"; };
-		5771095216C6E0AF007D32DA /* Entity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Entity.cpp; sourceTree = "<group>"; };
+		5771095216C6E0AF007D32DA /* Entity.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Entity.mm; sourceTree = "<group>"; };
 		5771095316C6E0AF007D32DA /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
 		5771095416C6E0AF007D32DA /* glBbox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glBbox.cpp; sourceTree = "<group>"; };
 		5771095516C6E0AF007D32DA /* GLCheck.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GLCheck.mm; sourceTree = "<group>"; };
@@ -92,7 +92,7 @@
 		5771096416C6E0AF007D32DA /* Macro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Macro.h; sourceTree = "<group>"; };
 		5771097116C6E0C5007D32DA /* Mathx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mathx.cpp; sourceTree = "<group>"; };
 		5771097216C6E0C5007D32DA /* Mathx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mathx.h; sourceTree = "<group>"; };
-		5771097316C6E0C5007D32DA /* Mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mesh.cpp; sourceTree = "<group>"; };
+		5771097316C6E0C5007D32DA /* Mesh.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Mesh.mm; sourceTree = "<group>"; };
 		5771097416C6E0C5007D32DA /* Mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mesh.h; sourceTree = "<group>"; };
 		5771097716C6E0D6007D32DA /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
 		5771097816C6E0D6007D32DA /* Random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Random.h; sourceTree = "<group>"; };
@@ -111,9 +111,9 @@
 		5771098516C6E0D6007D32DA /* Win.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Win.h; sourceTree = "<group>"; };
 		5771098616C6E0D6007D32DA /* World.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = World.mm; sourceTree = "<group>"; };
 		5771098716C6E0D6007D32DA /* World.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = World.h; sourceTree = "<group>"; };
-		5771099216C6F90D007D32DA /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainMenu.xib; path = PixelCity/MainMenu.xib; sourceTree = "<group>"; };
+		5771099216C6F90D007D32DA /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
 		5771099716C73734007D32DA /* PWGL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWGL.h; sourceTree = "<group>"; };
-		5771099816C73791007D32DA /* PWGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PWGL.cpp; path = ../PWGL.cpp; sourceTree = "<group>"; };
+		5771099816C73791007D32DA /* PWGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PWGL.cpp; sourceTree = "<group>"; };
 		5771099A16C73E01007D32DA /* glRgba.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glRgba.h; sourceTree = "<group>"; };
 		5771099B16C74178007D32DA /* glVertex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glVertex.h; sourceTree = "<group>"; };
 		5793ED6316CE1BDD006A46C2 /* Model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
@@ -135,7 +135,6 @@
 		5771090F16C6DFB1007D32DA = {
 			isa = PBXGroup;
 			children = (
-				5771099216C6F90D007D32DA /* MainMenu.xib */,
 				5771092416C6DFB1007D32DA /* PixelCity */,
 				5771091D16C6DFB1007D32DA /* Frameworks */,
 				5771091B16C6DFB1007D32DA /* Products */,
@@ -211,10 +210,10 @@
 			children = (
 				5771096216C6E0AF007D32DA /* Light.mm */,
 				5771096316C6E0AF007D32DA /* Light.h */,
-				5771097316C6E0C5007D32DA /* Mesh.cpp */,
+				5771097316C6E0C5007D32DA /* Mesh.mm */,
 				5771097416C6E0C5007D32DA /* Mesh.h */,
 				5793ED6316CE1BDD006A46C2 /* Model.h */,
-				5771095216C6E0AF007D32DA /* Entity.cpp */,
+				5771095216C6E0AF007D32DA /* Entity.mm */,
 				5771095316C6E0AF007D32DA /* Entity.h */,
 				5771098616C6E0D6007D32DA /* World.mm */,
 				5771098716C6E0D6007D32DA /* World.h */,
@@ -260,6 +259,7 @@
 		5771099616C7131B007D32DA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5771099216C6F90D007D32DA /* MainMenu.xib */,
 				5771097916C6E0D6007D32DA /* Render.mm */,
 				5771097A16C6E0D6007D32DA /* Render.h */,
 				5771097B16C6E0D6007D32DA /* RenderAPI.h */,
@@ -346,7 +346,7 @@
 				5771094F16C6E08B007D32DA /* Car.mm in Sources */,
 				5771095016C6E08B007D32DA /* Deco.mm in Sources */,
 				5771095116C6E08B007D32DA /* drawInfo.m in Sources */,
-				5771096516C6E0AF007D32DA /* Entity.cpp in Sources */,
+				5771096516C6E0AF007D32DA /* Entity.mm in Sources */,
 				5771096616C6E0AF007D32DA /* glBbox.cpp in Sources */,
 				5771096716C6E0AF007D32DA /* GLCheck.mm in Sources */,
 				5771096816C6E0AF007D32DA /* glMatrix.cpp in Sources */,
@@ -359,7 +359,7 @@
 				5771096F16C6E0AF007D32DA /* Ini.m in Sources */,
 				5771097016C6E0AF007D32DA /* Light.mm in Sources */,
 				5771097516C6E0C5007D32DA /* Mathx.cpp in Sources */,
-				5771097616C6E0C5007D32DA /* Mesh.cpp in Sources */,
+				5771097616C6E0C5007D32DA /* Mesh.mm in Sources */,
 				5771098816C6E0D6007D32DA /* Random.cpp in Sources */,
 				5771098916C6E0D6007D32DA /* Render.mm in Sources */,
 				5771098A16C6E0D6007D32DA /* Sky.mm in Sources */,

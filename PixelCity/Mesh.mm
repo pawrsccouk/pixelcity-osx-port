@@ -18,16 +18,21 @@
 #import "World.h"
 #import "Win.h"
 
-CMesh::CMesh ()
+@implementation Mesh
+
+-(id)init
 {
-  _list = glGenLists(1);
-  _compiled = false;
-  _polycount = 0;
+    self = [super init];
+    if(self) {
+        _list = glGenLists(1);
+        _compiled = false;
+        _polycount = 0;
+        
+    }
+    return self;
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-CMesh::~CMesh ()
+-(void)dealloc
 {
   glDeleteLists (_list, 1);
   _vertex.clear ();
@@ -36,45 +41,42 @@ CMesh::~CMesh ()
   _cube.clear ();
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void CMesh::VertexAdd (const GLvertex& v)
+-(void) addVertex:(const GLvertex&) v
 {
   _vertex.push_back(v);
-
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+-(size_t) vertexCount
+{
+    return _vertex.size();
+}
 
-void CMesh::CubeAdd (const cube& c)
+-(size_t) polyCount
+{
+    return _polycount;
+}
+
+-(void) addCube:(const cube&) c
 {
   _cube.push_back(c);
   _polycount += 5;
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void CMesh::QuadStripAdd (const quad_strip& qs)
+-(void) addQuadStrip:(const quad_strip&) qs
 {
   _quad_strip.push_back(qs);
   _polycount += (qs.index_list.size() - 2) / 2;
 }
 
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void CMesh::FanAdd (const fan& f)
+-(void) addFan:(const fan&) f
 {
   _fan.push_back(f);
   _polycount += f.index_list.size() - 2;
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-
-void CMesh::Render ()
+-(void) Render
 {
-	auto drawAtIndex = [this](int i) {
+	auto drawAtIndex = [self](int i) {
         _vertex[i].glTexCoord2();
         _vertex[i].glVertex3();
     };
@@ -121,43 +123,17 @@ void CMesh::Render ()
 	}
 }
 
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void CMesh::Compile ()
+-(void) Compile
 {
 	assert(glIsList(_list));
-	{	MakeDisplayList mdl(_list, GL_COMPILE);
-		Render ();
-	}
+	MakeDisplayList mdl(_list, GL_COMPILE);
+    [self Render];
 	_compiled = true;
 }
 
-template <class T>
-static std::ostream &streamVector(std::ostream &os, const std::vector<T> &v, const char *name, const char *separator)
-{
-    os << "\n[VECTOR<" << name << ">.count=" << v.size();
-    if(v.size() > 0) {
-        os  << ", .items=\n";
-        std::copy(v.begin(), v.end(), std::ostream_iterator<T>(os, separator));
-    }
-    return os << std::endl;
-}
 
-std::ostream &CMesh::operator<<(std::ostream &os) const
-{
-    os << "[MESH LIST=" << _list << ", POLYCOUNT=" << _polycount << ", COMPILED=" << _compiled;
-    streamVector<GLvertex  >(os, _vertex    , "VERTEX"    , "\n");
-    streamVector<cube      >(os, _cube      , "CUBE"      , "\n");
-    streamVector<quad_strip>(os, _quad_strip, "QUAD_STRIP", "\n");
-    streamVector<fan       >(os, _fan       , "FAN"       , "\n");
-    return os << "]" << std::endl;
-}
+@end
 
-
-std::ostream &quad_strip::operator<<(std::ostream &os) const { return streamVector<unsigned long>(os, index_list, "INDEX_LIST", ", "); }
-std::ostream &fan::operator<<       (std::ostream &os) const { return streamVector<unsigned long>(os, index_list, "INDEX_LIST", ", "); }
-std::ostream &cube::operator<<      (std::ostream &os) const { return streamVector<unsigned long>(os, index_list, "INDEX_LIST", ", "); }
 
 cube::cube(int first, ...)
 {

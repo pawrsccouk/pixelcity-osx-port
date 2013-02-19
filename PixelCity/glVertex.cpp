@@ -25,3 +25,11 @@ std::ostream &GLvertex::operator<<(std::ostream &os) const
 {
     return os << "[GLvertex POSITION=" << position << ", UV=" << uv << ", COLOR=" << color << ", BONE=" << bone << "]";
 }
+
+void GLvertex::apply() const
+{
+    color.glColor3();
+    uv.glTexCoord2();
+    position.glVertex3();
+}
+

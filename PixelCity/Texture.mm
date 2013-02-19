@@ -75,9 +75,9 @@ static int          build_time = 0;
  
  -----------------------------------------------------------------------------*/
 
-void drawrect_simple (int left, int top, int right, int bottom, GLrgba color)
+void drawrect_simple (int left, int top, int right, int bottom, const GLrgba &color)
 {
-	glColor3(color);
+	color.glColor3();
 	{	MakePrimitive mp(GL_QUADS);
 		glVertex2i (left, top);
 		glVertex2i (right, top);
@@ -91,17 +91,17 @@ void drawrect_simple (int left, int top, int right, int bottom, GLrgba color)
  
  -----------------------------------------------------------------------------*/
 
-void drawrect_simple (int left, int top, int right, int bottom, GLrgba color1, GLrgba color2)
+void drawrect_simple (int left, int top, int right, int bottom, const GLrgba &color1, const GLrgba &color2)
 {
-	glColor3(color1);
+	color1.glColor3();
 	{	MakePrimitive mp(GL_TRIANGLE_FAN);
 		glVertex2i ((left + right) / 2, (top + bottom) / 2);
-		glColor3(color2);
-		glVertex2i (left, top);
-		glVertex2i (right, top);
-		glVertex2i (right, bottom);
-		glVertex2i (left, bottom);
-		glVertex2i (left, top);
+		color2.glColor3();
+		glVertex2i(left, top);
+		glVertex2i(right, top);
+		glVertex2i(right, bottom);
+		glVertex2i(left, bottom);
+		glVertex2i(left, top);
 	}
 }
 
@@ -117,7 +117,7 @@ void drawrect (int left, int top, int right, int bottom, GLrgba color)
 	pwEnable(GL_BLEND);
 	pwLineWidth(1.0f);
 	pwPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor3(color);
+	color.glColor3();
 	
 	glReportError("drawrect setup done.");
 
@@ -161,7 +161,7 @@ void drawrect (int left, int top, int right, int bottom, GLrgba color)
 						float hue = 0.2f + (float)RandomLongR(100) / 300.0f + (float)RandomLongR(100) / 300.0f + (float)RandomLongR(100) / 300.0f;
 						GLrgba color_noise = glRgbaFromHsl(hue, 0.3f, 0.5f).colorWithAlpha(float(RandomLongR(potential)) / 144.0f);
 						glColor4f(randomColorVal(), randomColorVal(), randomColorVal(), float(RandomLongR(potential)) / 144.0f);
-						glColor4(color_noise);
+						color_noise.glColor4();
 						glVertex2i(i, j);
 					}
 				}
@@ -339,7 +339,7 @@ static void drawOneCloud(int x, int y, int width, int height, GLfloat scale, int
     float inv_scale = 1.0f - (scale);
     GLrgba color = (scale < 0.4f) ? WorldBloomColor() * 0.1f : GLrgba(0.0f);
     color = color.colorWithAlpha(0.2f);
-    glColor4(color);
+    color.glColor4();
     int width_adjust = int(float(width) / 2.0f + int(inv_scale * (float(width) / 2.0f)));
     int height_adjust = height + int(scale * float(height) * 0.99f);
     glTexCoord2f(0, 0);   glVertex2i(offset + x - width_adjust, y + height - height_adjust);
@@ -361,7 +361,7 @@ void CTexture::DrawSky ()
 		glColor3f(0,0,0);
 		glVertex2i(0, _half);
 		glVertex2i(_size, _half);
-		glColor3(color);
+		color.glColor3();
 		glVertex2i(0, _size - 2);  
 		glVertex2i(_size, _size - 2);  
 	}

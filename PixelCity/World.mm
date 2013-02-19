@@ -39,40 +39,16 @@ using namespace std;
 
 struct plot
 {
-	int             x;
-	int             z;
-	int             width;
-	int             depth;
-	
+	int x, z, width, depth;
 };
 
 enum {
-	FADE_IDLE,
-	FADE_OUT,
-	FADE_WAIT,
-	FADE_IN,
+	FADE_IDLE, FADE_OUT, FADE_WAIT, FADE_IN,
 };
 
 struct HSL
 {
-	float     hue;
-	float     sat;
-	float     lum;
-};
-
-class CStreet
-{
-public:
-	int                 _x;
-	int                 _y;
-	int                 _width;
-	int                 _depth;
-	CMesh*              _mesh;
-	
-	CStreet (int x, int y, int width, int depth);
-	~CStreet();
-	void                Render ();
-	
+	float hue, sat, lum;
 };
 
 static HSL light_colors[] = 
@@ -257,12 +233,13 @@ void do_building (plot p)
         //mark the land as used so other buildings don't appear here, even if we don't use it all.
 	claim (p.x, p.z, p.width, p.depth, CLAIM_BUILDING);
 	
+    Building *b = nil;
 	//The roundy mod buildings look best on square plots.
 	if (square && p.width > 20) {
 		int height = 45 + RandomIntR(10);
 		g_modern_count++;
 		g_skyscrapers++;
-		new CBuilding (BUILDING_MODERN, p.x, p.z, height, p.width, p.depth, seed, color);
+		b = [[Building alloc] initWithType:BUILDING_MODERN x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color];
 		return;
 	}
 	
@@ -271,7 +248,7 @@ void do_building (plot p)
 		 int height = 20 + RandomIntR(10);
 		 g_blocky_count++;
 		 g_skyscrapers++;
-		 new CBuilding (BUILDING_BLOCKY, p.x, p.z, height, p.width, p.depth, seed, color);
+		 b = [[Building alloc] initWithType:BUILDING_BLOCKY x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color];
 		 return;
 	 }
 	
@@ -289,7 +266,7 @@ void do_building (plot p)
 		g_modern_count++;
 	}
 	int height = 45 + RandomIntR(10);
-	new CBuilding (type, p.x, p.z, height, p.width, p.depth, seed, color);
+	b = [[Building alloc] initWithType:type x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color];
 	g_skyscrapers++;
 }
 
@@ -327,15 +304,15 @@ static int build_light_strip (int x1, int z1, int direction)
 	int depth = std::max(abs(z2 - z1), 1);
 	GLrgba color = glRgbaFromHsl (0.09f,  0.99f,  0.85f);
 	float size_adjust = 2.5f;	//We adjust the size of the lights with this.  
-	CDeco *d = new CDeco;
+	Deco *d = [[Deco alloc] init];
 	if (direction == EAST)
-		d->CreateLightStrip ((float)x1, (float)z1 - size_adjust, (float)width, (float)depth + size_adjust, 2, color);
+		[d CreateLightStripWithX:(float)x1 z:(float)z1 - size_adjust width:(float)width depth:(float)depth + size_adjust height:2 color:color];
 	else if (direction == WEST)
-		d->CreateLightStrip ((float)x1, (float)z1, (float)width, (float)depth + size_adjust, 2, color);
+		[d CreateLightStripWithX:(float)x1 z:(float)z1 width:(float)width depth:(float)depth + size_adjust height:2 color:color];
 	else if (direction == NORTH)
-		d->CreateLightStrip ((float)x1, (float)z1, (float)width + size_adjust, (float)depth, 2, color);
+		[d CreateLightStripWithX:(float)x1 z:(float)z1 width:(float)width + size_adjust depth:(float)depth height:2 color:color];
 	else
-		d->CreateLightStrip ((float)x1 - size_adjust, (float)z1, (float)width + size_adjust, (float)depth, 2, color);
+		[d CreateLightStripWithX:(float)x1 - size_adjust z:(float)z1 width:(float)width + size_adjust depth:(float)depth height:2 color:color];
 	
 	glReportError("build_light_strip END");
 	return length;
@@ -457,14 +434,14 @@ static void addSmallBuildings()
 					if (x < g_hot_zone.min.x || x > g_hot_zone.max.x || y < g_hot_zone.min.z || y > g_hot_zone.max.z)
                     {
 						height = 5 + RandomIntR(height) + RandomIntR(height);
-						new CBuilding (BUILDING_SIMPLE, x + 1, y + 1, height, width - 2, depth - 2, RandomInt(), building_color);
+                        [Building buildingWithType:BUILDING_SIMPLE x:x + 1 y:y + 1 height:height width:width - 2 depth:depth - 2 seed:RandomInt() color:building_color];
 					}
                     else
                     { //use fancy buildings.
 						height = 15 + RandomIntR(15);
 						width -=2;
 						depth -=2;
-						new CBuilding((COIN_FLIP() ? BUILDING_TOWER : BUILDING_BLOCKY), x + 1, y + 1, height, width, depth, RandomInt(), building_color);
+                        [Building buildingWithType:(COIN_FLIP() ? BUILDING_TOWER : BUILDING_BLOCKY) x:x + 1 y:y + 1 height:height width:width depth:depth seed:RandomInt() color:building_color];
 					}
 					break;
 				}

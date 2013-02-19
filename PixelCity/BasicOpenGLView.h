@@ -73,6 +73,7 @@ typedef struct {
 -(IBAction) toggleHelp:      (id) sender;
 -(IBAction) toggleNormalized:(id) sender;
 -(IBAction) toggleDebugLog:  (id) sender;
+-(IBAction) resetWorld:      (id) sender;
 
 - (void) drawRect:(NSRect)rect;
 

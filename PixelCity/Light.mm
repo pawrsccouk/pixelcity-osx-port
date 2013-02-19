@@ -141,7 +141,7 @@ void CLight::Render ()
 	
 	{
         MakePrimitive mp(GL_QUADS);
-		glColor4(_color);
+		_color.glColor4();
 		glTexCoord2f (0, 0);   
 		glVertex3f (pos.x + offset.x, pos.y - _vert_size, pos.z + offset.y);
 		glTexCoord2f (0, 1);   

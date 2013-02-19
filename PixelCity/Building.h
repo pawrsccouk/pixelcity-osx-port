@@ -9,39 +9,33 @@ enum BuildingType
   BUILDING_TOWER
 };
 
-class CBuilding : public CEntity
-{
-private:
+@class Mesh;
 
+@interface Building : Entity
+{
   int           _x, _y, _width, _depth, _height;
   unsigned long _texture_type, _seed, _roof_tiers;
   GLrgba        _color, _trim_color;
-  class CMesh  *_mesh, *_mesh_flat;
-  bool          _have_lights, _have_trim, _have_logo;
+  Mesh         *_mesh, *_mesh_flat;
+  BOOL          _have_lights, _have_trim, _have_logo;
+}
 
-  void                    CreateSimple ();
-  void                    CreateBlocky ();
-  void                    CreateModern ();
-  void                    CreateTower ();
+-(void)CreateSimple;
+-(void)CreateBlocky;
+-(void)CreateModern;
+-(void)CreateTower;
   
-  float                   ConstructWall (int start_x, int start_y, int start_z,
-                                         int direction, int length, int height,
-                                         unsigned long window_groups, float uv_start, bool blank_corners);
-  void                    ConstructSpike (int left, int right, int front, int back, int bottom, int top);
-  void                    ConstructCube (int left, int right, int front, int back, int bottom, int top);
-  void                    ConstructCube (float left, float right, float front, float back, float bottom, float top);
-  void                    ConstructRoof (float left, float right, float front, float back, float bottom);
+-(float)ConstructWallWithX:(int) start_x Y:(int)start_y Z:(int) start_z
+                       direction:(int) direction length:(int) length height:(int) height 
+                       windowGroups:(unsigned long) wgroup UVStart:(float) uvStart blankCorners:(BOOL) blankCorners;
 
-public:
-    CBuilding (BuildingType type, int x, int y, int height, int width, int depth, int seed, GLrgba color);
-    ~CBuilding ();
-    void     Render (void);
-    void     RenderFlat (bool colored);
+-(void)ConstructSpikeWithLeft:(int) left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;
+-(void)ConstructCubeWithLeft:(int)  left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;
+-(void)ConstructCubeWithFloatLeft:(float)  left right:(float) right front:(float) front back:(float) back bottom:(float) bottom top:(float) top;
+-(void)ConstructRoofWithLeft:(float)  left right:(float) right front:(float) front back:(float) back bottom:(float) bottom;
 
-    unsigned long PolyCount () const;
-    GLuint        Texture() const;
+-(id)initWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color;
++(id)buildingWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color;
 
-    virtual std::ostream &operator<<(std::ostream &os) const;
-};
+@end
 
-inline std::ostream &operator<<(std::ostream &os, const CBuilding &b) { return b.operator<<(os); }
