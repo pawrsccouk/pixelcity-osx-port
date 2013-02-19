@@ -14,7 +14,7 @@ enum BuildingType
 @interface Building : Entity
 {
   int           _x, _y, _width, _depth, _height;
-  unsigned long _texture_type, _seed, _roof_tiers;
+  GLulong _texture_type, _seed, _roof_tiers;
   GLrgba        _color, _trim_color;
   Mesh         *_mesh, *_mesh_flat;
   BOOL          _have_lights, _have_trim, _have_logo;
@@ -27,7 +27,7 @@ enum BuildingType
   
 -(float)ConstructWallWithX:(int) start_x Y:(int)start_y Z:(int) start_z
                        direction:(int) direction length:(int) length height:(int) height 
-                       windowGroups:(unsigned long) wgroup UVStart:(float) uvStart blankCorners:(BOOL) blankCorners;
+                       windowGroups:(GLulong) wgroup UVStart:(float) uvStart blankCorners:(BOOL) blankCorners;
 
 -(void)ConstructSpikeWithLeft:(int) left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;
 -(void)ConstructCubeWithLeft:(int)  left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;

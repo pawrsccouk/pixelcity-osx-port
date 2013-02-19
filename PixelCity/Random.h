@@ -3,13 +3,13 @@
 extern "C" {
 #endif
 
-    void RandomInit (unsigned long seed);
+    void RandomInit (GLulong seed);
     
-    unsigned long RandomLongR(long range);
-    unsigned long RandomLong(void);
+    GLulong RandomLongR(GLlong range);
+    GLulong RandomLong(void);
     
-    unsigned int  RandomIntR(int range);
-    unsigned int  RandomInt (void);
+    GLuint  RandomIntR(int range);
+    GLuint  RandomInt (void);
 
 
 #ifdef __cplusplus

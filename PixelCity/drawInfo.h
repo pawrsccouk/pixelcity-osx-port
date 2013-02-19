@@ -55,4 +55,4 @@
 //void initCapsTexture (GLCaps * displayCaps, CGDisplayCount numDisplays);
 
 // Draws the caps provided onto the current OpenGL screen.
-void drawCaps (GLCaps * displayCaps, CGDisplayCount numDisplays, long renderer, GLfloat width); // view width for drawing location
+void drawCaps (GLCaps * displayCaps, CGDisplayCount numDisplays, GLlong renderer, GLfloat width); // view width for drawing location

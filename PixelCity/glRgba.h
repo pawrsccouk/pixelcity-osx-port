@@ -18,7 +18,7 @@ public:
     
     explicit GLrgba(char* string);
     explicit GLrgba(float luminance);
-    explicit GLrgba(long c);
+    explicit GLrgba(GLlong c);
     GLrgba(int red, int green, int blue);
 
     GLrgba(const GLrgba &rhs);

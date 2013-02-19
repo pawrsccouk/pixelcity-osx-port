@@ -10,8 +10,8 @@ static const bool LOADING_SCREEN = true;  //Do we hide scene building behing a l
 static const int CARS            = 500;    //Controls the density of cars.
 static const int WORLD_EDGE      = 200;    //The "dead zone" along the edge of the world, with super-low detail.
 
-static const long RESET_INTERVAL  =  (SCREENSAVER ? 120000 : 999999); //milliseconds    //How often to rebuild the city
-static const int FADE_TIME        =  (SCREENSAVER ? 1500 : 1);  //milliseconds    //How long the screen fade takes when transitioning to a new city
+static const GLlong RESET_INTERVAL  =  (SCREENSAVER ? 120000 : 999999); //milliseconds    //How often to rebuild the city
+static const int FADE_TIME        =  (SCREENSAVER ? 1500 : 1);  //milliseconds    //How GLlong the screen fade takes when transitioning to a new city
 static const bool SHOW_DEBUG_GROUND  =  false;    //Debug ground texture that shows traffic lanes
 
 //Controls the ammount of space available for buildings.  Other code is wrtten assuming this will be a power of two.
@@ -45,7 +45,7 @@ extern "C" {
 	void DebugLog(const char* str, ...);
 
 // Milliseconds since computer started.
-	unsigned long GetTickCount();
+	GLulong GetTickCount();
 
 	void AppUpdate(int width, int height);
 	void AppInit(int width, int height);

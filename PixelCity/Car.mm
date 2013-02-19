@@ -24,7 +24,7 @@
     BOOL     _ready, _front;
     RoadDirection _direction;
     int      _drive_angle,  _change, _stuck;
-    unsigned int _row, _col;
+    GLuint   _row, _col;
     float    _speed, _max_speed;
 }
 
@@ -56,7 +56,7 @@ static NSMutableArray *all_cars = [NSMutableArray array];
 
 static int     count;
 static unsigned char carmap[WORLD_SIZE][WORLD_SIZE];
-static unsigned long next_update;
+static GLulong next_update;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #pragma mark - Global Interface
@@ -107,7 +107,7 @@ void CarUpdate ()
 {
     if (!TextureReady () || !EntityReady ())
         return;
-    unsigned long now = GetTickCount ();
+    GLulong now = GetTickCount ();
     if (next_update > now)
         return;
     next_update = now + UPDATE_INTERVAL;

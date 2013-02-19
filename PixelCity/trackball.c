@@ -47,6 +47,7 @@
 // Copyright ( C ) 2000-2007 Apple Inc. All Rights Reserved.
 //
 
+typedef long GLlong;
 #import "trackball.h"
 
 #import <math.h>
@@ -58,10 +59,10 @@ static const float kDeg2Rad = 3.1415927 / 180.;
 float gRadiusTrackball;
 float gStartPtTrackball[3];
 float gEndPtTrackball[3];
-long gXCenterTrackball = 0, gYCenterTrackball = 0;
+GLlong gXCenterTrackball = 0, gYCenterTrackball = 0;
 
 // mouse positon and view size as inputs
-void startTrackball (long x, long y, long originX, long originY, long width, long height)
+void startTrackball (GLlong x, GLlong y, GLlong originX, GLlong originY, GLlong width, GLlong height)
 {
     float xxyy;
     float nx, ny;
@@ -103,7 +104,7 @@ void startTrackball (long x, long y, long originX, long originY, long width, lon
 }
 
 // update to new mouse position, output rotation angle
-void rollToTrackball (long x, long y, float rot [4]) // rot is output rotation angle
+void rollToTrackball (GLlong x, GLlong y, float rot [4]) // rot is output rotation angle
 {
     float xxyy;
     float cosAng, sinAng;

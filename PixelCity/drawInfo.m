@@ -225,7 +225,7 @@ NSArray *createCapsTextures (GLCaps * displayCaps, CGDisplayCount numDisplays)
     return capsTextures;
 }
 
-void drawCaps (GLCaps * displayCaps, CGDisplayCount numDisplays, long renderer, GLfloat width) // view width for drawing location
+void drawCaps (GLCaps * displayCaps, CGDisplayCount numDisplays, GLlong renderer, GLfloat width) // view width for drawing location
 { // we are already in an orthographic per pixel projection
     NSArray *capsTextures = createCapsTextures(displayCaps, numDisplays);
 	short i;

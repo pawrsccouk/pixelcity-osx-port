@@ -29,7 +29,7 @@
 		5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095C16C6E0AF007D32DA /* glVertex.cpp */; };
 		5771096D16C6E0AF007D32DA /* glVector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095E16C6E0AF007D32DA /* glVector2.cpp */; };
 		5771096E16C6E0AF007D32DA /* glVector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095F16C6E0AF007D32DA /* glVector3.cpp */; };
-		5771096F16C6E0AF007D32DA /* Ini.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771096116C6E0AF007D32DA /* Ini.m */; };
+		5771096F16C6E0AF007D32DA /* Ini.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771096116C6E0AF007D32DA /* Ini.mm */; };
 		5771097016C6E0AF007D32DA /* Light.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771096216C6E0AF007D32DA /* Light.mm */; };
 		5771097516C6E0C5007D32DA /* Mathx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771097116C6E0C5007D32DA /* Mathx.cpp */; };
 		5771097616C6E0C5007D32DA /* Mesh.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097316C6E0C5007D32DA /* Mesh.mm */; };
@@ -86,7 +86,7 @@
 		5771095E16C6E0AF007D32DA /* glVector2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glVector2.cpp; sourceTree = "<group>"; };
 		5771095F16C6E0AF007D32DA /* glVector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glVector3.cpp; sourceTree = "<group>"; };
 		5771096016C6E0AF007D32DA /* Ini.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ini.h; sourceTree = "<group>"; };
-		5771096116C6E0AF007D32DA /* Ini.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Ini.m; sourceTree = "<group>"; };
+		5771096116C6E0AF007D32DA /* Ini.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Ini.mm; sourceTree = "<group>"; };
 		5771096216C6E0AF007D32DA /* Light.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Light.mm; sourceTree = "<group>"; };
 		5771096316C6E0AF007D32DA /* Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
 		5771096416C6E0AF007D32DA /* Macro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Macro.h; sourceTree = "<group>"; };
@@ -184,7 +184,7 @@
 				5771098416C6E0D6007D32DA /* Win.mm */,
 				5771098516C6E0D6007D32DA /* Win.h */,
 				5771096016C6E0AF007D32DA /* Ini.h */,
-				5771096116C6E0AF007D32DA /* Ini.m */,
+				5771096116C6E0AF007D32DA /* Ini.mm */,
 				5771096416C6E0AF007D32DA /* Macro.h */,
 				5771094916C6E08B007D32DA /* drawInfo.h */,
 				5771094A16C6E08B007D32DA /* drawInfo.m */,
@@ -356,7 +356,7 @@
 				5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */,
 				5771096D16C6E0AF007D32DA /* glVector2.cpp in Sources */,
 				5771096E16C6E0AF007D32DA /* glVector3.cpp in Sources */,
-				5771096F16C6E0AF007D32DA /* Ini.m in Sources */,
+				5771096F16C6E0AF007D32DA /* Ini.mm in Sources */,
 				5771097016C6E0AF007D32DA /* Light.mm in Sources */,
 				5771097516C6E0C5007D32DA /* Mathx.cpp in Sources */,
 				5771097616C6E0C5007D32DA /* Mesh.mm in Sources */,

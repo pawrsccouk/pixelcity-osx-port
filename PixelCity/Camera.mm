@@ -46,13 +46,13 @@ static GLvector movement /* = {0.0f, 0.0f, 0.0f}*/;
 static bool     cam_auto = true;	// PAW: hit 'C' to turn off.
 static float    tracker;
 static int      camera_behavior;
-static unsigned long last_update, last_move;
+static GLulong last_update, last_move;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static GLvector flycam_position (unsigned long t)
+static GLvector flycam_position (GLulong t)
 {
-  unsigned long   leg;
+  GLulong   leg;
   float       delta;
   GLvector    start, end;
   GLbbox      hot_zone;
@@ -87,8 +87,8 @@ static GLvector flycam_position (unsigned long t)
 
 static void do_auto_cam ()
 {
-    unsigned long now = GetTickCount ();
-    unsigned long elapsed = now - last_update;
+    GLulong now = GetTickCount ();
+    GLulong elapsed = now - last_update;
     elapsed = std::min(elapsed, 50ul); //limit to 1/20th second worth of time
     if (elapsed == 0)
         return;

@@ -13,27 +13,18 @@
  -----------------------------------------------------------------------------*/
 
 
-#import <math.h>
-#import <time.h>
-#import <vector>
-#import <assert.h>
-
-#import "glTypes.h"
+#import "Model.h"
 #import "building.h"
 #import "car.h"
 #import "deco.h"
 #import "light.h"
-#import "macro.h"
-#import "mathx.h"
 #import "mesh.h"
-#import "random.h"
 #import "render.h"
 #import "sky.h"
 #import "texture.h"
 #import "visible.h"
 #import "win.h"
 #import "world.h"
-#import "PWGL.h"
 
 using namespace std;
 
@@ -72,11 +63,11 @@ static HSL light_colors[] =
 static const size_t LIGHT_COLOR_COUNT = (sizeof(light_colors)/sizeof(HSL));
 
 static GLrgba         g_bloom_color;
-static long           g_last_update;
+static GLlong           g_last_update;
 static char           g_world[WORLD_SIZE][WORLD_SIZE];
-static unsigned long  g_fade_start = 0;
+static GLulong  g_fade_start = 0;
 static float          g_fade_current = 0.0f;
-static unsigned long  g_scene_begin = 0;
+static GLulong  g_scene_begin = 0;
 static int            g_fade_state = 0, g_modern_count = 0, g_tower_count = 0, g_blocky_count = 0, g_skyscrapers = 0, g_logo_index = 0;
 static bool           g_reset_needed = false;
 static GLbbox         g_hot_zone;
@@ -376,7 +367,7 @@ static GLbbox buildRoads()
 			y += 20;
 			broadway_done = true;
 		} else {
-			unsigned int depth = 6 + RandomIntR(6);
+			GLuint depth = 6 + RandomIntR(6);
 			if (y < WORLD_HALF / 2)
 				north_street = (float)(y + depth / 2);
 			if (y < (WORLD_SIZE - WORLD_HALF / 2))
@@ -394,7 +385,7 @@ static GLbbox buildRoads()
 			broadway_done = true;
 		}
         else {
-			unsigned int width = 6 + RandomIntR(6);
+			GLuint width = 6 + RandomIntR(6);
 			if (x <= WORLD_HALF / 2)
 				west_street = (float)(x + width / 2);
 			if (x <= WORLD_HALF + WORLD_HALF / 2)
@@ -418,7 +409,7 @@ static void addSmallBuildings()
 			if (g_world[CLAMP (x,0,WORLD_SIZE)][CLAMP (y,0,WORLD_SIZE)])
 				continue;
             
-			unsigned int width = 12 + RandomIntR(20), depth = 12 + RandomIntR(20), height = std::min(width, depth);
+			GLuint width = 12 + RandomIntR(20), depth = 12 + RandomIntR(20), height = std::min(width, depth);
 			if (x < 30 || y < 30 || x > WORLD_SIZE - 30 || y > WORLD_SIZE - 30)
 				height = RandomIntR(15) + 20;
 			else if (x < WORLD_HALF / 2)
@@ -556,14 +547,14 @@ void WorldRender ()
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 float WorldFade (void) { return g_fade_current; }
-unsigned long WorldSceneBegin() { return g_scene_begin; }
+GLulong WorldSceneBegin() { return g_scene_begin; }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-// How long since this current iteration of the city went on display,
-unsigned long WorldSceneElapsed()
+// How GLlong since this current iteration of the city went on display,
+GLulong WorldSceneElapsed()
 {
-	unsigned long elapsed = (!EntityReady () || !WorldSceneBegin ()) ? 1
+	GLulong elapsed = (!EntityReady () || !WorldSceneBegin ()) ? 1
                                                                      : GetTickCount () - (WorldSceneBegin());
 	return std::max(elapsed, 1ul);
 }
@@ -572,7 +563,7 @@ unsigned long WorldSceneElapsed()
 
 void WorldUpdate (void)
 {	
-	unsigned long now = GetTickCount ();
+	GLulong now = GetTickCount ();
 	if (g_reset_needed) {
 		doReset (); //Now we've faded out the scene, rebuild it
 	}
@@ -582,7 +573,7 @@ void WorldUpdate (void)
 			g_fade_start = now;
 			g_fade_current = 1.0f;
 		}    
-		unsigned long fade_delta = now - g_fade_start;
+		GLulong fade_delta = now - g_fade_start;
 		//See if we're done fading in or out
 		if (fade_delta > FADE_TIME && g_fade_state != FADE_WAIT) {
 			if (g_fade_state == FADE_OUT) {

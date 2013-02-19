@@ -29,11 +29,11 @@
 #import <functional>
 
 // Local headers
+#import "PWGL.h"
 #import "glTypes.h"
 #import "glRgba.h"
 #import "glVertex.h"
 #import "Mathx.h"
-#import "PWGL.h"
 #import "Random.h"
 #import "Macro.h"
 

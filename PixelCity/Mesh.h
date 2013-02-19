@@ -12,7 +12,7 @@ struct cube
         // End the list with LIST_TERM
         // Example cube c(1, 2, 3, 5, 8, LIST_TERM);
     cube(int first, ...);
-    std::vector<unsigned long> index_list;   // probably always .size() == 10...
+    std::vector<GLulong> index_list;   // probably always .size() == 10...
     std::ostream &operator<<(std::ostream &os) const;
 };
 inline std::ostream &operator<<(std::ostream &os, const cube &c) { return c.operator<<(os); }
@@ -24,7 +24,7 @@ struct quad_strip
         // End the list with LIST_TERM
         // Example quad_strip s(1, 2, 3, 5, 8, LIST_TERM);
     quad_strip(int first, ...);
-    std::vector<unsigned long> index_list;
+    std::vector<GLulong> index_list;
     std::ostream &operator<<(std::ostream &os) const;
 };
 inline std::ostream &operator<<(std::ostream &os, const quad_strip &s) { return s.operator<<(os); }
@@ -36,7 +36,7 @@ struct fan
         // End the list with LIST_TERM
         // Example fan f(1, 2, 3, 5, 8, LIST_TERM);
     fan(int first, ...);
-    std::vector<unsigned long> index_list;
+    std::vector<GLulong> index_list;
     std::ostream &operator<<(std::ostream &os) const;
 };
 inline std::ostream &operator<<(std::ostream &os, const fan &f) { return f.operator<<(os); }

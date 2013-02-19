@@ -7,7 +7,7 @@ extern "C" {
 
     void  LightRender (void);
     void  LightClear (void);
-    unsigned long LightCount (void);
+    GLulong LightCount (void);
 
 #if defined(__cplusplus)
 }

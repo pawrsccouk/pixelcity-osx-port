@@ -37,7 +37,7 @@ static cell           cell_list[GRID_SIZE][GRID_SIZE];
 static NSMutableArray *allEntities = [NSMutableArray array];
 static bool           sorted = false, compiled = false;
 static int            polycount = 0, compile_x = 0, compile_y = 0, compile_count = 0;
-static unsigned long  compile_end = 0;
+static GLulong  compile_end = 0;
 
 
 /*
@@ -180,7 +180,7 @@ void EntityUpdate ()
 
         //We want to do several cells at once. Enough to get things done, but not so many that the program is unresponsive.
     if (LOADING_SCREEN) {  //If we're using a loading screen, we want to build as fast as possible
-        unsigned long stop_time = GetTickCount () + 100;
+        GLulong stop_time = GetTickCount () + 100;
         while (!compiled && GetTickCount () < stop_time)
             do_compile ();
     } else //Take it slow
@@ -314,7 +314,7 @@ int EntityPolyCount (void)
 
 -(GLuint) texture { return 0; }
 -(BOOL) alpha { return NO; }
--(unsigned long) polyCount { return 0; }
+-(GLulong) polyCount { return 0; }
 
 @end
 

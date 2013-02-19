@@ -12,6 +12,10 @@
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 
+// Define long types (OpenGL doesn't seem to have these).
+typedef unsigned long GLulong;
+typedef long GLlong;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,6 +48,7 @@ void pwBindTexture(GLenum type, GLuint texture);
 void pwPolygonMode(GLenum face, GLenum mode);
 void pwPushAttrib (GLbitfield mask);
 void pwPopAttrib (void);
+void pwGenTextures(GLsizei n, GLuint *textures);
 
 void pwTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
 void pwTexParameteri(GLenum target, GLenum pname, GLenum param);

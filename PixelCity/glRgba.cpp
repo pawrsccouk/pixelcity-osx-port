@@ -86,7 +86,7 @@ GLrgba::GLrgba(char* string)
     if ((pound = strchr (buffer, '#')))
         pound[0] = ' ';
     
-    unsigned int color = 0;
+    GLuint color = 0;
     if (sscanf (string, "%x", &color) != 1)
         _red = _green = _blue = 0.0f;
     else {
@@ -122,7 +122,7 @@ GLrgba::GLrgba(int red, int green, int blue)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-GLrgba::GLrgba(long c)
+GLrgba::GLrgba(GLlong c)
 : _red  (float(GetRValue(c)) / 255.0f),
   _green(float(GetGValue(c)) / 255.0f),
   _blue (float(GetBValue(c)) / 255.0f),

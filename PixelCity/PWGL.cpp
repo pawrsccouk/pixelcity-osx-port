@@ -60,6 +60,8 @@ void pwTexSubImage2D (GLenum target, GLint level, GLint xoffset, GLint yoffset, 
                       GLenum format, GLenum type, const GLvoid *pixels)
 { glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels); glReportError("glTexSubImage2D"); }
 
+void pwGenTextures(GLsizei n, GLuint *textures) { glGenTextures(n, textures); glReportError("glGenTextures"); }
+
 // PAW: These are NOT error-checked because glGetError() is not allowed between glBegin()/glEnd()
 // so checking for errors is, in itself, an error. (it returns "invalid operation" from glEnd()).
 

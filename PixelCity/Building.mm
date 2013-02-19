@@ -33,6 +33,7 @@ enum AddonType
 
 static GLvector vector_buffer[MAX_VBUFFER];
 static short LIGHT_SIZE = 1;
+static const float ONE_SEGMENT          = (1.0f / SEGMENTS_PER_TEXTURE);
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -82,7 +83,7 @@ static short LIGHT_SIZE = 1;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(unsigned long) polyCount
+-(GLulong) polyCount
 {
   return _mesh.polyCount + _mesh_flat.polyCount;
 }
@@ -147,7 +148,7 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
   p[8] = GLvertexMake(x1, y1, z1, u, v1);
   p[9] = GLvertexMake(x1, y2, z1, u, v2);
 
-  unsigned long base_index = _mesh.vertexCount;
+  GLulong base_index = _mesh.vertexCount;
   cube c;
   for (int i = 0; i < 10; i++) {
     p[i].uv.x = (p[i].position.x + p[i].position.z) / (float)SEGMENTS_PER_TEXTURE;
@@ -178,7 +179,7 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
     p[9] = GLvertexMake(x1, y2, z1, 0.0f, 0.0f);
     
     cube  c;
-    unsigned long base_index = _mesh_flat.vertexCount;
+    GLulong base_index = _mesh_flat.vertexCount;
     for (int i = 0; i < 10; i++) {
         p[i].uv.x = (p[i].position.x + p[i].position.z) / (float)SEGMENTS_PER_TEXTURE;
         [_mesh_flat addVertex:p[i]];
@@ -196,14 +197,14 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
 {
     int       air_conditioners = 0, i = 0;
     int       face = 0;
-    unsigned long addon = 0;
+    GLulong addon = 0;
     float     ac_base = 0.0f;
     
     _roof_tiers++;
     int max_tiers = _height / 10;
     int width = int(right - left );
     int depth = int(back  - front);
-    unsigned long height = 5 - _roof_tiers;
+    GLulong height = 5 - _roof_tiers;
     float logo_offset = 0.2f;
     
         //See if this building is special and worthy of fancy roof decorations.
@@ -331,7 +332,7 @@ Z:(int) start_z
 direction:(int) direction
 length:(int) length
 height:(int) height
-windowGroups:(unsigned long) windowGroups
+windowGroups:(GLulong) windowGroups
 UVStart:(float) uvStart
 blankCorners:(BOOL) blankCorners
 {
@@ -403,7 +404,7 @@ blankCorners:(BOOL) blankCorners
   int         half_depth, half_width;
   int         tiers;
   int         max_tiers;
-  unsigned long grouping;
+  GLulong grouping;
   float       lid_height;
   float       uv_start;
   bool        skip;
@@ -558,16 +559,16 @@ static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
   GLvector2   start, end;
   int         angle;
   int         windows;
-  unsigned long cap_height;
+  GLulong cap_height;
   int         half_depth, half_width;
 //  float       dist;
   float       length;
   quad_strip  qs;
   fan         f;
   int         points;
-  unsigned long skip_interval;
+  GLulong skip_interval;
   int         skip_counter;
-  unsigned long skip_delta;
+  GLulong skip_delta;
   int         i;
   bool        logo_done;
   bool        do_trim;
@@ -660,13 +661,13 @@ static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
 -(void)CreateTower
 {
     float ledge = (float)RandomIntR(3) * 0.25f;        //How much ledges protrude from the building
-    unsigned long ledge_height = RandomIntR(4) + 1;               //How tall the ledges are, in stories
-    unsigned long grouping = RandomIntR(3) + 2;               //How the windows are grouped
+    GLulong ledge_height = RandomIntR(4) + 1;               //How tall the ledges are, in stories
+    GLulong grouping = RandomIntR(3) + 2;               //How the windows are grouped
     bool  blank_corners = RandomIntR(4) > 0;               //if the corners of the building have no windows
     //  bool roof_spike = RandomIntR(3) == 0;              //if the roof is pointed or has infrastructure on it
     unsigned tier_fraction = 2 + RandomIntR(4);               //What fraction of the remaining height should be given to each tier
-    unsigned long narrowing_interval = 1 + RandomIntR(10);           //How often (in tiers) does the building get narrower?
-    unsigned long foundation = 2 + RandomIntR(3);               //The height of the windowsless slab at the bottom
+    GLulong narrowing_interval = 1 + RandomIntR(10);           //How often (in tiers) does the building get narrower?
+    GLulong foundation = 2 + RandomIntR(3);               //The height of the windowsless slab at the bottom
     //  bool tower = RandomInt (5) != 0 && _height > 40;   //The odds that we'll have a big fancy spikey top
 
         //set our initial parameters

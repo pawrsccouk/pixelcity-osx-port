@@ -1,9 +1,8 @@
 /*-----------------------------------------------------------------------------
 									               r a n d o m
 -----------------------------------------------------------------------------*/
-
+#import "Model.h"
 #import <memory.h>
-#import "random.h"
 
 /*-----------------------------------------------------------------------------
   The Mersenne Twister by Matsumoto and Nishimura <matumoto@math.keio.ac.jp>.
@@ -15,25 +14,25 @@
 
 static const int M = 397, N = 624;
 
-static const unsigned long LOWER_MASK = 0x7fffffff, UPPER_MASK = 0x80000000;
-static const unsigned long TEMPERING_MASK_B   =   0x9d2c5680, TEMPERING_MASK_C   =   0xefc60000;
-static const unsigned long MATRIX_A           =   0x9908b0df;
+static const GLulong LOWER_MASK = 0x7fffffff, UPPER_MASK = 0x80000000;
+static const GLulong TEMPERING_MASK_B   =   0x9d2c5680, TEMPERING_MASK_C   =   0xefc60000;
+static const GLulong MATRIX_A           =   0x9908b0df;
 
-inline unsigned long TEMPERING_SHIFT_L(unsigned long y) { return (y >> 18); }
-inline unsigned long TEMPERING_SHIFT_S(unsigned long y) { return (y << 7 ); }
-inline unsigned long TEMPERING_SHIFT_T(unsigned long y) { return (y << 15); }
-inline unsigned long TEMPERING_SHIFT_U(unsigned long y) { return (y >> 11); }
+inline GLulong TEMPERING_SHIFT_L(GLulong y) { return (y >> 18); }
+inline GLulong TEMPERING_SHIFT_S(GLulong y) { return (y << 7 ); }
+inline GLulong TEMPERING_SHIFT_T(GLulong y) { return (y << 15); }
+inline GLulong TEMPERING_SHIFT_U(GLulong y) { return (y >> 11); }
 
 static int              k = 1;
-static unsigned long    mag01[2] = {0x0, MATRIX_A};
-static unsigned long    ptgfsr[N];
+static GLulong    mag01[2] = {0x0, MATRIX_A};
+static GLulong    ptgfsr[N];
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-unsigned long RandomLong(void)
+GLulong RandomLong(void)
 {
   int		     kk;
-  unsigned long	 y;
+  GLulong	 y;
   
   if (k == N) {
     for (kk = 0; kk < N - M; kk++) {
@@ -58,14 +57,14 @@ unsigned long RandomLong(void)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-unsigned long RandomLongR(long range)
+GLulong RandomLongR(GLlong range)
 {
   return range ? (RandomLong() % range) : 0;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void RandomInit (unsigned long seed)
+void RandomInit (GLulong seed)
 {
   ptgfsr[0] = seed;
   for (k = 1; k < N; k++)
@@ -73,12 +72,12 @@ void RandomInit (unsigned long seed)
   k = 1;
 }
 
-unsigned int RandomIntR(int range)
+GLuint RandomIntR(int range)
 {
     return unsigned(RandomLongR(range));
 }
 
-unsigned int RandomInt(void)
+GLuint RandomInt(void)
 {
     return unsigned(RandomLong());
 }

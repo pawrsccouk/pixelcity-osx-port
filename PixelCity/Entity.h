@@ -10,7 +10,7 @@
 -(id)init;
 @property (nonatomic) GLuint texture;
 @property (nonatomic) BOOL alpha;
-@property (nonatomic) unsigned long polyCount;
+@property (nonatomic) GLulong polyCount;
 @property (nonatomic, readonly) GLvector center;
   
         // Virtual Methods
@@ -23,7 +23,7 @@
 // 
 //inline GLuint        CEntity::Texture ()  const { return 0; }
 //inline bool          CEntity::Alpha ()    const { return false; }
-//inline unsigned long CEntity::PolyCount() const { return 0; }
+//inline GLulong CEntity::PolyCount() const { return 0; }
 //inline GLvector      CEntity::Center()    const { return _center; }
 //inline void CEntity::Render (void) const               {}
 //inline void CEntity::RenderFlat (bool wireframe) const {}

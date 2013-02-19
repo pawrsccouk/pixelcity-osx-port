@@ -69,16 +69,16 @@
 
 // local CF dictionary routines
 
-//static long _getDictLong (CFDictionaryRef refDict, CFStringRef key)
+//static GLlong _getDictLong (CFDictionaryRef refDict, CFStringRef key)
 //{
-//  long int_value;
+//  GLlong int_value;
 //  CFNumberRef num_value = (CFNumberRef)CFDictionaryGetValue(refDict, key);
 //  if (!num_value) // if can't get a number for the dictionary
 //    return -1;  // fail
 //  // or if cant convert it
 //  if (!CFNumberGetValue(num_value, kCFNumberLongType, &int_value)) 
 //    return -1; // fail
-//  return int_value; // otherwise return the long value
+//  return int_value; // otherwise return the GLlong value
 //}
 //
 //static double _getDictDouble (CFDictionaryRef refDict, CFStringRef key)
@@ -90,7 +90,7 @@
 //  // or if cant convert it
 //  if (!CFNumberGetValue(num_value, kCFNumberDoubleType, &double_value)) 
 //    return -1; // fail
-//  return double_value; // otherwise return the long value
+//  return double_value; // otherwise return the GLlong value
 //}
 //
 // -------------------------
@@ -148,10 +148,10 @@ unsigned char HaveOpenGLCapsChanged (GLCaps aDisplayCaps[],
       CGDisplayModeRelease(dispMode);
       
       // check for all geometry matches 
-      if( (aDisplayCaps[i].deviceWidth   != (long) displayRect.size.width)
-      ||  (aDisplayCaps[i].deviceHeight  != (long) displayRect.size.height)
-      ||  (aDisplayCaps[i].deviceOriginX != (long) displayRect.origin.x)
-      ||  (aDisplayCaps[i].deviceOriginY != (long) displayRect.origin.y)
+      if( (aDisplayCaps[i].deviceWidth   != (GLlong) displayRect.size.width)
+      ||  (aDisplayCaps[i].deviceHeight  != (GLlong) displayRect.size.height)
+      ||  (aDisplayCaps[i].deviceOriginX != (GLlong) displayRect.origin.x)
+      ||  (aDisplayCaps[i].deviceOriginY != (GLlong) displayRect.origin.y)
       ||  (aDisplayCaps[i].deviceDepth   != bitsPerPixel)
       ||  (aDisplayCaps[i].deviceRefresh != (short)(refreshRate + 0.5)) )
         return 1; // round to GLint
@@ -258,10 +258,10 @@ void CheckOpenGLCaps (CGDisplayCount maxDspys,
 
 //      // get mode dictionary
 //      CFDictionaryRef dispMode = CGDisplayCurrentMode (dspys[i]); 
-      dCaps[i].deviceWidth = (long) displayRect.size.width;
-      dCaps[i].deviceHeight = (long) displayRect.size.height;   
-      dCaps[i].deviceOriginX = (long) displayRect.origin.x;   
-      dCaps[i].deviceOriginY = (long) displayRect.origin.y;   
+      dCaps[i].deviceWidth = (GLlong) displayRect.size.width;
+      dCaps[i].deviceHeight = (GLlong) displayRect.size.height;   
+      dCaps[i].deviceOriginX = (GLlong) displayRect.origin.x;   
+      dCaps[i].deviceOriginY = (GLlong) displayRect.origin.y;   
       dCaps[i].deviceDepth = (short) bitsPerPixel;
       dCaps[i].deviceRefresh = (short) (refreshRate + 0.5);
     }

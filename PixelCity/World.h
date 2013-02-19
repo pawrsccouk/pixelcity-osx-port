@@ -8,8 +8,8 @@ void      WorldInit (void);
 float     WorldFade (void);
 void      WorldRender ();
 void      WorldReset (void);
-unsigned long WorldSceneBegin ();
-unsigned long WorldSceneElapsed ();
+GLulong WorldSceneBegin ();
+GLulong WorldSceneElapsed ();
 void      WorldTerm (void);
 void      WorldUpdate (void);
 

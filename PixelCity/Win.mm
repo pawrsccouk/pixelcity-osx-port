@@ -443,7 +443,7 @@ bool WinInit (void)
 
 // PAW: Replacement for Windows function that returns time since computer was started in milliseconds.
 // gettimeofday returns it in microseconds, so we need to convert the result.
-unsigned long GetTickCount()
+GLulong GetTickCount()
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);

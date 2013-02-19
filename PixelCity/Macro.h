@@ -19,7 +19,7 @@ template <class T> inline int SIGN(const T& x)
 }
 
 
-inline GLubyte GetRValue(unsigned long rgb) { return GLubyte(rgb); }
-inline GLubyte GetGValue(unsigned long rgb) { return GLubyte(GLushort(rgb) >> 8 ); }
-inline GLubyte GetBValue(unsigned long rgb) { return GLubyte(GLushort(rgb) >> 16); }
+inline GLubyte GetRValue(GLulong rgb) { return GLubyte(rgb); }
+inline GLubyte GetGValue(GLulong rgb) { return GLubyte(GLushort(rgb) >> 8 ); }
+inline GLubyte GetBValue(GLulong rgb) { return GLubyte(GLushort(rgb) >> 16); }
 

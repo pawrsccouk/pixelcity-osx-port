@@ -54,7 +54,7 @@
 //
 
 #import <ApplicationServices/ApplicationServices.h>
-#import <OpenGL/gl.h> // PAW for GLint
+#import "PWGL.h" // PAW for GLint
 
 typedef struct {
   // developers can add capabilities as required
@@ -63,10 +63,10 @@ typedef struct {
   CGOpenGLDisplayMask cglDisplayMask; // CGL display mask
   
   // current (at time of look up) device geometry
-  long deviceWidth; // pixel width
-  long deviceHeight; // pixel width
-  long deviceOriginX; // left location of device (relative to main device)
-  long deviceOriginY; // upper location of device (relative to main device)
+  GLlong deviceWidth; // pixel width
+  GLlong deviceHeight; // pixel width
+  GLlong deviceOriginX; // left location of device (relative to main device)
+  GLlong deviceOriginY; // upper location of device (relative to main device)
   short deviceDepth; // pixel depth in bits
   short deviceRefresh; // integer refresh rate in Hz
   

@@ -25,6 +25,10 @@
 #import "win.h"
 #import "RenderAPI.h"
 
+static const int   LOGO_RESOLUTION      = 512;
+static const int   LOGO_ROWS            = 16;
+static const float LOGO_PIXELS          = (LOGO_RESOLUTION / LOGO_ROWS);
+
 static const int    RENDER_DISTANCE  =   1280;
 static const int    MAX_TEXT         =   256;
 static const int    COLOR_CYCLE_TIME =   10000;			//milliseconds
@@ -499,8 +503,8 @@ void static do_help (void)
 
 void do_fps ()
 {
-    unsigned long interval = 1000;
-    static unsigned long next_update = 0;
+    GLulong interval = 1000;
+    static GLulong next_update = 0;
     if (next_update > GetTickCount())
         return;
     next_update = GetTickCount() + interval;
@@ -725,7 +729,7 @@ void RenderUpdate (int width, int height)
 	EntityRender (g_flat);
     
 	if (!LOADING_SCREEN) {
-		long elapsed = 3000 - WorldSceneElapsed();
+		GLlong elapsed = 3000 - WorldSceneElapsed();
 		if (elapsed >= 0 && elapsed <= 3000) {
 			drawFogFX(float(elapsed) / 3000.0f);
 			pwDisable(GL_TEXTURE_2D);

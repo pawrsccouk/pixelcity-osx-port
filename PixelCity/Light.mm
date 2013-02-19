@@ -26,48 +26,39 @@
 
 static void addLight(float x, float y, float z, float r, float g, float b, float a, int size, bool blinks);
 
-
-class CLight
+@interface Light : NSObject
 {
     GLvector        _position;
     GLrgba          _color;
     int             _size;
-    float           _vert_size;
-    float           _flat_size;
-    bool            _blink;
-    unsigned long   _blink_interval;
-    int             _cell_x;
-    int             _cell_z;
-    
-public:
-    CLight(GLvector pos, GLrgba color, int size);
-    void            Render ();
-    void            Blink ();
-    
-};
+    float           _vert_size, _flat_size;
+    GLulong   _blink_interval;
+    int             _cell_x, _cell_z;
+}
+@property (nonatomic) BOOL blink;
+
+-(id) initWithPosition:(const GLvector&) pos color:(const GLrgba&) color size:(int) size blink:(BOOL)blink;
+-(void) render;
+@end
 
 static GLvector2      angles[5][360];
-std::vector<CLight*>  all_lights;
+static NSMutableArray *allLights = [NSMutableArray array];
 static bool           angles_done;
 
 void LightAdd(const GLvector &position, const GLrgba &color, int size, bool blink)
 {
-    CLight *newLight = new CLight(position, color, size);
-    all_lights.push_back(newLight);
-    if(blink)
-        newLight->Blink();
+    [allLights addObject:[[Light alloc] initWithPosition:position color:color size:size blink:blink]];
 }
 
 static const short MAX_SIZE = 5;
 
 void LightClear ()
 {
-    std::for_each( all_lights.begin(), all_lights.end(), [](CLight* l){ delete l; } );
-    all_lights.resize(0);
+    [allLights removeAllObjects];
 }
 
 
-unsigned long LightCount () {  return all_lights.size();  }
+GLulong LightCount () {  return allLights.count;  }
 
 
 
@@ -76,14 +67,12 @@ void LightRender ()
 	if (!EntityReady ())
 		return;
 
-	if (!angles_done) {
-		for (int size = 0; size < MAX_SIZE; size++) {
+	if (!angles_done)
+		for (int size = 0; size < MAX_SIZE; size++)
 			for (int i = 0 ;i < 360; i++) {
 				angles[size][i].x = cosf (float(i) * DEGREES_TO_RADIANS) * (float(size) + 0.5f);
 				angles[size][i].y = sinf (float(i) * DEGREES_TO_RADIANS) * (float(size) + 0.5f);
 			}
-		}
-	}
 
     pwDisable(GL_FOG);      // Allow the lights to peek out of the fog.
 	pwDepthMask (GL_FALSE);
@@ -93,38 +82,41 @@ void LightRender ()
 	pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_LIGHT));
 	pwDisable (GL_CULL_FACE);
 	
-    std::for_each(all_lights.begin(), all_lights.end(), std::mem_fun(&CLight::Render));
+    for(Light *light in allLights)
+        [light render];
 
 	pwDepthMask (GL_TRUE);
 }
 
 /*---------------------------------------------------------------------------------------------------------------------------------*/
 
-CLight::CLight (GLvector pos, GLrgba color, int size)
+@implementation Light
+@synthesize blink = _blink;
+
+-(id)initWithPosition:(const GLvector &)pos color:(const GLrgba &)color size:(int)size blink:(BOOL)blink
 {
-    _position = pos;
-    _color = color;
-    _size = CLAMP(size, 0, (MAX_SIZE - 1));
-    _vert_size = (float)_size + 0.5f;
-    _flat_size = _vert_size + 0.5f;
-    _blink = false;
-    _cell_x = WORLD_TO_GRID(pos.x);
-    _cell_z = WORLD_TO_GRID(pos.z);
+    self = [super init];
+    if(self) {
+        self.blink = blink;
+        _position = pos;
+        _color = color;
+        _size = CLAMP(size, 0, (MAX_SIZE - 1));
+        _vert_size = _size + 0.5f;
+        _flat_size = _vert_size + 0.5f;
+        _cell_x = WORLD_TO_GRID(pos.x);
+        _cell_z = WORLD_TO_GRID(pos.z);
+    }
+    return self;
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void CLight::Blink ()
+-(void)setBlink:(BOOL) blink
 {
-  _blink = true;
+  _blink = blink;
         //we don't want blinkers to be in sync, so have them blink at slightly different rates. (Milliseconds)
   _blink_interval = 1500 + RandomIntR(500);
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-
-void CLight::Render ()
+-(void)render
 {
 	if (!Visible (_cell_x, _cell_z))
 		return;
@@ -139,16 +131,16 @@ void CLight::Render ()
 	GLvector2 offset = angles[_size][angle];
 	GLvector pos = _position;
 	
-	{
-        MakePrimitive mp(GL_QUADS);
-		_color.glColor4();
-		glTexCoord2f (0, 0);   
-		glVertex3f (pos.x + offset.x, pos.y - _vert_size, pos.z + offset.y);
-		glTexCoord2f (0, 1);   
-		glVertex3f (pos.x - offset.x, pos.y - _vert_size, pos.z - offset.y);
-		glTexCoord2f (1, 1);   
-		glVertex3f (pos.x - offset.x, pos.y + _vert_size, pos.z - offset.y);
-		glTexCoord2f (1, 0);   
-		glVertex3f (pos.x + offset.x, pos.y + _vert_size, pos.z + offset.y);
+	pwBegin(GL_QUADS);
+    @try {
+        GLvertex(GLvector(pos.x + offset.x, pos.y - _vert_size, pos.z + offset.y), GLvector2(0, 0), _color).apply();
+        GLvertex(GLvector(pos.x - offset.x, pos.y - _vert_size, pos.z - offset.y), GLvector2(0, 1), _color).apply();
+        GLvertex(GLvector(pos.x - offset.x, pos.y + _vert_size, pos.z - offset.y), GLvector2(1, 1), _color).apply();
+        GLvertex(GLvector(pos.x + offset.x, pos.y + _vert_size, pos.z + offset.y), GLvector2(1, 0), _color).apply();
 	}
+    @finally { pwEnd(); }
 }
+@end
+
+
+

@@ -57,7 +57,7 @@ static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the give
 
 -(void)RenderFlat:(BOOL) colored { }
 -(BOOL)alpha { return _use_alpha; }
--(unsigned long)polyCount  { return _mesh.polyCount; }
+-(GLulong)polyCount  { return _mesh.polyCount; }
 -(GLuint) texture  { return _texture; }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -132,7 +132,7 @@ static const short LIGHT_SIZE = 3;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(void) CreateLightTrimWithChain:(GLvector*) chain count:(int) count height:(float) height seed:(unsigned long) seed color:(GLrgba) color;
+-(void) CreateLightTrimWithChain:(GLvector*) chain count:(int) count height:(float) height seed:(GLulong) seed color:(GLrgba) color;
 {
     _color = color;
     _center = glVector (0.0f, 0.0f, 0.0f);
