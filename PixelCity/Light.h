@@ -1,5 +1,3 @@
-#ifndef _LIGHT_H_
-#define _LIGHT_H_
 
 #if defined(__cplusplus)
 extern "C" {
@@ -15,4 +13,3 @@ extern "C" {
 
 void LightAdd(const GLvector &position, const GLrgba &color, int size, bool blink);
 
-#endif // _LIGHT_H_

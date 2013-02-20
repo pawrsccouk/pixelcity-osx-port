@@ -1,5 +1,3 @@
-#ifndef MATH_X_
-#define MATH_X_
 
 static const float DEGREES_TO_RADIANS   =    0.017453292F;
 static const float RADIANS_TO_DEGREES   =    57.29577951F;
@@ -27,4 +25,3 @@ float MathScalarCurve (float val);
 }
 #endif
 
-#endif // defined MATH_X_

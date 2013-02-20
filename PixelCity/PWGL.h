@@ -6,9 +6,6 @@
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
 //
 
-#ifndef PixelCity_PWGL_h
-#define PixelCity_PWGL_h
-
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 
@@ -75,4 +72,3 @@ void pwTexCoord2f(GLfloat x, GLfloat y);
 #endif
 
 
-#endif

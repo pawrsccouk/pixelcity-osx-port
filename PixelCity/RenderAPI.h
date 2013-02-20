@@ -6,8 +6,6 @@
 //
 //
 
-#ifndef PixelCity_RenderAPI_h
-#define PixelCity_RenderAPI_h
 
 #ifdef __cplusplus
 extern "C"
@@ -56,4 +54,3 @@ extern "C"
 #endif
 
 
-#endif

@@ -127,22 +127,16 @@ GLrgba::GLrgba(GLlong c)
   _green(float(GetGValue(c)) / 255.0f),
   _blue (float(GetBValue(c)) / 255.0f),
   _alpha(1.0f)
-{
-}
+{}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 GLrgba::GLrgba(float luminance)
 : _red(luminance), _green(luminance), _blue(luminance), _alpha(1.0f)
-{
-}
+{}
 
-/*-----------------------------------------------------------------------------
-Takes the given index and returns a "random" color unique for that index.
-512 Unique values: #0 and #512 will be the same, as will #1 and #513, etc
-Useful for visual debugging in some situations.
------------------------------------------------------------------------------*/
-
+//Takes the given index and returns a "random" color unique for that index. 512 Unique values: #0 and #512 will be the same, as will #1 and #513, etc
+//Useful for visual debugging in some situations.
 GLrgba glRgbaUnique (int i)
 {
   float red   = 0.4f + ((i & 1) ? 0.2f : 0.0f) + ((i &  8) ? 0.3f : 0.0f) - ((i &  64) ? 0.3f : 0.0f);
@@ -165,9 +159,7 @@ ostream& GLrgba::operator<<(ostream &os) const
     return os << "[GLrgba A=" << alpha() << ", R=" << red() << ", G=" << green() << ", B=" << blue() << "]";
 }
 
-/*-----------------------------------------------------------------------------
-  + operator                          
------------------------------------------------------------------------------*/
+//  + operator                          
 
 GLrgba GLrgba::operator+ (const GLrgba& c) const
 {
@@ -179,23 +171,8 @@ GLrgba GLrgba::operator+ (const float& c) const
   return GLrgba(red() + c, green() + c, blue() + c, alpha());
 } 
 
-//void GLrgba::operator+= (const GLrgba& c)
-//{
-//  _red += c.red();
-//  _green += c.green();
-//  _blue += c.blue();
-//}
-//
-//void GLrgba::operator+= (const float& c)
-//{
-//  _red += c;
-//  _green += c;
-//  _blue += c;
-//}
 
-/*-----------------------------------------------------------------------------
-  - operator                          
------------------------------------------------------------------------------*/
+//  - operator                          
 
 GLrgba GLrgba::operator- (const GLrgba& c) const
 {
@@ -207,23 +184,7 @@ GLrgba GLrgba::operator- (const float& c) const
   return GLrgba(red() - c, green() - c, blue() - c, alpha());
 }
 
-//void GLrgba::operator-= (const GLrgba& c)
-//{
-//  _red   -= c.red();
-//  _green -= c.green();
-//  _blue  -= c.blue();
-//}
-//
-//void GLrgba::operator-= (const float& c)
-//{
-//  _red   -= c;
-//  _green -= c;
-//  _blue  -= c;
-//}
-
-/*-----------------------------------------------------------------------------
-  * operator                          
------------------------------------------------------------------------------*/
+//  * operator
 
 GLrgba GLrgba::operator* (const GLrgba& c) const
 {
@@ -235,23 +196,8 @@ GLrgba GLrgba::operator* (const float& c) const
   return GLrgba(red() * c, green() * c, blue() * c, alpha());
 }
 
-//void GLrgba::operator*= (const GLrgba& c)
-//{
-//  _red   *= c.red();
-//  _green *= c.green();
-//  _blue  *= c.blue();
-//}
-//
-//void GLrgba::operator*= (const float& c)
-//{
-//  _red   *= c;
-//  _green *= c;
-//  _blue  *= c;
-//}
 
-/*-----------------------------------------------------------------------------
-  / operator                          
------------------------------------------------------------------------------*/
+//  / operator                          
 
 GLrgba GLrgba::operator/ (const GLrgba& c) const
 {
@@ -262,20 +208,6 @@ GLrgba GLrgba::operator/ (const float& c) const
 {
   return GLrgba(red() / c, green() / c, blue() / c, alpha());
 }
-
-//void GLrgba::operator/= (const GLrgba& c)
-//{
-//  _red   /= c.red();
-//  _green /= c.green();
-//  _blue  /= c.blue();
-//}
-//
-//void GLrgba::operator/= (const float& c)
-//{
-//  _red   /= c;
-//  _green /= c;
-//  _blue  /= c;
-//}
 
 bool GLrgba::operator==(const GLrgba& c) const
 {
@@ -300,7 +232,6 @@ GLrgba GLrgba::colorWithAlpha(float newAlpha) const { return GLrgba(red(), green
     //Random SATURATED color
 GLrgba RANDOM_COLOR(void)
 {
-    //was #define RANDOM_COLOR (glRgbaFromHsl(float(RandomVal(255))/255.0f, 1.0f, 0.75f))
     return glRgbaFromHsl(float(RandomIntR(255))/255.0f, 1.0f, 0.75f);
 }
 

@@ -1,5 +1,5 @@
 
-#define WRAP(x,y) (unsigned(x) % y)
+inline GLuint WRAP(GLuint x, GLuint y) { return GLuint(x) % y; }
 
 template <class T> inline const T& CLAMP(const T& a, const T& b, const T& c) { return (a < b ? b : (a > c ? c : a)); }
 

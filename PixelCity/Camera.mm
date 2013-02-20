@@ -15,8 +15,9 @@
 #import "Model.h"
 #import "ini.h"
 #import "world.h"
-#import "win.h"
+#import "Visible.h"
 #import "Camera.h"
+#import "Win.h"
 
 enum
 {

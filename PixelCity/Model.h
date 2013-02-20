@@ -6,8 +6,6 @@
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
 //
 
-#ifndef PixelCity_Model_h
-#define PixelCity_Model_h
 
 
 // Standard header for including stock stuff that shouldn't change very often.
@@ -37,4 +35,3 @@
 #import "Random.h"
 #import "Macro.h"
 
-#endif

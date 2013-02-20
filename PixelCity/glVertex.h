@@ -6,9 +6,6 @@
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
 //
 
-#ifndef PixelCity_glVertex_h
-#define PixelCity_glVertex_h
-
 
 struct GLvertex
 {
@@ -31,4 +28,3 @@ inline std::ostream &operator<<(std::ostream &os, const GLvertex &v) { return v.
 inline void GLvertex::glVertex3() const { position.glVertex3(); }
 inline void GLvertex::glTexCoord2() const { uv.glTexCoord2(); }
 
-#endif

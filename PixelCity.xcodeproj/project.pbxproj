@@ -22,8 +22,6 @@
 		5771096516C6E0AF007D32DA /* Entity.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095216C6E0AF007D32DA /* Entity.mm */; };
 		5771096616C6E0AF007D32DA /* glBbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095416C6E0AF007D32DA /* glBbox.cpp */; };
 		5771096716C6E0AF007D32DA /* GLCheck.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095516C6E0AF007D32DA /* GLCheck.mm */; };
-		5771096816C6E0AF007D32DA /* glMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095716C6E0AF007D32DA /* glMatrix.cpp */; };
-		5771096916C6E0AF007D32DA /* glQuat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095816C6E0AF007D32DA /* glQuat.cpp */; };
 		5771096A16C6E0AF007D32DA /* glRgba.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095916C6E0AF007D32DA /* glRgba.cpp */; };
 		5771096B16C6E0AF007D32DA /* GLString.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771095B16C6E0AF007D32DA /* GLString.m */; };
 		5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095C16C6E0AF007D32DA /* glVertex.cpp */; };
@@ -76,8 +74,6 @@
 		5771095416C6E0AF007D32DA /* glBbox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glBbox.cpp; sourceTree = "<group>"; };
 		5771095516C6E0AF007D32DA /* GLCheck.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GLCheck.mm; sourceTree = "<group>"; };
 		5771095616C6E0AF007D32DA /* GLCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLCheck.h; sourceTree = "<group>"; };
-		5771095716C6E0AF007D32DA /* glMatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glMatrix.cpp; sourceTree = "<group>"; };
-		5771095816C6E0AF007D32DA /* glQuat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glQuat.cpp; sourceTree = "<group>"; };
 		5771095916C6E0AF007D32DA /* glRgba.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; path = glRgba.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		5771095A16C6E0AF007D32DA /* GLString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLString.h; sourceTree = "<group>"; };
 		5771095B16C6E0AF007D32DA /* GLString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLString.m; sourceTree = "<group>"; };
@@ -239,8 +235,6 @@
 				5771095416C6E0AF007D32DA /* glBbox.cpp */,
 				5771095516C6E0AF007D32DA /* GLCheck.mm */,
 				5771095616C6E0AF007D32DA /* GLCheck.h */,
-				5771095716C6E0AF007D32DA /* glMatrix.cpp */,
-				5771095816C6E0AF007D32DA /* glQuat.cpp */,
 				5771095916C6E0AF007D32DA /* glRgba.cpp */,
 				5771099A16C73E01007D32DA /* glRgba.h */,
 				5771099B16C74178007D32DA /* glVertex.h */,
@@ -349,8 +343,6 @@
 				5771096516C6E0AF007D32DA /* Entity.mm in Sources */,
 				5771096616C6E0AF007D32DA /* glBbox.cpp in Sources */,
 				5771096716C6E0AF007D32DA /* GLCheck.mm in Sources */,
-				5771096816C6E0AF007D32DA /* glMatrix.cpp in Sources */,
-				5771096916C6E0AF007D32DA /* glQuat.cpp in Sources */,
 				5771096A16C6E0AF007D32DA /* glRgba.cpp in Sources */,
 				5771096B16C6E0AF007D32DA /* GLString.m in Sources */,
 				5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */,

@@ -6,9 +6,6 @@
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
 //
 
-#ifndef PixelCity_glRGBA_h
-#define PixelCity_glRGBA_h
-
 class GLrgba
 {
     float _red, _green, _blue, _alpha;
@@ -67,8 +64,3 @@ GLrgba    glRgbaMultiply (GLrgba c1, GLrgba c2);
 GLrgba    glRgbaUnique (int i);
 GLrgba    glRgbaFromHsl (float h, float s, float l);
 
-    // Calls glColor3fv and glColor4fv with the RGB/A values in color.
-//void glColor3(const GLrgba &color);
-//void glColor4(const GLrgba &color);
-
-#endif

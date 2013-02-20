@@ -14,10 +14,6 @@ static const GLlong RESET_INTERVAL  =  (SCREENSAVER ? 120000 : 999999); //millis
 static const int FADE_TIME        =  (SCREENSAVER ? 1500 : 1);  //milliseconds    //How GLlong the screen fade takes when transitioning to a new city
 static const bool SHOW_DEBUG_GROUND  =  false;    //Debug ground texture that shows traffic lanes
 
-//Controls the ammount of space available for buildings.  Other code is wrtten assuming this will be a power of two.
-static const int WORLD_SIZE = 1024;
-static const int WORLD_HALF = (WORLD_SIZE / 2);
-
 //Bitflags used to track how world space is being used.
 enum ClaimFlags {
     CLAIM_ROAD       =   1 ,

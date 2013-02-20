@@ -47,8 +47,6 @@
 // Copyright ( C ) 2000-2007 Apple Inc. All Rights Reserved.
 //
 
-#ifndef __trackball_h__
-#define __trackball_h__
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,4 +65,3 @@ void addToRotationTrackball (float * dA, float * A);
 }
 #endif
 
-#endif

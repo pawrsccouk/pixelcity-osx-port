@@ -1,7 +1,4 @@
 
-#ifndef PixelCity_ENTITY
-#define PixelCity_ENTITY
-
 @interface Entity : NSObject
 {
   GLvector _center;
@@ -47,5 +44,3 @@ void      EntityDump(void);
 }
 #endif
 
-
-#endif
