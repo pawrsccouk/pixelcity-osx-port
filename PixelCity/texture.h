@@ -1,5 +1,4 @@
 static const int   SEGMENTS_PER_TEXTURE = 64;
-
 static const int   TRIM_RESOLUTION      = 256;
 static const int   TRIM_ROWS            = 4;
 static const float TRIM_SIZE            = (1.0f / TRIM_ROWS);
@@ -29,26 +28,25 @@ typedef enum TextureType
 
 static const int BUILDING_COUNT  =  ((TEXTURE_BUILDING9 - TEXTURE_BUILDING1) + 1);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 @class World;
 
-unsigned  TextureFromName (char* name);
-unsigned  TextureId (TextureType texType);
-void      TextureInit (World *world);
-void      TextureTerm (void);
-GLuint    TextureRandomBuilding (GLulong index);
-bool      TextureReady ();
-void      TextureReset (void);
-void      TextureUpdate (World *world, bool showFlat, bool showBloom);
+@interface Textures : NSObject
+
+@property (nonatomic, readonly) BOOL ready;
+
+-(id)   initWithWorld:(World *) world;
+
+//-(GLuint) textureFromName:(NSString*) name;
+-(GLuint) textureId:(TextureType) texType;
+-(void)   term;
+-(GLuint) randomBuilding:(GLulong) index;
+-(void)   reset;
+-(void)   update:(World *)world showFlat:(BOOL) showFlat showBloom:(BOOL) showBloom;
 
     // PAW: Return the texture ID of one of a set of pre-defined logos.
     // Shamus' code worked by creating one large logo texture, and then getting each logo to map a different sub-rect of it.
     // I'm going to try creating an array of smaller textures instead.
-GLuint    TextureRandomLogo(void);
+-(GLuint) randomLogo;
 
-#ifdef __cplusplus
-}
-#endif
+@end
+

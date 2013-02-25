@@ -172,7 +172,7 @@ static void updateProgress(Entities *entities, float fade)
     RenderPrintOverlayText (1, "%s v%d.%d.%03d\n%1.2f%%", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, entities.progress * 100.0f);
 }
 
-static void drawDebugEffect()
+static void drawDebugEffect(World *world)
 {
     const size_t TICK_INTERVAL = 2 * 1000;  // seconds to millis.
     static size_t lastCheck = 0;
@@ -181,7 +181,7 @@ static void drawDebugEffect()
         // Change the logo every couple of seconds.
     if(GetTickCount() > lastCheck + TICK_INTERVAL) {
         lastCheck = GetTickCount();
-        lastLogoTex = TextureRandomLogo();
+        lastLogoTex = [world.textures randomLogo];
     }
     float blockHeight = g_render_height / 4.0f, blockWidth = g_render_width / 2.0f;
     pwBindTexture(GL_TEXTURE_2D, lastLogoTex);
@@ -275,7 +275,7 @@ static void drawDebugOverbloomEffect(const GLrgba &bloomColor)
 
 static void doEffects(EffectType type, World *world)
 {
-    if (!TextureReady ())
+    if (! world.textures.ready)
 		return;
     
         //Now change projection modes so we can render full-screen effects
@@ -299,12 +299,12 @@ static void doEffects(EffectType type, World *world)
             pwEnable (GL_TEXTURE_2D);
             pwDisable(GL_DEPTH_TEST);
             pwDepthMask (GL_FALSE);
-            pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_BLOOM));
+            pwBindTexture(GL_TEXTURE_2D, [world.textures textureId:TEXTURE_BLOOM]);
             
             switch (type) {
-                case EFFECT_DEBUG:            drawDebugEffect();            break;
+                case EFFECT_DEBUG:            drawDebugEffect(world);                       break;
                 case EFFECT_BLOOM_RADIAL:     drawBloomRadialEffect(world.bloomColor);      break;
-                case EFFECT_COLOR_CYCLE:      drawColorCycleEffect();       break;
+                case EFFECT_COLOR_CYCLE:      drawColorCycleEffect();                       break;
                 case EFFECT_BLOOM:            drawBloomEffect(world.bloomColor);            break;
                 case EFFECT_DEBUG_OVERBLOOM:  drawDebugOverbloomEffect(world.bloomColor); 	break;
                 default:
@@ -317,7 +317,7 @@ static void doEffects(EffectType type, World *world)
                 if (fade > 0.0f)
                     fadeDisplay(fade);
                 
-                if (TextureReady () && ! world.entities.ready && fade != 0.0f)
+                if (world.textures.ready && ! world.entities.ready && fade != 0.0f)
                     updateProgress(world.entities, fade);
             }
         }
@@ -483,7 +483,7 @@ void RenderUpdate (World *world, int width, int height)
 	g_render_height = height;
 	g_frames++;
     
-	TextureUpdate(world, g_flat, isBloom());
+	[world.textures update:world showFlat:g_flat showBloom:isBloom()];
 	glReportError("AppUpdate:After TextureUpdate");
 
 	do_fps();
@@ -497,7 +497,7 @@ void RenderUpdate (World *world, int width, int height)
 	if (g_letterbox) 
 		pwViewport (0, g_letterbox_offset, g_render_width, g_render_height);
     
-	if (LOADING_SCREEN && TextureReady () && ! world.entities.ready) {
+	if (LOADING_SCREEN && world.textures.ready && ! world.entities.ready) {
 		doEffects (EFFECT_NONE, world);
 		return;
 	}
@@ -532,7 +532,7 @@ void RenderUpdate (World *world, int width, int height)
 	pwDisable (GL_FOG);
     
     if(! g_flat)
-        SkyRender();
+        [world.sky render];
     
 	if (g_show_fog)
         drawFog();

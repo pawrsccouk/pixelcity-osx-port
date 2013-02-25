@@ -85,7 +85,7 @@ static const short LIGHT_SIZE = 3;
                                        size:LIGHT_SIZE
                                       blink:YES];
     
-    _texture = TextureId (TEXTURE_LATTICE);
+    _texture = [self.world.textures textureId:TEXTURE_LATTICE];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -110,7 +110,7 @@ static const short LIGHT_SIZE = 3;
   
   [_mesh addQuadStrip:quad_strip( 0, 1, 3, 2, LIST_TERM) ];
   
-  _texture = TextureRandomLogo(); // TextureId (TEXTURE_LOGOS);
+  _texture = [self.world.textures randomLogo]; // TextureId (TEXTURE_LOGOS);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -120,7 +120,7 @@ static const short LIGHT_SIZE = 3;
   _color = color;
   _use_alpha = true;
   _center = glVector (x + width / 2, height, z + depth / 2);
-  _texture = TextureId (TEXTURE_LIGHT);
+  _texture = [self.world.textures textureId:TEXTURE_LIGHT];
   
   float u = (width < depth) ? 1.0f : float(int(width / depth));
   float v = (width < depth) ? float(int(depth / width)) : 1.0f;
@@ -175,7 +175,7 @@ static const short LIGHT_SIZE = 3;
     }
     
     [_mesh addQuadStrip:qs];
-    _texture = TextureId (TEXTURE_TRIM);
+    _texture = [self.world.textures textureId:TEXTURE_TRIM];
     [_mesh Compile];
 }
 

@@ -17,6 +17,7 @@
 #import "camera.h"
 #import "sky.h"
 #import "texture.h"
+#import "World.h"
 
 static const int SKYPOINTS = 24;
 
@@ -33,80 +34,27 @@ static const int SKY_HALF = (SKY_GRID / 2);
 
 #pragma mark - Sky
 
-@interface Sky : NSObject
+@interface Sky ()
 {
     int m_list;
     int m_stars_list;
     CSkyPoint m_grid[SKY_GRID][SKY_GRID];
 }
-   
--(id)init;
--(void)Render;
-    
+
 @end
 
-static Sky *theSky;
-
-
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void SkyInit()
-{
-    theSky = [[Sky alloc] init];
-}
-
-void SkyRender()
-{
-  [theSky Render];
-}
-
-void SkyClear ()
-{
-    theSky = NULL;
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 @implementation Sky
 
--(void) Render
-{
-    if (!TextureReady ())
-        return;
-    
-    pwDepthMask (GL_FALSE);
-    pwPushAttrib (GL_POLYGON_BIT | GL_FOG_BIT);
-    pwPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-    pwDisable (GL_CULL_FACE);
-    pwDisable (GL_FOG);
-    {
-        pwPushMatrix();
-        @try {
-            pwLoadIdentity();
-            GLvector angle = CameraAngle (), position = CameraPosition ();
-            pwRotatef (angle.x, 1.0f, 0.0f, 0.0f);
-            pwRotatef (angle.y, 0.0f, 1.0f, 0.0f);
-            pwRotatef (angle.z, 0.0f, 0.0f, 1.0f);
-            pwTranslatef (0.0f, -position.y / 100.0f, 0.0f);
-            pwEnable (GL_TEXTURE_2D);
-            pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_SKY));
-            glCallList (m_list);
-        }
-        @finally { pwPopMatrix(); }
-    }
-    pwPopAttrib();
-    pwDepthMask(GL_TRUE);
-    pwEnable (GL_COLOR_MATERIAL);
-}
-
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
--(id)init
+-(id)initWithWorld:(World *)world
 {
     self = [super init];
     if(self) {
+        _world = world;
+    
         CSkyPoint circle[SKYPOINTS];
         float size = 10.0f;
         for (int i = 0; i < SKYPOINTS; i++) {
@@ -138,4 +86,42 @@ void SkyClear ()
     }
     return self;
 }
+
+-(void)clear
+{
+}
+
+-(void) render
+{
+    if (! self.world.textures.ready)
+        return;
+    
+    pwDepthMask (GL_FALSE);
+    pwPushAttrib (GL_POLYGON_BIT | GL_FOG_BIT);
+    pwPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+    pwDisable (GL_CULL_FACE);
+    pwDisable (GL_FOG);
+    {
+        pwPushMatrix();
+        @try {
+            pwLoadIdentity();
+            GLvector angle = CameraAngle (), position = CameraPosition ();
+            pwRotatef (angle.x, 1.0f, 0.0f, 0.0f);
+            pwRotatef (angle.y, 0.0f, 1.0f, 0.0f);
+            pwRotatef (angle.z, 0.0f, 0.0f, 1.0f);
+            pwTranslatef (0.0f, -position.y / 100.0f, 0.0f);
+            pwEnable (GL_TEXTURE_2D);
+            pwBindTexture(GL_TEXTURE_2D, [self.world.textures textureId:TEXTURE_SKY]);
+            glCallList (m_list);
+        }
+        @finally { pwPopMatrix(); }
+    }
+    pwPopAttrib();
+    pwDepthMask(GL_TRUE);
+    pwEnable (GL_COLOR_MATERIAL);
+}
+
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 @end

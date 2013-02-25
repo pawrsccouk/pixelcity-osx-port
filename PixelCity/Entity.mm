@@ -148,7 +148,7 @@ struct Cell
 
 -(void) update
 {
-    if (!TextureReady()) {
+    if (! self.world.textures.ready) {
         _sorted = NO;
         return;
     }

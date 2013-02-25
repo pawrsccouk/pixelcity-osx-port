@@ -1,13 +1,13 @@
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+@class World;
 
 
-void SkyInit();
-void SkyRender();
-void SkyClear();
+@interface Sky : NSObject
 
-#ifdef __cplusplus
-}
-#endif
+@property (nonatomic, readonly) __weak World *world;
+
+-(id)initWithWorld:(World*) world;
+-(void) render;
+-(void) clear;
+
+@end
+

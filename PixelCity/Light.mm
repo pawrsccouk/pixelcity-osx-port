@@ -107,7 +107,7 @@ static const short MAX_SIZE = 5;
 	pwEnable (GL_BLEND);
 	pwDisable (GL_CULL_FACE);
 	pwBlendFunc (GL_ONE, GL_ONE);
-	pwBindTexture(GL_TEXTURE_2D, TextureId(TEXTURE_LIGHT));
+	pwBindTexture(GL_TEXTURE_2D, [self.world.textures textureId:TEXTURE_LIGHT]);
 	pwDisable (GL_CULL_FACE);
 	
     for(Light *light in _allLights)

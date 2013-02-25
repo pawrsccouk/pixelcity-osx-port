@@ -23,10 +23,7 @@
 #import "car.h"
 #import "light.h"
 #import "Entity.h"
-
-static bool textures_done = false;
-static int  build_time = 0;
-static NSMutableArray *allTextures = [NSMutableArray array];
+#import "GLString.h"
 
 #pragma mark - Texture interface
 
@@ -34,13 +31,13 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 {
 	int  _desired_size, _half, _segment_size;
 	bool _masked, _mipmap, _clamp;
-    __weak World *_world;
 }
 
 @property (nonatomic) TextureType type;
 @property (nonatomic) GLuint glid;
 @property (nonatomic) GLint  size;
 @property (nonatomic) BOOL ready;
+@property (nonatomic, readonly) __weak World *world;
 
 +(id)textureWithType:(TextureType) type size:(int) size mipmap:(BOOL) mipmap clamp:(BOOL) clamp masked:(BOOL) masked world:(World*)world;
 
@@ -54,13 +51,24 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 @end
 
 
+@interface Textures ()
+{
+    int  _buildTime;
+    NSMutableArray *_allTextures;
+}
+
+-(void) addBuildTime:(GLulong) timeElapsed;
+
+@end
+
+
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #pragma mark - Texture implementation
 
 @implementation Texture
 
-@synthesize type = _type, size = _size, glid = _glid;
+@synthesize type = _type, size = _size, glid = _glid, world = _world;
 
 +(id)textureWithType:(TextureType)type size:(int)size mipmap:(BOOL)mipmap clamp:(BOOL)clamp masked:(BOOL)masked world:(World *)world
 {
@@ -171,7 +179,7 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 		pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		pwDisable (GL_CULL_FACE);
 		pwEnable (GL_TEXTURE_2D);
-		pwBindTexture (GL_TEXTURE_2D, TextureId (TEXTURE_SOFT_CIRCLE));
+		pwBindTexture (GL_TEXTURE_2D, [self.world.textures textureId:TEXTURE_SOFT_CIRCLE]);
 		pwDepthMask (GL_FALSE);
 		
         pwBegin(GL_QUADS);
@@ -303,7 +311,7 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 		pwTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	_ready = true;
 	GLulong lapsed = GetTickCount() - start;
-	build_time += lapsed;
+    [self.world.textures addBuildTime:lapsed];
 }
 
 static void drawOneCloud(const GLrgba &bloomColor, int x, int y, int width, int height, GLfloat scale, int offset)
@@ -543,6 +551,9 @@ static void window (int x, int y, int size, TextureType tt, GLrgba color)
 #pragma mark - Global interface
 
 
+@implementation Textures
+@synthesize ready = _ready;
+
 static void doBloom(World *world, Texture *t, bool showFlat)
 {
 	pwBindTexture(GL_TEXTURE_2D, 0);
@@ -572,46 +583,42 @@ static void doBloom(World *world, Texture *t, bool showFlat)
 
 
 
-GLuint TextureId (TextureType texType)
+-(GLuint) textureId:(TextureType) texType
 {
-	for (Texture* t in allTextures)
+	for (Texture* t in _allTextures)
 		if (t.type == texType)
 			return t.glid;
 	return 0;
 }
 
-
-unsigned TextureRandomBuilding (GLulong index)
+-(GLuint)randomBuilding:(GLulong)index
 {
 	index = labs(index) % BUILDING_COUNT;
-	return TextureId((TextureType)(TEXTURE_BUILDING1 + index));
+	return [self textureId:(TextureType(TEXTURE_BUILDING1 + index))];
 }
 
-
-void TextureReset (void)
+-(void)reset
 {	
-	textures_done = false;
-	build_time = 0;
-	for (Texture *t in allTextures)
+	_ready = false;
+	_buildTime = 0;
+	for (Texture *t in _allTextures)
 		[t Clear];
 }
 
-
-bool TextureReady()
-{	
-	return textures_done;	
+-(void)addBuildTime:(GLulong)timeElapsed
+{
+    _buildTime += timeElapsed;
 }
 
-
-void TextureUpdate(World *world, bool showFlat, bool showBloom)
+-(void)update:(World *)world showFlat:(BOOL)showFlat showBloom:(BOOL)showBloom
 {
 	glReportError("TextureUpdate:Beginning.");
 	
-	if (textures_done) {
+	if (self.ready) {
 		if (! showBloom)
 			return;
 		
-		for(Texture *t in allTextures) {
+		for(Texture *t in _allTextures) {
 			if(t.type == TEXTURE_BLOOM) {
 				doBloom(world, t, showFlat);
 				return;
@@ -619,36 +626,140 @@ void TextureUpdate(World *world, bool showFlat, bool showBloom)
 		}
 	}
 
-	for (Texture *t in allTextures) {
+	for (Texture *t in _allTextures) {
 		if(! t.ready) {
 			[t Rebuild];
 			return;
 		}
 	}
     glReportError("TextureUpdate:After CTexture::Rebuild()");
-	textures_done = true;
+	_ready = true;
 }
 
-
-void TextureTerm (void)
+-(void)term
 {
-    [allTextures removeAllObjects];
+    [_allTextures removeAllObjects];
 }
 
-
-void TextureInit (World *world)
+-(id)initWithWorld:(World *)world
 {
-    [allTextures addObject:[Texture textureWithType:TEXTURE_SKY         size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_LATTICE     size:128 mipmap:YES clamp:YES masked:YES world:world]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_LIGHT       size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_SOFT_CIRCLE size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_HEADLIGHT   size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_BLOOM       size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_TRIM        size:TRIM_RESOLUTION mipmap:YES clamp:NO masked:NO world:world]];
+    self = [super init];
+    if(self) {
+        _ready = false;
+        _buildTime = 0;
+        _allTextures = [NSMutableArray array];
+        
+        [_allTextures addObject:[Texture textureWithType:TEXTURE_SKY         size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
+        [_allTextures addObject:[Texture textureWithType:TEXTURE_LATTICE     size:128 mipmap:YES clamp:YES masked:YES world:world]];
+        [_allTextures addObject:[Texture textureWithType:TEXTURE_LIGHT       size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+        [_allTextures addObject:[Texture textureWithType:TEXTURE_SOFT_CIRCLE size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+        [_allTextures addObject:[Texture textureWithType:TEXTURE_HEADLIGHT   size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+        [_allTextures addObject:[Texture textureWithType:TEXTURE_BLOOM       size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
+        [_allTextures addObject:[Texture textureWithType:TEXTURE_TRIM        size:TRIM_RESOLUTION mipmap:YES clamp:NO masked:NO world:world]];
+        
+        for (int i = TEXTURE_BUILDING1; i <= TEXTURE_BUILDING9; i++)
+            [_allTextures addObject:[Texture textureWithType:TextureType(i) size:512 mipmap:YES clamp:NO masked:NO world:world]];
+    }
+    return self;
+}
+
+static NSArray *getFontAttributes()
+{
+    static NSMutableArray *fontAttribs;
+    if(!fontAttribs) {
+        NSString *fontNames[] = { @"Helvetica-Bold", @"Courier-Bold", @"Times-Bold", @"Impact", @"Chalkboard-Bold", @"Baskerville-Bold" };
+        int arraySize = sizeof(fontNames) / sizeof(fontNames[0]);
+        fontAttribs = [NSMutableArray arrayWithCapacity:6];
+        
+        for(NSUInteger i = 0; i < arraySize; i++) {
+            NSFont *font = [NSFont fontWithName:fontNames[i] size:32];
+            if(font)
+                [fontAttribs addObject:@{
+       NSFontAttributeName            : font,
+       NSForegroundColorAttributeName : [NSColor whiteColor]}];
+            else  NSLog(@"Font %@ could not be created.", fontNames[i]);
+        }
+    }
+    return fontAttribs;
+}
+
+static NSArray *makeLogos()
+{
+    NSArray* prefix =
+    @[
+	@"i"        ,	@"Green "   ,	@"Mega"     ,	@"Super "   ,
+	@"Omni"     ,	@"e"        ,	@"Hyper"    ,	@"Global "  ,
+	@"Vital"    ,	@"Next "    ,	@"Pacific " ,	@"Metro"    ,
+	@"Unity "   ,	@"G-"       ,	@"Trans"    ,	@"Infinity ",
+	@"Superior ",	@"Monolith ",	@"Best "    ,	@"Atlantic ",
+	@"First "   ,	@"Union "   ,	@"National ",
+    ];
     
-	for (int i = TEXTURE_BUILDING1; i <= TEXTURE_BUILDING9; i++)
-        [allTextures addObject:[Texture textureWithType:TextureType(i) size:512 mipmap:YES clamp:NO masked:NO world:world]];
+    NSArray* name =
+    @[
+	@"Biotic"    ,	@"Info"       ,	@"Data"      ,	@"Solar"    ,
+	@"Aerospace" ,	@"Motors"     ,	@"Nano"      ,	@"Online"   ,
+	@"Circuits"  ,	@"Energy"     ,	@"Med"       ,	@"Robotic"  ,
+	@"Exports"   ,	@"Security"   ,	@"Systems"   ,	@"Financial",
+	@"Industrial",	@"Media"      ,	@"Materials" ,	@"Foods"    ,
+	@"Networks"  ,	@"Shipping"   ,	@"Tools"     ,	@"Medical"  ,
+	@"Publishing",	@"Enterprises",	@"Audio"     ,	@"Health"   ,
+	@"Bank"      ,	@"Imports"    ,	@"Apparel"   ,	@"Petroleum",
+	@"Studios"   ,
+    ];
+    
+    NSArray* suffix =
+    @[
+	@"Corp"      ,	@" Inc.",	@"Co"        ,	@"World",
+	@".Com"      ,	@" USA" ,	@" Ltd."     ,	@"Net",
+	@" Tech"     ,	@" Labs",	@" Mfg."     ,	@" UK",
+	@" Unlimited",	@" One" ,	@" LLC"
+    ];
+    
+    pwDepthMask(GL_FALSE);
+    pwDisable(GL_BLEND);
+    
+    static const int NUM_LOGOS = 20;
+    int __block name_num = RandomIntR(int(name.count)), __block prefix_num = RandomIntR(int(prefix.count)), __block suffix_num = RandomIntR(int(suffix.count));
+    int font = RandomIntR(GLint(getFontAttributes().count));
+    
+    NSMutableArray *textures = [NSMutableArray array];
+    
+    auto getPrefixName = ^{ return [NSString stringWithFormat:@"%@%@", [prefix objectAtIndex:prefix_num], [name objectAtIndex:name_num]]; };
+    auto getsuffixName = ^{ return [NSString stringWithFormat:@"%@%@", [name objectAtIndex:name_num]    , [suffix objectAtIndex:suffix_num]]; };
+    
+    for(int i = 0; i < NUM_LOGOS; i++) {
+        
+        NSMutableDictionary *logoAttributes = [NSMutableDictionary dictionaryWithDictionary:[getFontAttributes() objectAtIndex:font]];
+        [logoAttributes setObject:[NSColor whiteColor] forKey:NSForegroundColorAttributeName];
+        assert([logoAttributes objectForKey:NSFontAttributeName] != nil);
+        
+        GLString *s = [[GLString alloc] initWithString:COIN_FLIP() ? getPrefixName() : getsuffixName()
+                                            attributes:logoAttributes
+                                             textColor:[NSColor whiteColor]
+                                              boxColor:[NSColor clearColor]
+                                           borderColor:[NSColor clearColor]];
+        GLuint textureId = [s makeTexture];
+        assert(textureId);
+        if(textureId)
+            [textures addObject:[NSNumber numberWithInt:textureId]];
+        
+        name_num   = (name_num   + 1) % name.count  ;
+        prefix_num = (prefix_num + 1) % prefix.count;
+        suffix_num = (suffix_num + 1) % suffix.count;
+    }
+    return textures;
 }
 
 
+-(GLuint) randomLogo
+{
+    static NSArray *textures = nil;
+    if(!textures)
+        textures = makeLogos();
+    
+    return [[textures objectAtIndex:RandomIntR(GLint(textures.count))] intValue];
+}
+
+@end
 

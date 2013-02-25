@@ -133,7 +133,7 @@ static const GLvector directions[] = {
   pwDisable (GL_CULL_FACE);
   pwBlendFunc (GL_ONE, GL_ONE);
   pwBindTexture (GL_TEXTURE_2D, 0);
-  pwBindTexture(GL_TEXTURE_2D, TextureId (TEXTURE_HEADLIGHT));
+  pwBindTexture(GL_TEXTURE_2D, [self.world.textures textureId:TEXTURE_HEADLIGHT]);
   for(Car *car in _cars)
       [car render];
   pwDepthMask (GL_TRUE);
@@ -143,11 +143,13 @@ static const GLvector directions[] = {
 
 -(void) update
 {
-    if (!TextureReady () || ! self.world.entities.ready)
+    if (!self.world.textures.ready || ! self.world.entities.ready)
         return;
+    
     GLulong now = GetTickCount ();
     if (_nextUpdate > now)
         return;
+    
     _nextUpdate = now + UPDATE_INTERVAL;
     for(Car *car in _cars)
         [car update];

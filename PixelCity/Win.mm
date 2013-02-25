@@ -57,7 +57,6 @@ World *AppInit(int width, int height)
     RandomInit (time (NULL));
     CameraInit ();
     RenderInit (width, height);
-    TextureInit(world);
     return world;
 }
 
@@ -66,7 +65,7 @@ World *AppInit(int width, int height)
 void AppTerm (World *world)
 {
 	DebugLog("AppTerm");
-    TextureTerm ();
+    [world.textures term];
     [world term];
     RenderTerminate();
 }

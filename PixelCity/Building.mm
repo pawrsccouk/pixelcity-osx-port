@@ -78,7 +78,7 @@ static const float ONE_SEGMENT          = (1.0f / SEGMENTS_PER_TEXTURE);
 
 -(GLuint) texture
 {
-  return TextureRandomBuilding (_texture_type);
+  return [self.world.textures randomBuilding:_texture_type];
 }
 
 

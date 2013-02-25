@@ -503,7 +503,7 @@ static plot makePlot(int x, int z, int width, int depth)
     [self.entities clear];
 	[self.lights clear];
 	[self.cars clear];
-	TextureReset ();
+	[self.textures reset];
 	
         //Pick a tint for the bloom
 	_bloomColor = get_light_color(0.5f + float(RandomLongR(10)) / 20.0f, 0.75f);
@@ -565,7 +565,7 @@ static plot makePlot(int x, int z, int width, int depth)
 		[self fullReset]; //Now we've faded out the scene, rebuild it
 	}
 	if (_fade != FADE_IDLE) {
-		if (_fade == FADE_WAIT && TextureReady () && self.entities.ready) {
+		if (_fade == FADE_WAIT && self.textures.ready && self.entities.ready) {
 			_fade = FADE_IN;
 			_fadeStart = now;
 			_fadeCurrent = 1.0f;
@@ -590,10 +590,10 @@ static plot makePlot(int x, int z, int width, int depth)
 			if (_fade == FADE_WAIT)
 				_fadeCurrent = 1.0f;
 		}
-		if (! TextureReady())
+		if (! self.textures.ready)
 			_fadeCurrent = 1.0f;
 	} 
-	if (_fade == FADE_IDLE && ! TextureReady()) {
+	if (_fade == FADE_IDLE && ! self.textures.ready) {
 		_fade = FADE_IN;
 		_fadeStart = now;
 	}
@@ -616,9 +616,9 @@ static plot makePlot(int x, int z, int width, int depth)
         _cars     = [[Cars     alloc] initWithWorld:self];
         _lights   = [[Lights   alloc] initWithWorld:self];
         _entities = [[Entities alloc] initWithWorld:self];
-        
-        SkyInit();
-        
+        _sky      = [[Sky      alloc] initWithWorld:self];
+        _textures = [[Textures alloc] initWithWorld:self];
+
         [self reset];
         _fade = FADE_OUT;
         _fadeStart = 0;

@@ -1,5 +1,5 @@
 
-@class Cars, Entities, Lights;
+@class Cars, Entities, Lights, Textures, Sky;
 
 @interface World : NSObject
 {
@@ -13,6 +13,8 @@
 @property (nonatomic, readonly) Cars     *cars;
 @property (nonatomic, readonly) Entities *entities;
 @property (nonatomic, readonly) Lights   *lights;
+@property (nonatomic, readonly) Textures *textures;
+@property (nonatomic, readonly) Sky      *sky;
 
 @property (nonatomic, readonly) GLbbox hotZone;
 @property (nonatomic, readonly) float fadeCurrent;
