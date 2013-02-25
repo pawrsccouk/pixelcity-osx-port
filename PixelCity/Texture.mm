@@ -562,9 +562,9 @@ static void doBloom(World *world, Texture *t, bool showFlat)
 	pwClearColor (0.0f, 0.0f, 0.0f, 0.0f);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	pwEnable (GL_TEXTURE_2D);
-	EntityRender(showFlat);
+	[world.entities render:showFlat];
 	[world.cars render];
-	LightRender ();
+	[world.lights render];
 	pwBindTexture(GL_TEXTURE_2D, t.glid);
 	pwTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	pwCopyTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, t.size, t.size, 0);

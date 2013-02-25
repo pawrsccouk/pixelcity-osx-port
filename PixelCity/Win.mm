@@ -38,7 +38,7 @@ void AppQuit ()
 void AppUpdate (World *world, int width, int height)
 {    
 	CameraUpdate (world);
-	EntityUpdate ();    
+	[world.entities update];
 	[world update];
         //cleanup and restore the viewport after TextureUpdate()
 	RenderResize (width, height);     

@@ -164,12 +164,12 @@ static void fadeDisplay(float fade)
     glVertex2i (g_render_width, 0);
 }
 
-static void updateProgress(float fade)
+static void updateProgress(Entities *entities, float fade)
 {
     int radius = g_render_width / 16;
     GLrgba color(0.5f);
-    do_progress ((float)g_render_width / 2, (float)g_render_height / 2, (float)radius, fade, EntityProgress ());
-    RenderPrintOverlayText (1, "%s v%d.%d.%03d\n%1.2f%%", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, EntityProgress () * 100.0f);
+    do_progress ((float)g_render_width / 2, (float)g_render_height / 2, (float)radius, fade, entities.progress);
+    RenderPrintOverlayText (1, "%s v%d.%d.%03d\n%1.2f%%", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, entities.progress * 100.0f);
 }
 
 static void drawDebugEffect()
@@ -317,8 +317,8 @@ static void doEffects(EffectType type, World *world)
                 if (fade > 0.0f)
                     fadeDisplay(fade);
                 
-                if (TextureReady () && !EntityReady () && fade != 0.0f)
-                    updateProgress(fade);
+                if (TextureReady () && ! world.entities.ready && fade != 0.0f)
+                    updateProgress(world.entities, fade);
             }
         }
         pwMatrixMode (GL_PROJECTION);
@@ -400,39 +400,6 @@ void RenderResize (int width, int height)
 	pwMatrixMode (GL_MODELVIEW);
 }
 
-static NSString *showStatus(GLenum status)
-{
-    NSDictionary *dict =
-    @{
-    @(GL_FRAMEBUFFER_COMPLETE)                 : @"GL_FRAMEBUFFER_COMPLETE",
-    @(GL_FRAMEBUFFER_UNDEFINED)                : @"GL_FRAMEBUFFER_UNDEFINED",
-    @(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)    : @"GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT",
-    @(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) : @"GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT",
-    @(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER)   : @"GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER",
-    @(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER)   : @"GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER",
-    @(GL_FRAMEBUFFER_UNSUPPORTED)              : @"GL_FRAMEBUFFER_UNSUPPORTED",
-    @(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE)   : @"GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE",
-    @(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE)   : @"GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE",
-//    @(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS) : @"GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS",
-    @(0)                                       : @"Error retrieving framebuffer info"
-    };
-    NSString *statusStr = dict[@(status)];
-    if(! statusStr)
-        statusStr = [NSString stringWithFormat:@"Unknown error %@ from checkFramebufferStatus", @(status)];
-    return statusStr;
-}
-
-// Dump some diagnostics about the current opengl context to fix debugging issues.
-static void printOpenGLDiagnostics(NSString *location)
-{
-    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-    if(status != GL_FRAMEBUFFER_COMPLETE)
-        NSLog(@"Status = %@", showStatus(status));
-    
-    NSOpenGLContext *glContext = [NSOpenGLContext currentContext];
-    NSLog(@"%@: OpenGL context is %@, attached to view %@", location, glContext, glContext.view);
-}
-
 void RenderInit (int width, int height)
 {
 	DebugLog("RenderInit");
@@ -440,9 +407,7 @@ void RenderInit (int width, int height)
     g_fog_distance   = WORLD_HALF;
     
         //clear the viewport so the user isn't looking at trash while the program starts
-	pwViewport (0, 0, width, height);
-    printOpenGLDiagnostics(@"RenderInit");
-    
+	pwViewport (0, 0, width, height);    
 	pwClearColor (0.0f, 0.0f, 0.0f, 1.0f);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -532,7 +497,7 @@ void RenderUpdate (World *world, int width, int height)
 	if (g_letterbox) 
 		pwViewport (0, g_letterbox_offset, g_render_width, g_render_height);
     
-	if (LOADING_SCREEN && TextureReady () && !EntityReady ()) {
+	if (LOADING_SCREEN && TextureReady () && ! world.entities.ready) {
 		doEffects (EFFECT_NONE, world);
 		return;
 	}
@@ -585,7 +550,7 @@ void RenderUpdate (World *world, int width, int height)
         // adding scaling to the model matrix causes the lighting to be too dark.
     (g_show_normalized ? glEnable : glDisable)(GL_NORMALIZE);
     
-	EntityRender (g_flat);
+	[world.entities render:g_flat];
     
 	if (!LOADING_SCREEN) {
 		GLlong elapsed = 3000 - world.sceneElapsed;
@@ -594,26 +559,26 @@ void RenderUpdate (World *world, int width, int height)
 			pwDisable(GL_TEXTURE_2D);
 			pwEnable(GL_BLEND);
 			pwBlendFunc(GL_ONE, GL_ONE);
-			EntityRender(g_flat);
+			[world.entities render:g_flat];
 		}
 	} 
-	if (EntityReady ())
-		LightRender ();
+	if (world.entities.ready)
+		[world.lights render];
 
 	[world.cars render];
 
 	if (RenderWireframe()) {
 		pwDisable (GL_TEXTURE_2D);
 		pwPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		EntityRender(g_flat);
+		[world.entities render:g_flat];
 	}
 
 	doEffects(g_effect, world);
     
 	if (g_show_fps)     //Framerate tracker
 		RenderPrintOverlayText(1, "FPS=%d : Entities=%d : polys=%d",
-                               g_current_fps, EntityCount () + LightCount () + world.cars.count,
-                               EntityPolyCount () + LightCount () + world.cars.count);
+                               g_current_fps, world.entities.count + world.lights.count + world.cars.count,
+                               world.entities.polyCount + world.lights.count + world.cars.count);
     
 	if (g_show_help)    //Show the help overlay
 		do_help ();

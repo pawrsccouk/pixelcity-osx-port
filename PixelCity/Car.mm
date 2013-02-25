@@ -27,7 +27,6 @@ typedef GLvector2 AngleMap[360];
     AngleMap _angles;
     BOOL     _anglesDone;
     GLulong  _nextUpdate;
-    __weak World *_world;
 }
 
 -(id)initWithWorld:(World*)world;
@@ -80,7 +79,7 @@ static const GLvector directions[] = {
 #pragma mark - Global Interface
 
 @implementation Cars
-@synthesize count = _count;
+@synthesize count = _count, world = _world;
 
 
 -(id)initWithWorld:(World *)world
@@ -144,7 +143,7 @@ static const GLvector directions[] = {
 
 -(void) update
 {
-    if (!TextureReady () || !EntityReady ())
+    if (!TextureReady () || ! self.world.entities.ready)
         return;
     GLulong now = GetTickCount ();
     if (_nextUpdate > now)

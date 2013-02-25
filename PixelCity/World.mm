@@ -82,6 +82,7 @@ struct BuildingCounts {
 @implementation World
 @synthesize cars = _cars, bloomColor = _bloomColor, logoIndex = _logoIndex, hotZone = _hotZone;
 @synthesize fadeStart = _fadeStart, fadeCurrent = _fadeCurrent, sceneBegin = _sceneBegin, sceneElapsed = _sceneElapsed;
+@synthesize lights = _lights;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -286,7 +287,7 @@ static plot makePlot(int x, int z, int width, int depth)
 	int depth = std::max(abs(z2 - z1), 1);
 	GLrgba color = glRgbaFromHsl (0.09f,  0.99f,  0.85f);
 	float size_adjust = 2.5f;	//We adjust the size of the lights with this.  
-	Deco *d = [[Deco alloc] init];
+	Deco *d = [[Deco alloc] initWithWorld:self];
 	if (direction == EAST)
 		[d CreateLightStripWithX:(float)x1 z:(float)z1 - size_adjust width:(float)width depth:(float)depth + size_adjust height:2 color:color];
 	else if (direction == WEST)
@@ -499,8 +500,8 @@ static plot makePlot(int x, int z, int width, int depth)
 //    RandomInit (6);
 	_resetNeeded = false;
 	_logoIndex = _sceneBegin = 0;
-	EntityClear ();
-	LightClear ();
+    [self.entities clear];
+	[self.lights clear];
 	[self.cars clear];
 	TextureReset ();
 	
@@ -550,8 +551,8 @@ static plot makePlot(int x, int z, int width, int depth)
 // How GLlong since this current iteration of the city went on display,
 -(GLulong) sceneElapsed
 {
-	GLulong elapsed = (!EntityReady () || !self.sceneBegin) ? 1
-                                                              : GetTickCount () - self.sceneBegin;
+	GLulong elapsed = (!self.entities.ready || !self.sceneBegin)
+                      ? 1 : GetTickCount () - self.sceneBegin;
 	return std::max(elapsed, 1ul);
 }
 
@@ -564,7 +565,7 @@ static plot makePlot(int x, int z, int width, int depth)
 		[self fullReset]; //Now we've faded out the scene, rebuild it
 	}
 	if (_fade != FADE_IDLE) {
-		if (_fade == FADE_WAIT && TextureReady () && EntityReady ()) {
+		if (_fade == FADE_WAIT && TextureReady () && self.entities.ready) {
 			_fade = FADE_IN;
 			_fadeStart = now;
 			_fadeCurrent = 1.0f;
@@ -612,7 +613,9 @@ static plot makePlot(int x, int z, int width, int depth)
         _fadeStart = 0;
         _startTime = 0;
         
-        _cars = [[Cars alloc] initWithWorld:self];
+        _cars     = [[Cars     alloc] initWithWorld:self];
+        _lights   = [[Lights   alloc] initWithWorld:self];
+        _entities = [[Entities alloc] initWithWorld:self];
         
         SkyInit();
         

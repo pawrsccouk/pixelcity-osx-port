@@ -5,6 +5,7 @@
 @interface Cars : NSObject
 
 @property (nonatomic, readonly) NSUInteger count;
+@property (nonatomic, readonly) World *world;
 
 -(id) initWithWorld:(World*) world;
 

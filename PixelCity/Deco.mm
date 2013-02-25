@@ -33,9 +33,9 @@ static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the give
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(id)init
+-(id)initWithWorld:(World *)world
 {
-    self = [super init];
+    self = [super initWithWorld:world];
     if(self) {
         _mesh = [[Mesh alloc] init];
         _use_alpha = false;
@@ -66,23 +66,26 @@ static const short LIGHT_SIZE = 3;
 
 -(void) CreateRadioTowerWithPosition:(GLvector) pos height:(float) height;
 {
-  float offset = height / 15.0f;
-  _center = pos;
-  _use_alpha = true;
-  
+    float offset = height / 15.0f;
+    _center = pos;
+    _use_alpha = true;
+    
         //Radio tower
-  [_mesh addVertex:GLvertex(glVector(_center.x         , _center.y + height, _center.z         ), glVector(0, 1))];
-  [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0))];
-  [_mesh addVertex:GLvertex(glVector(_center.x + offset, _center.y         , _center.z - offset), glVector(0, 0))];
-  [_mesh addVertex:GLvertex(glVector(_center.x + offset, _center.y         , _center.z + offset), glVector(1, 0))];
-  [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z + offset), glVector(0, 0))];
-  [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0))];
-
-  [_mesh addFan:fan(0, 1, 2, 3, 4, 5, LIST_TERM)];
-  
-  LightAdd(_center, GLrgba(1.0f, 192.0f/255.0f, 160.0f/255.0f, 1.0f), LIGHT_SIZE, true);
-  
-  _texture = TextureId (TEXTURE_LATTICE);
+    [_mesh addVertex:GLvertex(glVector(_center.x         , _center.y + height, _center.z         ), glVector(0, 1))];
+    [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0))];
+    [_mesh addVertex:GLvertex(glVector(_center.x + offset, _center.y         , _center.z - offset), glVector(0, 0))];
+    [_mesh addVertex:GLvertex(glVector(_center.x + offset, _center.y         , _center.z + offset), glVector(1, 0))];
+    [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z + offset), glVector(0, 0))];
+    [_mesh addVertex:GLvertex(glVector(_center.x - offset, _center.y         , _center.z - offset), glVector(1, 0))];
+    
+    [_mesh addFan:fan(0, 1, 2, 3, 4, 5, LIST_TERM)];
+    
+    [self.world.lights newLightWithPosition:_center
+                                      color:GLrgba(1.0f, 192.0f/255.0f, 160.0f/255.0f, 1.0f)
+                                       size:LIGHT_SIZE
+                                      blink:YES];
+    
+    _texture = TextureId (TEXTURE_LATTICE);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/

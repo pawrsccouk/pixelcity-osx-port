@@ -1,46 +1,44 @@
+@class Entity, World;
+
+@interface Entities : NSObject
+{
+    GLint   _compileX, _compileY, _compileCount;
+    BOOL    _sorted;
+    GLulong _compileEnd;
+    NSMutableArray *_allEntities;
+}
+@property (nonatomic, readonly) GLulong count;
+@property (nonatomic, readonly) float progress;
+@property (nonatomic, readonly) BOOL ready;
+@property (nonatomic, readonly) GLint polyCount;
+@property (nonatomic, readonly) __weak World *world;
+
+-(id)   initWithWorld:(World*) world;
+-(void) clear;
+-(void)addEntity:(Entity*) entity;
+-(void) render:(BOOL) showFlat;
+-(void) update;
+
+@end
+
 
 @interface Entity : NSObject
 {
   GLvector _center;
 
 }
--(id)init;
+    // Designated initializer
+    // Add this entity to the global list of entities in the world provided.
+-(id)initWithWorld:(World*) world;
+
 @property (nonatomic) GLuint texture;
 @property (nonatomic) BOOL alpha;
 @property (nonatomic) GLulong polyCount;
 @property (nonatomic, readonly) GLvector center;
-  
+@property (nonatomic, readonly) __weak World *world;
+
         // Virtual Methods
 -(void) Render;
 -(void) RenderFlat:(BOOL) wirefame;
 -(void) Update;
 @end
-
-//inline std::ostream &operator<<(std::ostream &os, const CEntity &e) { return e.operator<<(os); }
-// 
-//inline GLuint        CEntity::Texture ()  const { return 0; }
-//inline bool          CEntity::Alpha ()    const { return false; }
-//inline GLulong CEntity::PolyCount() const { return 0; }
-//inline GLvector      CEntity::Center()    const { return _center; }
-//inline void CEntity::Render (void) const               {}
-//inline void CEntity::RenderFlat (bool wireframe) const {}
-//inline void CEntity::Update (void)                     {}
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void      EntityClear ();
-size_t    EntityCount (void);
-float     EntityProgress ();
-bool      EntityReady ();
-void      EntityRender (bool showFlat);
-void      EntityUpdate (void);
-int       EntityPolyCount (void);
-void      EntityDump(void);
-
-#ifdef __cplusplus
-}
-#endif
-

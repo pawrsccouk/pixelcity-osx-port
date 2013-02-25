@@ -46,7 +46,7 @@ static const float ONE_SEGMENT          = (1.0f / SEGMENTS_PER_TEXTURE);
 
 -(id)initWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color world:(World*) world
 {
-    self = [super init];
+    self = [super initWithWorld:world];
     if(self) {
         _world = world;
         _color = color.colorWithAlpha(0.1f);
@@ -217,7 +217,7 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
     
         //Consider putting a logo on the roof, if it's tall enough
     if (addon == ADDON_LOGO && !_have_logo) {
-        Deco *d = [[Deco alloc] init];
+        Deco *d = [[Deco alloc] initWithWorld:self.world];
         
         face = (width > depth) ? (COIN_FLIP() ? NORTH : SOUTH)
                                : (COIN_FLIP() ? EAST  : WEST);
@@ -244,17 +244,18 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
         [d CreateLogoWithStart:start end:end base:bottom seed:_world.logoIndex color:_trim_color];
         _have_logo = true;
     } else if (addon == ADDON_TRIM) {
-        Deco *d =  [[Deco alloc] init];
+        Deco *d =  [[Deco alloc] initWithWorld:self.world];
         vector_buffer[0] = glVector (left  - logo_offset, bottom, back  + logo_offset);
         vector_buffer[1] = glVector (left  - logo_offset, bottom, front - logo_offset);
         vector_buffer[2] = glVector (right + logo_offset, bottom, front - logo_offset);
         vector_buffer[3] = glVector (right + logo_offset, bottom, back  + logo_offset);
         [d CreateLightTrimWithChain:vector_buffer count:4 height:(float)RandomIntR(2) + 1.0f seed:_seed color:_trim_color];
     } else if (addon == ADDON_LIGHTS && !_have_lights) {
-        LightAdd(glVector (left , (float)(bottom + 2), front), _trim_color, LIGHT_SIZE, false);
-        LightAdd(glVector (right, (float)(bottom + 2), front), _trim_color, LIGHT_SIZE, false);
-        LightAdd(glVector (right, (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE, false);
-        LightAdd(glVector (left , (float)(bottom + 2), back ), _trim_color, LIGHT_SIZE, false);
+        Lights *lights = self.world.lights;
+        [lights newLightWithPosition:glVector(left , (float)(bottom + 2), front) color:_trim_color size:LIGHT_SIZE blink:NO];
+        [lights newLightWithPosition:glVector(right, (float)(bottom + 2), front) color:_trim_color size:LIGHT_SIZE blink:NO];
+        [lights newLightWithPosition:glVector(right, (float)(bottom + 2), back ) color:_trim_color size:LIGHT_SIZE blink:NO];
+        [lights newLightWithPosition:glVector(left , (float)(bottom + 2), back ) color:_trim_color size:LIGHT_SIZE blink:NO];
         _have_lights = true;
     }
     bottom += (float)height;
@@ -282,7 +283,7 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
     }
     
     if (_height > 45) {
-        Deco *d = [[Deco alloc] init];
+        Deco *d = [[Deco alloc] initWithWorld:self.world];
         [d CreateRadioTowerWithPosition:glVector ((float)(left + right) / 2.0f, (float)bottom, (float)(front + back) / 2.0f) height:15.0f];
     }
 }
@@ -611,7 +612,7 @@ static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
         logo_done = true;
         start = glVector (pos.x, pos.z);
         end = glVector (p.position.x, p.position.z);
-        d = [[Deco alloc] init];
+        d = [[Deco alloc] initWithWorld:self.world];
         [d CreateLogoWithStart:start end:end base:(float)_height seed:_world.logoIndex color:RANDOM_COLOR()];
       }
     } else if (skip_counter != 1)
@@ -634,7 +635,7 @@ static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
   }
   //if this is a big building and it didn't get a logo, consider giving it a light strip
   if (!logo_done && do_trim) {
-    d = [[Deco alloc] init];
+    d = [[Deco alloc] initWithWorld:self.world];
     [d CreateLightTrimWithChain:vector_buffer count:(points / 2) - 2 height:(float)cap_height / 2 seed:_seed color:RANDOM_COLOR()];
   }
   qs.index_list.reserve(points);   

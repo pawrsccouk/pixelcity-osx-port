@@ -23,7 +23,7 @@
 #import "World.h"
 #import "assert.h"
 
-struct cell
+struct Cell
 {
   unsigned        list_textured;
   unsigned        list_flat;
@@ -32,41 +32,34 @@ struct cell
   GLvector        pos;
 };
 
-static cell           cell_list[GRID_SIZE][GRID_SIZE];
-//std::vector<CEntity *> entity_vec;
-static NSMutableArray *allEntities = [NSMutableArray array];
-static bool           sorted = false, compiled = false;
-static int            polycount = 0, compile_x = 0, compile_y = 0, compile_count = 0;
-static GLulong  compile_end = 0;
 
-
-/*
-static bool comparator(const CEntity *e1, const CEntity *e2)
+@interface Entities ()
 {
-    if (!e1->Alpha () &&  e2->Alpha()) return true;
-    if ( e1->Alpha()  && !e2->Alpha()) return false;
-    return (e1->Texture() < e2->Texture());
+    Cell _cellList[GRID_SIZE][GRID_SIZE];
 }
-*/
+@end
+
+@implementation Entities
+@synthesize polyCount = _polyCount, ready = _compiled, world = _world;
 
 
 
-static void do_compile ()
+-(void) do_compile
 {
-    if (compiled)
+    if (_compiled)
         return;
 
 	glReportError("do_compile BEGIN");
 
 	//Now group entites on the grid 
 	//make a list for the textured objects in this region
-    int x = compile_x, y = compile_y;
-	if (!cell_list[x][y].list_textured)
-		cell_list[x][y].list_textured = glGenLists(1);
+    int x = _compileX, y = _compileY;
+	if (!_cellList[x][y].list_textured)
+		_cellList[x][y].list_textured = glGenLists(1);
 	{
-    	MakeDisplayList mdl(cell_list[x][y].list_textured, GL_COMPILE, "do_compile (textured)");
-		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
-        for(Entity *ent in allEntities) {
+    	MakeDisplayList mdl(_cellList[x][y].list_textured, GL_COMPILE, "do_compile (textured)");
+		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
+        for(Entity *ent in _allEntities) {
 			GLvector pos = ent.center;
 			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha) {
 				pwBindTexture(GL_TEXTURE_2D, ent.texture);
@@ -77,14 +70,14 @@ static void do_compile ()
 	glReportError("do_compile textured entities");
 	
 	//Make a list of flat-color stuff (A/C units, ledges, roofs, etc.)
-	if (!cell_list[x][y].list_flat)
-		cell_list[x][y].list_flat = glGenLists(1);
+	if (!_cellList[x][y].list_flat)
+		_cellList[x][y].list_flat = glGenLists(1);
     
 	{
-        MakeDisplayList mdl(cell_list[x][y].list_flat, GL_COMPILE, "do_compile flat");
+        MakeDisplayList mdl(_cellList[x][y].list_flat, GL_COMPILE, "do_compile flat");
 		pwEnable (GL_CULL_FACE);
-		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
-        for(Entity *ent in allEntities) {
+		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
+        for(Entity *ent in _allEntities) {
 			GLvector pos = ent.center;
 			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha)
 				[ent RenderFlat:NO];
@@ -93,13 +86,13 @@ static void do_compile ()
 	glReportError("do_compile flat entities");
 	
 	//Now a list of flat-colored stuff that will be wireframe friendly
-	if (!cell_list[x][y].list_flat_wireframe)
-		cell_list[x][y].list_flat_wireframe = glGenLists(1);
+	if (!_cellList[x][y].list_flat_wireframe)
+		_cellList[x][y].list_flat_wireframe = glGenLists(1);
 	{
-        MakeDisplayList mdl(cell_list[x][y].list_flat_wireframe, GL_COMPILE, "do_compile wireframe");
+        MakeDisplayList mdl(_cellList[x][y].list_flat_wireframe, GL_COMPILE, "do_compile wireframe");
 		pwEnable (GL_CULL_FACE);
-		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
-        for(Entity *ent in allEntities) {
+		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
+        for(Entity *ent in _allEntities) {
 			GLvector pos = ent.center;
 			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha)
 				[ent RenderFlat:YES];
@@ -108,16 +101,16 @@ static void do_compile ()
 	glReportError("do_compile Flat wireframeable entities");
 	
 	//Now a list of stuff to be alpha-blended, and thus rendered last
-	if (!cell_list[x][y].list_alpha)
-		cell_list[x][y].list_alpha = glGenLists(1);
+	if (!_cellList[x][y].list_alpha)
+		_cellList[x][y].list_alpha = glGenLists(1);
     
 	{
-        MakeDisplayList mdl(cell_list[x][y].list_alpha, GL_COMPILE, "do_compile alpha");
-		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
+        MakeDisplayList mdl(_cellList[x][y].list_alpha, GL_COMPILE, "do_compile alpha");
+		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
 		pwDepthMask (GL_FALSE);
 		pwEnable (GL_BLEND);
 		pwDisable (GL_CULL_FACE);
-        for(Entity *ent in allEntities) {
+        for(Entity *ent in _allEntities) {
 			GLvector pos = ent.center;
 			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && ent.alpha)
             {
@@ -131,79 +124,68 @@ static void do_compile ()
 	
 
   //now walk the grid
-  compile_x++;
-  if (compile_x == GRID_SIZE) {
-    compile_x = 0;
-    compile_y++;
-    if (compile_y == GRID_SIZE)
-      compiled = true;
-    compile_end = GetTickCount ();
-  } 
-  compile_count++;
-}
+    _compileX++;
+    if (_compileX == GRID_SIZE) {
+        _compileX = 0;
+        _compileY++;
+        if (_compileY == GRID_SIZE)
+            _compiled = YES;
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-bool EntityReady ()
-{
-  return compiled;
+        _compileEnd = GetTickCount ();
+    } 
+    _compileCount++;
 }
 
 
-float EntityProgress ()
+
+-(float) progress
 {
-  return (float)compile_count / (GRID_SIZE * GRID_SIZE);
+  return (float)_compileCount / (GRID_SIZE * GRID_SIZE);
 }
 
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
-void EntityUpdate ()
+-(void) update
 {
-    if (!TextureReady ()) {
-        sorted = false;
+    if (!TextureReady()) {
+        _sorted = NO;
         return;
     }
     
         //Changing textures is pretty expensive, and thus sorting the entites so that they are grouped by texture used can really improve framerate.
-    if (!sorted) {
-        [allEntities sortUsingComparator:^NSComparisonResult(Entity *e1, Entity *e2) {
+    if (! _sorted) {
+        [_allEntities sortUsingComparator:^NSComparisonResult(Entity *e1, Entity *e2) {
          if ( e1.alpha && !e2.alpha)    return NSOrderedAscending;
          if (!e1.alpha &&  e2.alpha)    return NSOrderedDescending;
          if ( e1.texture > e2.texture)  return NSOrderedAscending;
          if ( e1.texture < e2.texture)  return NSOrderedDescending;
          return NSOrderedSame;
          }];
-        sorted = true;
+        _sorted = true;
     }
 
         //We want to do several cells at once. Enough to get things done, but not so many that the program is unresponsive.
     if (LOADING_SCREEN) {  //If we're using a loading screen, we want to build as fast as possible
         GLulong stop_time = GetTickCount () + 100;
-        while (!compiled && GetTickCount () < stop_time)
-            do_compile ();
+        while (! _compiled && GetTickCount () < stop_time)
+            [self do_compile];
     } else //Take it slow
-        do_compile ();
+        [self do_compile];
 }
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void EntityDump(void)
+-(NSString *) description
 {
-//    std::clog << "BEGIN ENTITY DUMP" << std::endl;
-//    size_t i = 0;
-//    for(Entity *ent in allEntities) {
-//        std::clog << "Entity " << i++ << " = " << *e << std::endl;
-//    });
-//    std::clog << "END ENTITY_DUMP" << std::endl;
+    return [NSString stringWithFormat:@"Entities %p sorted=%d, compiled=%d, %d polys", self, _sorted, self.ready, self.polyCount];
 }
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
 
-void EntityRender (bool showFlat)
+-(void) render:(BOOL) showFlat
 {
     //Draw all textured objects
 	int       polymode[2];
@@ -214,8 +196,8 @@ void EntityRender (bool showFlat)
 	
     for (int x = 0; x < GRID_SIZE; x++)
 		for (int y = 0; y < GRID_SIZE; y++)
-			if( Visible(x,y) && (cell_list[x][y].list_textured > 0) )
-                pwCallList (cell_list[x][y].list_textured);
+			if( Visible(x,y) && (_cellList[x][y].list_textured > 0) )
+                pwCallList (_cellList[x][y].list_textured);
 
         //draw all flat colored objects
 	pwBindTexture(GL_TEXTURE_2D, 0);
@@ -224,9 +206,9 @@ void EntityRender (bool showFlat)
 		for (int y = 0; y < GRID_SIZE; y++) 
 			if (Visible (x, y)) {
 				if (wireframe) {
-					if(cell_list[x][y].list_flat_wireframe > 0) { pwCallList(cell_list[x][y].list_flat_wireframe); }
+					if(_cellList[x][y].list_flat_wireframe > 0) { pwCallList(_cellList[x][y].list_flat_wireframe); }
 				} else {
-					if(cell_list[x][y].list_flat           > 0) { pwCallList(cell_list[x][y].list_flat          ); }
+					if(_cellList[x][y].list_flat           > 0) { pwCallList(_cellList[x][y].list_flat          ); }
 				}
 			}
 
@@ -236,69 +218,90 @@ void EntityRender (bool showFlat)
     pwEnable (GL_BLEND);
     for (int x = 0; x < GRID_SIZE; x++)
         for (int y = 0; y < GRID_SIZE; y++)
-            if( Visible(x, y) && (cell_list[x][y].list_alpha > 0) )
-                pwCallList(cell_list[x][y].list_alpha);
+            if( Visible(x, y) && (_cellList[x][y].list_alpha > 0) )
+                pwCallList(_cellList[x][y].list_alpha);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void EntityClear ()
+-(void) clear
 {
-	glReportError("EntityClear BEGIN");
-    [allEntities removeAllObjects];
-	compile_x = compile_y = compile_count = 0;
-	compiled = sorted = false;
+    [_allEntities removeAllObjects];
+	_compileX = _compileY = _compileCount = 0;
+	_compiled = _sorted = NO;
 	
 	// PAW: Only generate the list once the names have been allocated with glGenList() otherwise OpenGL errors.
 	for (int x = 0; x < GRID_SIZE; x++) {
 		for (int y = 0; y < GRID_SIZE; y++) {
-			cell* pcell = &(cell_list[x][y]);
+			Cell* pcell = &(_cellList[x][y]);
 			if(pcell->list_textured       > 0) { pwNewList(pcell->list_textured      , GL_COMPILE);  pwEndList();  }
 			if(pcell->list_alpha          > 0) { pwNewList(pcell->list_alpha         , GL_COMPILE);  pwEndList();  }
 			if(pcell->list_flat_wireframe > 0) { pwNewList(pcell->list_flat_wireframe, GL_COMPILE);  pwEndList();  }
 			if(pcell->list_flat           > 0) { pwNewList(pcell->list_flat          , GL_COMPILE);  pwEndList();  }
 		}
 	}
-	glReportError("EntityClear END");
+	glReportError("Entities clear");
 }
 
 
-size_t EntityCount ()
+-(GLulong) count
 {
-  return allEntities.count;
+  return _allEntities.count;
 }
 
 
-void EntityInit (void)
+-(id) initWithWorld:(World*)world
 {
+    self = [super init];
+    if(self) {
+        _world = world;
+        _allEntities = [NSMutableArray array];
+    }
+    return self;
 }
 
 
-int EntityPolyCount (void)
+-(GLint) polyCount
 {
-    if (!sorted)    return 0;
-    if (polycount)  return polycount;
+    if (! _sorted)   return 0;
+    if (_polyCount)  return _polyCount;
     
-    for(Entity *ent in allEntities)
-        polycount += ent.polyCount;
-    return polycount;
+    for(Entity *ent in _allEntities)
+        _polyCount += ent.polyCount;
+    return _polyCount;
 }
+
+-(void)addEntity:(Entity*) entity
+{
+    [_allEntities addObject:entity];
+    _polyCount = 0;
+}
+
+@end
 
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 @implementation Entity
-@synthesize center = _center;
+@synthesize center = _center, world = _world;
 
 -(id)init
 {
+    [NSException raise:@"Logic error" format:@"Don't use raw init, use initWithWorld or initWithParent instead"];
+    return [super init];
+}
+
+-(id)initWithWorld:(World*) world
+{
     self = [super init];
     if(self) {
-        [allEntities addObject:self];
-        polycount = 0;
+        _world = world;
+        [world.entities addEntity:self];
     }
     return self;
+    
 }
+
 
 -(void) Render
 {

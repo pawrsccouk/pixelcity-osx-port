@@ -113,7 +113,7 @@ static void loadAndInit(NSMenuItem *item, BOOL *flag, const char *settingName, v
     // Dump logs and debug info to the console.
 -(IBAction) info: (id) sender
 {
-    EntityDump();
+    NSLog(@"%@", ((BasicOpenGLView*)self.view).world.entities);
 }
 
 

@@ -1,5 +1,5 @@
 
-@class Cars;
+@class Cars, Entities, Lights;
 
 @interface World : NSObject
 {
@@ -9,7 +9,11 @@
 
 @property (nonatomic, readonly) GLrgba bloomColor;
 @property (nonatomic, readonly) GLuint logoIndex;
-@property (nonatomic, readonly) Cars  *cars;
+
+@property (nonatomic, readonly) Cars     *cars;
+@property (nonatomic, readonly) Entities *entities;
+@property (nonatomic, readonly) Lights   *lights;
+
 @property (nonatomic, readonly) GLbbox hotZone;
 @property (nonatomic, readonly) float fadeCurrent;
 @property (nonatomic, readonly) GLulong  fadeStart;
