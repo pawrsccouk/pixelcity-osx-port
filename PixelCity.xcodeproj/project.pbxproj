@@ -12,7 +12,6 @@
 		5771092B16C6DFB1007D32DA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771092A16C6DFB1007D32DA /* main.m */; };
 		5771092F16C6DFB1007D32DA /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 5771092D16C6DFB1007D32DA /* Credits.rtf */; };
 		5771093C16C6DFE9007D32DA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5771093B16C6DFE9007D32DA /* OpenGL.framework */; };
-		5771094B16C6E08B007D32DA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771093E16C6E08B007D32DA /* AppDelegate.m */; };
 		5771094C16C6E08B007D32DA /* BasicOpenGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094016C6E08B007D32DA /* BasicOpenGLView.mm */; };
 		5771094D16C6E08B007D32DA /* Building.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094116C6E08B007D32DA /* Building.mm */; };
 		5771094E16C6E08B007D32DA /* Camera.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094316C6E08B007D32DA /* Camera.mm */; };
@@ -41,6 +40,8 @@
 		5771098F16C6E0D6007D32DA /* World.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771098616C6E0D6007D32DA /* World.mm */; };
 		5771099316C6F90E007D32DA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5771099216C6F90D007D32DA /* MainMenu.xib */; };
 		5771099916C73792007D32DA /* PWGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771099816C73791007D32DA /* PWGL.cpp */; };
+		5780824616DA7F0B00D4A3B5 /* PixelCityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */; };
+		5780824716DA7F0B00D4A3B5 /* PixelCityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,8 +56,6 @@
 		5771092C16C6DFB1007D32DA /* PixelCity-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PixelCity-Prefix.pch"; sourceTree = "<group>"; };
 		5771092E16C6DFB1007D32DA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		5771093B16C6DFE9007D32DA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		5771093D16C6E08B007D32DA /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		5771093E16C6E08B007D32DA /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		5771093F16C6E08B007D32DA /* BasicOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasicOpenGLView.h; sourceTree = "<group>"; };
 		5771094016C6E08B007D32DA /* BasicOpenGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BasicOpenGLView.mm; sourceTree = "<group>"; };
 		5771094116C6E08B007D32DA /* Building.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = Building.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -97,7 +96,7 @@
 		5771097B16C6E0D6007D32DA /* RenderAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderAPI.h; sourceTree = "<group>"; };
 		5771097C16C6E0D6007D32DA /* Sky.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = Sky.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		5771097D16C6E0D6007D32DA /* Sky.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sky.h; sourceTree = "<group>"; };
-		5771097E16C6E0D6007D32DA /* Texture.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = Texture.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		5771097E16C6E0D6007D32DA /* Texture.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = Texture.mm; sourceTree = "<group>"; };
 		5771097F16C6E0D6007D32DA /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
 		5771098016C6E0D6007D32DA /* trackball.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trackball.c; sourceTree = "<group>"; };
 		5771098116C6E0D6007D32DA /* trackball.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trackball.h; sourceTree = "<group>"; };
@@ -112,6 +111,9 @@
 		5771099816C73791007D32DA /* PWGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PWGL.cpp; sourceTree = "<group>"; };
 		5771099A16C73E01007D32DA /* glRgba.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glRgba.h; sourceTree = "<group>"; };
 		5771099B16C74178007D32DA /* glVertex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glVertex.h; sourceTree = "<group>"; };
+		5780824316DA7F0B00D4A3B5 /* PixelCityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixelCityViewController.h; sourceTree = "<group>"; };
+		5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelCityViewController.mm; sourceTree = "<group>"; };
+		5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PixelCityViewController.xib; sourceTree = "<group>"; };
 		5793ED6316CE1BDD006A46C2 /* Model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -171,8 +173,6 @@
 				5771099616C7131B007D32DA /* Views */,
 				5771099516C712C8007D32DA /* OpenGL Support */,
 				5771099416C7124B007D32DA /* Model */,
-				5771093D16C6E08B007D32DA /* AppDelegate.h */,
-				5771093E16C6E08B007D32DA /* AppDelegate.m */,
 				5771097716C6E0D6007D32DA /* Random.cpp */,
 				5771097816C6E0D6007D32DA /* Random.h */,
 				5771098016C6E0D6007D32DA /* trackball.c */,
@@ -185,6 +185,9 @@
 				5771094916C6E08B007D32DA /* drawInfo.h */,
 				5771094A16C6E08B007D32DA /* drawInfo.m */,
 				5771092516C6DFB1007D32DA /* Supporting Files */,
+				5780824316DA7F0B00D4A3B5 /* PixelCityViewController.h */,
+				5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */,
+				5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */,
 			);
 			path = PixelCity;
 			sourceTree = "<group>";
@@ -322,6 +325,7 @@
 				5771092916C6DFB1007D32DA /* InfoPlist.strings in Resources */,
 				5771092F16C6DFB1007D32DA /* Credits.rtf in Resources */,
 				5771099316C6F90E007D32DA /* MainMenu.xib in Resources */,
+				5780824716DA7F0B00D4A3B5 /* PixelCityViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,7 +337,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5771092B16C6DFB1007D32DA /* main.m in Sources */,
-				5771094B16C6E08B007D32DA /* AppDelegate.m in Sources */,
 				5771094C16C6E08B007D32DA /* BasicOpenGLView.mm in Sources */,
 				5771094D16C6E08B007D32DA /* Building.mm in Sources */,
 				5771094E16C6E08B007D32DA /* Camera.mm in Sources */,
@@ -361,6 +364,7 @@
 				5771098E16C6E0D6007D32DA /* Win.mm in Sources */,
 				5771098F16C6E0D6007D32DA /* World.mm in Sources */,
 				5771099916C73792007D32DA /* PWGL.cpp in Sources */,
+				5780824616DA7F0B00D4A3B5 /* PixelCityViewController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -442,10 +446,13 @@
 		5771093916C6DFB2007D32DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_ENABLE_OBJC_GC = required;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PixelCity/PixelCity-Prefix.pch";
 				INFOPLIST_FILE = "PixelCity/PixelCity-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -454,10 +461,13 @@
 		5771093A16C6DFB2007D32DA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_ENABLE_OBJC_GC = required;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PixelCity/PixelCity-Prefix.pch";
 				INFOPLIST_FILE = "PixelCity/PixelCity-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

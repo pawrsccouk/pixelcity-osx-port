@@ -34,6 +34,7 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 {
 	int  _desired_size, _half, _segment_size;
 	bool _masked, _mipmap, _clamp;
+    __weak World *_world;
 }
 
 @property (nonatomic) TextureType type;
@@ -41,9 +42,9 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 @property (nonatomic) GLint  size;
 @property (nonatomic) BOOL ready;
 
-+(id)textureWithType:(TextureType) type size:(int) size mipmap:(BOOL) mipmap clamp:(BOOL) clamp masked:(BOOL) masked;
++(id)textureWithType:(TextureType) type size:(int) size mipmap:(BOOL) mipmap clamp:(BOOL) clamp masked:(BOOL) masked world:(World*)world;
 
--(id)initWithType:(TextureType) type size:(int) size mipmap:(BOOL) mipmap clamp:(BOOL) clamp masked:(BOOL) masked;
+-(id)initWithType:(TextureType) type size:(int) size mipmap:(BOOL) mipmap clamp:(BOOL) clamp masked:(BOOL) masked world:(World*) world;
 -(void) Clear;
 -(void) Rebuild;
 -(void) DrawWindows;
@@ -61,18 +62,19 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 
 @synthesize type = _type, size = _size, glid = _glid;
 
-+(id)textureWithType:(TextureType)type size:(int)size mipmap:(BOOL)mipmap clamp:(BOOL)clamp masked:(BOOL)masked
++(id)textureWithType:(TextureType)type size:(int)size mipmap:(BOOL)mipmap clamp:(BOOL)clamp masked:(BOOL)masked world:(World *)world
 {
-    return [[Texture alloc] initWithType:type size:size mipmap:mipmap clamp:clamp masked:masked];
+    return [[Texture alloc] initWithType:type size:size mipmap:mipmap clamp:clamp masked:masked world:world];
 }
 
--(id)initWithType:(TextureType)type size:(int)size mipmap:(BOOL)mipmap clamp:(BOOL)clamp masked:(BOOL)masked
+-(id)initWithType:(TextureType)type size:(int)size mipmap:(BOOL)mipmap clamp:(BOOL)clamp masked:(BOOL)masked world:(World *)world
 {
     self = [super init];
     if(self) {
         auto allocTexture = ^{ GLuint texId = 0; pwGenTextures(1, &texId); return texId; };
         self.glid = allocTexture();
         self.type = type;
+        _world  = world;
         _mipmap = mipmap;
         _clamp = clamp;
         _masked = masked;
@@ -137,7 +139,7 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 
 -(void)DrawSky
 {
-	GLrgba color = WorldBloomColor();
+	GLrgba color = _world.bloomColor;
 	float grey = (color.red() + color.green() + color.blue()) / 3.0f;
 	color = (color + GLrgba(grey) * 2.0f) / 15.0f;    //desaturate, slightly dim
 	pwDisable (GL_BLEND);
@@ -176,7 +178,7 @@ static NSMutableArray *allTextures = [NSMutableArray array];
         @try {
             for (int offset = -skySize; offset <= skySize; offset += skySize)
                 for (int scale = 1.0f; scale > 0.0f; scale -= 0.25f)
-                    drawOneCloud(x, y, width, hght, scale, offset);
+                    drawOneCloud(_world.bloomColor, x, y, width, hght, scale, offset);
         }
         @finally { pwEnd(); }
 	}
@@ -304,10 +306,10 @@ static NSMutableArray *allTextures = [NSMutableArray array];
 	build_time += lapsed;
 }
 
-static void drawOneCloud(int x, int y, int width, int height, GLfloat scale, int offset)
+static void drawOneCloud(const GLrgba &bloomColor, int x, int y, int width, int height, GLfloat scale, int offset)
 {
     float inv_scale = 1.0f - (scale);
-    GLrgba color = (scale < 0.4f) ? WorldBloomColor() * 0.1f : GLrgba(0.0f);
+    GLrgba color = (scale < 0.4f) ? bloomColor * 0.1f : GLrgba(0.0f);
     color = color.colorWithAlpha(0.2f);
     color.glColor4();
     int width_adjust = int(float(width) / 2.0f + int(inv_scale * (float(width) / 2.0f)));
@@ -541,7 +543,7 @@ static void window (int x, int y, int size, TextureType tt, GLrgba color)
 #pragma mark - Global interface
 
 
-static void doBloom(Texture *t, bool showFlat)
+static void doBloom(World *world, Texture *t, bool showFlat)
 {
 	pwBindTexture(GL_TEXTURE_2D, 0);
 	pwViewport(0, 0, t.size , t.size);
@@ -561,7 +563,7 @@ static void doBloom(Texture *t, bool showFlat)
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	pwEnable (GL_TEXTURE_2D);
 	EntityRender(showFlat);
-	CarRender ();
+	[world.cars render];
 	LightRender ();
 	pwBindTexture(GL_TEXTURE_2D, t.glid);
 	pwTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -601,7 +603,7 @@ bool TextureReady()
 }
 
 
-void TextureUpdate(bool showFlat, bool showBloom)
+void TextureUpdate(World *world, bool showFlat, bool showBloom)
 {
 	glReportError("TextureUpdate:Beginning.");
 	
@@ -611,7 +613,7 @@ void TextureUpdate(bool showFlat, bool showBloom)
 		
 		for(Texture *t in allTextures) {
 			if(t.type == TEXTURE_BLOOM) {
-				doBloom(t, showFlat);
+				doBloom(world, t, showFlat);
 				return;
 			}
 		}
@@ -634,19 +636,18 @@ void TextureTerm (void)
 }
 
 
-void TextureInit (void)
+void TextureInit (World *world)
 {
-    [allTextures addObject:[Texture textureWithType:TEXTURE_SKY         size:512 mipmap:YES clamp:NO  masked:NO ]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_LATTICE     size:128 mipmap:YES clamp:YES masked:YES]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_LIGHT       size:128 mipmap:NO  clamp:NO  masked:YES]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_SOFT_CIRCLE size:128 mipmap:NO  clamp:NO  masked:YES]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_HEADLIGHT   size:128 mipmap:NO  clamp:NO  masked:YES]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_BLOOM       size:512 mipmap:YES clamp:NO  masked:NO ]];
-    [allTextures addObject:[Texture textureWithType:TEXTURE_TRIM        size:TRIM_RESOLUTION mipmap:YES clamp:NO masked:NO]];
-//    [allTextures addObject:[Texture textureWithType:TEXTURE_LOGOS       size:LOGO_RESOLUTION mipmap:YES clamp:NO masked:YES]];
+    [allTextures addObject:[Texture textureWithType:TEXTURE_SKY         size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
+    [allTextures addObject:[Texture textureWithType:TEXTURE_LATTICE     size:128 mipmap:YES clamp:YES masked:YES world:world]];
+    [allTextures addObject:[Texture textureWithType:TEXTURE_LIGHT       size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+    [allTextures addObject:[Texture textureWithType:TEXTURE_SOFT_CIRCLE size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+    [allTextures addObject:[Texture textureWithType:TEXTURE_HEADLIGHT   size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+    [allTextures addObject:[Texture textureWithType:TEXTURE_BLOOM       size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
+    [allTextures addObject:[Texture textureWithType:TEXTURE_TRIM        size:TRIM_RESOLUTION mipmap:YES clamp:NO masked:NO world:world]];
     
 	for (int i = TEXTURE_BUILDING1; i <= TEXTURE_BUILDING9; i++)
-        [allTextures addObject:[Texture textureWithType:TextureType(i) size:512 mipmap:YES clamp:NO masked:NO]];
+        [allTextures addObject:[Texture textureWithType:TextureType(i) size:512 mipmap:YES clamp:NO masked:NO world:world]];
 }
 
 

@@ -18,6 +18,7 @@
 #import "Visible.h"
 #import "Camera.h"
 #import "Win.h"
+#import "World.h"
 
 enum
 {
@@ -51,14 +52,14 @@ static GLulong last_update, last_move;
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static GLvector flycam_position (GLulong t)
+static GLvector flycam_position (GLulong t, World *world)
 {
   GLulong   leg;
   float       delta;
   GLvector    start, end;
   GLbbox      hot_zone;
 
-  hot_zone = WorldHotZone ();
+  hot_zone = world.hotZone;
   t %= FLYCAM_CIRCUT; 
   leg = t / FLYCAM_LEG;
   delta = (float)(t % FLYCAM_LEG) / FLYCAM_LEG;
@@ -86,7 +87,7 @@ static GLvector flycam_position (GLulong t)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static void do_auto_cam ()
+static void do_auto_cam (World *world)
 {
     GLulong now = GetTickCount ();
     GLulong elapsed = now - last_update;
@@ -131,13 +132,13 @@ static void do_auto_cam ()
         case CAMERA_FLYCAM1:
         case CAMERA_FLYCAM2:
         case CAMERA_FLYCAM3:
-            auto_position = (flycam_position (now) + flycam_position (now + 4000)) / 2.0f;
-            target = flycam_position (now + FLYCAM_CIRCUT_HALF - ONE_SECOND * 3);
+            auto_position = (flycam_position (now, world) + flycam_position(now + 4000, world)) / 2.0f;
+            target = flycam_position(now + FLYCAM_CIRCUT_HALF - ONE_SECOND * 3, world);
             break;
             
         case CAMERA_SPEED:
-            auto_position = (flycam_position (now) + flycam_position (now + 500)) / 2.0f;
-            target = flycam_position (now + ONE_SECOND * 5);
+            auto_position = (flycam_position(now, world) + flycam_position(now + 500, world)) / 2.0f;
+            target = flycam_position(now + ONE_SECOND * 5, world);
             auto_position.y /= 2;
             target.y /= 2;
             break;
@@ -301,7 +302,7 @@ void CameraInit (void)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraUpdate (void)		
+void CameraUpdate (World *world)
 {
 	DebugLog("Camera Update: Movement = (%lf, %lf)", movement.x, movement.y);
 	
@@ -314,7 +315,7 @@ void CameraUpdate (void)
         cam_auto = true;
 
     if (cam_auto)
-        do_auto_cam ();
+        do_auto_cam(world);
 
     if (angle.y < 0.0f)
         angle.y = 360.0f - float(fmod(fabs(angle.y), 360.0f));

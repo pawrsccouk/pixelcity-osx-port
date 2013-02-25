@@ -8,13 +8,15 @@ void  CameraPositionSet (const GLvector &new_pos);
 extern "C" {
 #endif
 
+@class World;
+
 void  CameraAutoToggle ();
 float CameraDistance (void);
 void  CameraDistanceSet (float new_distance);
 void  CameraInit (void);
 void  CameraNextBehavior (void);
 void  CameraReset ();
-void  CameraUpdate (void);	
+void  CameraUpdate (World *world);
 void  CameraTerm (void);
 
 void  CameraForward (float delta);

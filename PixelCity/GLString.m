@@ -169,6 +169,12 @@
                               borderColor:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:1.0f alpha:0.0f]];
 }
 
+-(NSString*) description
+{
+    return [NSString stringWithFormat:@"%@ _string=%@ colors:(box=%@, border=%@, text=%@), antialias=%d tex size=(%f, %f)",
+            [self class], _string, _boxColor, _borderColor, _textColor, _antialias, _texSize.width, _texSize.height];
+}
+
 static NSBitmapImageRep* makeBitmap(NSAttributedString *string, CGSize frameSize, CGSize marginSize,
                                     NSColor *boxColor, NSColor *borderColor, NSColor *textColor,
                                     BOOL antialias, float cornerRadius)

@@ -33,16 +33,16 @@ struct plot
 	int x, z, width, depth;
 };
 
-enum {
+typedef enum FadeType {
 	FADE_IDLE, FADE_OUT, FADE_WAIT, FADE_IN,
-};
+} FadeType;
 
 struct HSL
 {
 	float hue, sat, lum;
 };
 
-static HSL light_colors[] = 
+static const HSL light_colors[] =
 { 
 	0.04f,  0.9f,  0.93f,   //Amber / pink
 	0.055f, 0.95f, 0.93f,   //Slightly brighter amber 
@@ -62,21 +62,28 @@ static HSL light_colors[] =
 }; 
 static const size_t LIGHT_COLOR_COUNT = (sizeof(light_colors)/sizeof(HSL));
 
-static GLrgba         g_bloom_color;
-static GLlong           g_last_update;
-static char           g_world[WORLD_SIZE][WORLD_SIZE];
-static GLulong  g_fade_start = 0;
-static float          g_fade_current = 0.0f;
-static GLulong  g_scene_begin = 0;
-static int            g_fade_state = 0, g_modern_count = 0, g_tower_count = 0, g_blocky_count = 0, g_skyscrapers = 0, g_logo_index = 0;
-static bool           g_reset_needed = false;
-static GLbbox         g_hot_zone;
-static time_t         g_start_time = 0;
+struct BuildingCounts {
+    GLuint modern, tower, blocky, skyscraper;
+    void reset() { modern = tower = blocky = skyscraper = 0; }
+    BuildingCounts()  { reset(); }
+};
 
+@interface World ()
+{
+    BOOL _resetNeeded;
+    time_t   _startTime;
+    GLlong   _lastUpdate;
+    char     _world[WORLD_SIZE][WORLD_SIZE];
+    BuildingCounts _counts;
+    FadeType _fade;
+}
+@end
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+@implementation World
+@synthesize cars = _cars, bloomColor = _bloomColor, logoIndex = _logoIndex, hotZone = _hotZone;
+@synthesize fadeStart = _fadeStart, fadeCurrent = _fadeCurrent, sceneBegin = _sceneBegin, sceneElapsed = _sceneElapsed;
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 static GLrgba get_light_color (float sat, float lum)
 {
@@ -84,39 +91,31 @@ static GLrgba get_light_color (float sat, float lum)
 	return glRgbaFromHsl (light_colors[index].hue, sat, lum);
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static void claim (int x, int y, int width, int depth, int val)
+-(void) claimPlot:(plot) plot value:(int) val
 {
-	for (int xx = x; xx < (x + width); xx++) {
-		for (int yy = y; yy < (y + depth); yy++) {
-			g_world[CLAMP (xx,0,WORLD_SIZE - 1)][CLAMP (yy,0,WORLD_SIZE - 1)] |= val;
+	for (int xx = plot.x; xx < (plot.x + plot.width); xx++) {
+		for (int yy = plot.z; yy < (plot.z + plot.depth); yy++) {
+			_world[CLAMP (xx, 0, WORLD_SIZE - 1)][CLAMP (yy, 0, WORLD_SIZE - 1)] |= val;
 		}
 	}
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
-
-static bool claimed (int x, int y, int width, int depth)
+-(BOOL) claimed:(plot) plot
 {
-	for (int xx = x; xx < x + width; xx++) {
-		for (int yy = y; yy < y + depth; yy++) {
-			if (g_world[CLAMP (xx,0,WORLD_SIZE - 1)][CLAMP (yy,0,WORLD_SIZE - 1)])
-				return true;
+	for (int xx = plot.x; xx < plot.x + plot.width; xx++) {
+		for (int yy = plot.z; yy < plot.z + plot.depth; yy++) {
+			if (_world[CLAMP (xx, 0, WORLD_SIZE - 1)][CLAMP (yy, 0, WORLD_SIZE - 1)])
+				return YES;
 		}
 	}
-	return false;	
+	return NO;
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static void build_road (int x1, int y1, int width, int depth)
+-(void) buildRoadAtX:(int) x1 y:(int) y1 width:(int) width depth:(int) depth
 {
 	//the given rectangle defines a street and its sidewalk. See which way it goes.
 	int lanes = (width > depth) ? depth : width;
@@ -137,35 +136,32 @@ static void build_road (int x1, int y1, int width, int depth)
 	//take the remaining space and give half to each direction
 	lanes /= 2;
 	//Mark the entire rectangle as used
-	claim (x1, y1, width, depth, CLAIM_WALK);
+	[self claimPlot:makePlot(x1, y1, width, depth) value:CLAIM_WALK];
 	//now place the directional roads
 	if (width > depth) {
-		claim (x1, y1 + sidewalk, width, lanes, CLAIM_ROAD | MAP_ROAD_WEST);
-		claim (x1, y1 + sidewalk + lanes + divider, width, lanes, CLAIM_ROAD | MAP_ROAD_EAST);
+		[self claimPlot:makePlot(x1, y1 + sidewalk, width, lanes) value:CLAIM_ROAD | MAP_ROAD_WEST];
+		[self claimPlot:makePlot(x1, y1 + sidewalk + lanes + divider, width, lanes) value:CLAIM_ROAD | MAP_ROAD_EAST];
 	} else {
-		claim (x1 + sidewalk, y1, lanes, depth, CLAIM_ROAD | MAP_ROAD_SOUTH);
-		claim (x1 + sidewalk + lanes + divider, y1, lanes, depth, CLAIM_ROAD | MAP_ROAD_NORTH);
+		[self claimPlot:makePlot(x1 + sidewalk, y1, lanes, depth) value:CLAIM_ROAD | MAP_ROAD_SOUTH];
+		[self claimPlot:makePlot(x1 + sidewalk + lanes + divider, y1, lanes, depth) value:CLAIM_ROAD | MAP_ROAD_NORTH];
 	}
-	
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static plot find_plot (int x, int z)
+-(plot) findPlotAtX:(int) x z:(int) z
 {	
 	//We've been given the location of an open bit of land, but we have no 
 	//idea how big it is. Find the boundary.
 	int x1 = x, x2 = x;
-	while (!claimed (x1 - 1, z, 1, 1) && x1 > 0)
+	while (! [self claimed:makePlot(x1 - 1, z, 1, 1)] && x1 > 0)
 		x1--;
-	while (!claimed (x2 + 1, z, 1, 1) && x2 < WORLD_SIZE)
+	while (! [self claimed:makePlot(x2 + 1, z, 1, 1)] && x2 < WORLD_SIZE)
 		x2++;
 	int z1 = z, z2 = z;
-	while (!claimed (x, z1 - 1, 1, 1) && z1 > 0)
+	while (! [self claimed:makePlot(x, z1 - 1, 1, 1)] && z1 > 0)
 		z1--;
-	while (!claimed (x, z2 + 1, 1, 1) && z2 < WORLD_SIZE)
+	while (! [self claimed:makePlot(x, z2 + 1, 1, 1)] && z2 < WORLD_SIZE)
 		z2++;
 	plot p;	
 	p.width = (x2 - x1);
@@ -175,25 +171,22 @@ static plot find_plot (int x, int z)
 	return p;
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static plot make_plot (int x, int z, int width, int depth)
+static plot makePlot(int x, int z, int width, int depth)
 {
 	plot p = {x, z, width, depth};
 	return p;	
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void do_building (plot p)
+
+-(void) doBuildingWithPlot:(plot)p
 {
 	//now we know how big the rectangle plot is. 
 	int area = p.width * p.depth;
-	GLrgba color = WorldLightColor(RandomInt());
+	GLrgba color = [self lightColorAtIndex:RandomInt()];
 	int seed = RandomInt();
 	//Make sure the plot is big enough for a building
 	if (p.width < 10 || p.depth < 10)
@@ -204,16 +197,16 @@ void do_building (plot p)
 		if (COIN_FLIP()) {
 			p.width /= 2;
 			if (COIN_FLIP())
-				do_building (make_plot (p.x, p.z, p.width, p.depth));
+				[self doBuildingWithPlot:makePlot(p.x, p.z, p.width, p.depth)];
 			else
-				do_building (make_plot (p.x + p.width, p.z, p.width, p.depth));
+				[self doBuildingWithPlot:makePlot(p.x + p.width, p.z, p.width, p.depth)];
 			return;
 		} else {
 			p.depth /= 2;
 			if (COIN_FLIP())
-				do_building (make_plot (p.x, p.z, p.width, p.depth));
+				[self doBuildingWithPlot:makePlot(p.x, p.z, p.width, p.depth)];
 			else
-				do_building (make_plot (p.x, p.z + p.depth, p.width, p.depth));
+				[self doBuildingWithPlot:makePlot(p.x, p.z + p.depth, p.width, p.depth)];
 			return;
 		}
 	}
@@ -222,50 +215,48 @@ void do_building (plot p)
         //The plot is "square" if width & depth are close
 	bool square = abs (p.width - p.depth) < 10;
         //mark the land as used so other buildings don't appear here, even if we don't use it all.
-	claim (p.x, p.z, p.width, p.depth, CLAIM_BUILDING);
+	[self claimPlot:p value:CLAIM_BUILDING];
 	
     Building *b = nil;
 	//The roundy mod buildings look best on square plots.
 	if (square && p.width > 20) {
 		int height = 45 + RandomIntR(10);
-		g_modern_count++;
-		g_skyscrapers++;
-		b = [[Building alloc] initWithType:BUILDING_MODERN x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color];
+		_counts.modern++;
+		_counts.skyscraper++;
+		b = [[Building alloc] initWithType:BUILDING_MODERN x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color world:self];
 		return;
 	}
 	
 	 //Rectangular plots are a good place for Blocky style buildings to sprawl blockily.
 	 if (p.width > p.depth * 2 || (p.depth > p.width * 2 && area > 800)) {
 		 int height = 20 + RandomIntR(10);
-		 g_blocky_count++;
-		 g_skyscrapers++;
-		 b = [[Building alloc] initWithType:BUILDING_BLOCKY x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color];
+		 _counts.blocky++;
+		 _counts.skyscraper++;
+		 b = [[Building alloc] initWithType:BUILDING_BLOCKY x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color world:self];
 		 return;
 	 }
 	
 	//g_tower_count = -1;
 	//This spot isn't ideal for any particular building, but try to keep a good mix
 	BuildingType type = BUILDING_SIMPLE;
-	if (g_tower_count < g_modern_count && g_tower_count < g_blocky_count) {
+	if (_counts.tower < _counts.modern && _counts.tower < _counts.blocky) {
 		type = BUILDING_TOWER;
-		g_tower_count++;
-	} else if (g_blocky_count < g_modern_count) {
+		_counts.tower++;
+	} else if (_counts.blocky < _counts.modern) {
 		type = BUILDING_BLOCKY;
-		g_blocky_count++;
+		_counts.blocky++;
 	} else {
 		type = BUILDING_MODERN;
-		g_modern_count++;
+		_counts.modern++;
 	}
 	int height = 45 + RandomIntR(10);
-	b = [[Building alloc] initWithType:type x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color];
-	g_skyscrapers++;
+	b = [[Building alloc] initWithType:type x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color world:self];
+	_counts.skyscraper++;
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static int build_light_strip (int x1, int z1, int direction)
+-(int) buildLightStripAtX:(int) x1 z:(int) z1 direction:(int) direction
 {
 	glReportError("build_light_strip START");
 	
@@ -281,7 +272,7 @@ static int build_light_strip (int x1, int z1, int direction)
 	int x2 = x1, z2 = z1, length = 0;
 	while (x2 > 0 && x2 < WORLD_SIZE && z2 > 0 && z2 < WORLD_SIZE)
     {
-		if ((g_world[x2][z2] & CLAIM_ROAD))
+		if ((_world[x2][z2] & CLAIM_ROAD))
 			break;
 		length++;
 		x2 += dir_x;
@@ -309,29 +300,27 @@ static int build_light_strip (int x1, int z1, int direction)
 	return length;
 }
 
-/*-----------------------------------------------------------------------------
- 
- -----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static void buildStreetlights()
+-(void) buildStreetlights
 {
 	//Scan for places to put runs of streetlights on the north & south side of the road
 	for (int x = 1; x < WORLD_SIZE - 1; x++)
     {
 		for (int y = 0; y < WORLD_SIZE; y++)
         {
-			if((!(g_world[x][y] & CLAIM_WALK))   //if this isn't a bit of sidewalk, then keep looking
-            || ( (g_world[x][y] & CLAIM_ROAD)) ) //also if it's used as a road, skip it.
+			if((!(_world[x][y] & CLAIM_WALK))   //if this isn't a bit of sidewalk, then keep looking
+            || ( (_world[x][y] & CLAIM_ROAD)) ) //also if it's used as a road, skip it.
 				continue;
             
-			bool road_left  = (g_world[x + 1][y] & CLAIM_ROAD) != 0;
-			bool road_right = (g_world[x - 1][y] & CLAIM_ROAD) != 0;
+			bool road_left  = (_world[x + 1][y] & CLAIM_ROAD) != 0;
+			bool road_right = (_world[x - 1][y] & CLAIM_ROAD) != 0;
             
 			if((!road_left && !road_right)	//if the cells to our east and west are not road, then we're not on a corner.
             ||  (road_left &&  road_right))	//if the cell to our east AND west is road, then we're on a median. skip it
 				continue;
             
-			y += build_light_strip (x, y, road_right ? SOUTH : NORTH);
+			y += [self buildLightStripAtX:x z:y direction:road_right ? SOUTH : NORTH];
 		}
 	}
 
@@ -339,31 +328,31 @@ static void buildStreetlights()
     for (int y = 1; y < WORLD_SIZE - 1; y++) {
         for (int x = 1; x < WORLD_SIZE - 1; x++) {
             
-            if((!(g_world[x][y] & CLAIM_WALK))   //if this isn't a bit of sidewalk, then keep looking
-            || ( (g_world[x][y] & CLAIM_ROAD)))   //If it's used as a road, skip it.
+            if((!(_world[x][y] & CLAIM_WALK))   //if this isn't a bit of sidewalk, then keep looking
+            || ( (_world[x][y] & CLAIM_ROAD)))   //If it's used as a road, skip it.
                 continue;
             
-            bool road_left  = (g_world[x][y + 1] & CLAIM_ROAD) != 0;
-            bool road_right = (g_world[x][y - 1] & CLAIM_ROAD) != 0;
+            bool road_left  = (_world[x][y + 1] & CLAIM_ROAD) != 0;
+            bool road_right = (_world[x][y - 1] & CLAIM_ROAD) != 0;
             
             if(( road_left &&  road_right)    //if the cell to our east AND west is road, then we're on a median. skip it
             || (!road_left && !road_right))    //if the cells to our north and south are not road, then we're not on a corner.
                 continue;
             
-            x += build_light_strip (x, y, road_right ? EAST : WEST);
+            x += [self buildLightStripAtX:x z:y direction:road_right ? EAST : WEST];
         }
     }
 }
 
 
     // Builds all the roads needed. Returns a bounding box enclosing the roadmap just built
-static GLbbox buildRoads()
+-(GLbbox) buildRoads
 {
     float west_street, north_street, east_street, south_street;
     bool broadway_done = false;
 	for (int y = WORLD_EDGE; y < WORLD_SIZE - WORLD_EDGE; y += RandomLongR(25) + 25) {
 		if (!broadway_done && y > WORLD_HALF - 20) {
-			build_road (0, y, WORLD_SIZE, 19);
+			[self buildRoadAtX:0 y:y width:WORLD_SIZE depth:19];
 			y += 20;
 			broadway_done = true;
 		} else {
@@ -372,7 +361,7 @@ static GLbbox buildRoads()
 				north_street = (float)(y + depth / 2);
 			if (y < (WORLD_SIZE - WORLD_HALF / 2))
 				south_street = (float)(y + depth / 2);
-			build_road (0, y, WORLD_SIZE, depth);
+			[self buildRoadAtX:0 y:y width:WORLD_SIZE depth:depth];
 		}
 	}
 	
@@ -380,7 +369,7 @@ static GLbbox buildRoads()
 	for (int x = WORLD_EDGE; x < WORLD_SIZE - WORLD_EDGE; x += RandomLongR(25) + 25)
     {
 		if (!broadway_done && x > WORLD_HALF - 20) {
-			build_road (x, 0, 19, WORLD_SIZE);
+			[self buildRoadAtX:x y:0 width:19 depth:WORLD_SIZE];
 			x += 20;
 			broadway_done = true;
 		}
@@ -390,7 +379,7 @@ static GLbbox buildRoads()
 				west_street = (float)(x + width / 2);
 			if (x <= WORLD_HALF + WORLD_HALF / 2)
 				east_street = (float)(x + width / 2);
-			build_road (x, 0, width, WORLD_SIZE);
+			[self buildRoadAtX:x y:0 width:width depth:WORLD_SIZE];
 		}
 	}
         //We kept track of the positions of streets that will outline the high-detail hot zone in the middle of the world.
@@ -399,14 +388,15 @@ static GLbbox buildRoads()
                            glVector(east_street, 0.0f, south_street));
 }
 
-static void addSmallBuildings()
+-(void) addSmallBuildings
 {
+    auto highType = ^{ return COIN_FLIP() ? BUILDING_TOWER : BUILDING_BLOCKY; };
         //now blanket the rest of the world with lesser buildings
 	for (int x = 0; x < WORLD_SIZE; x ++)
     {
 		for (int y = 0; y < WORLD_SIZE; y ++)
         {
-			if (g_world[CLAMP (x,0,WORLD_SIZE)][CLAMP (y,0,WORLD_SIZE)])
+			if (_world[CLAMP (x,0,WORLD_SIZE)][CLAMP (y,0,WORLD_SIZE)])
 				continue;
             
 			GLuint width = 12 + RandomIntR(20), depth = 12 + RandomIntR(20), height = std::min(width, depth);
@@ -417,22 +407,23 @@ static void addSmallBuildings()
             
 			while (width > 8 && depth > 8)
             {
-				if (!claimed (x, y, width, depth))
+                plot p = makePlot(x, y, width, depth);
+				if (! [self claimed:p])
                 {
-					claim(x, y, width, depth, CLAIM_BUILDING);
-					GLrgba building_color = WorldLightColor (RandomInt());
+					[self claimPlot:p value:CLAIM_BUILDING];
+					GLrgba building_color = [self lightColorAtIndex:RandomInt()];
                         //if we're out of the hot zone, use simple buildings
-					if (x < g_hot_zone.min.x || x > g_hot_zone.max.x || y < g_hot_zone.min.z || y > g_hot_zone.max.z)
+					if (x < self.hotZone.min.x || x > self.hotZone.max.x || y < self.hotZone.min.z || y > self.hotZone.max.z)
                     {
 						height = 5 + RandomIntR(height) + RandomIntR(height);
-                        [Building buildingWithType:BUILDING_SIMPLE x:x + 1 y:y + 1 height:height width:width - 2 depth:depth - 2 seed:RandomInt() color:building_color];
+                        [Building buildingWithType:BUILDING_SIMPLE x:x + 1 y:y + 1 height:height width:width - 2 depth:depth - 2 seed:RandomInt() color:building_color world:self];
 					}
                     else
                     { //use fancy buildings.
 						height = 15 + RandomIntR(15);
 						width -=2;
 						depth -=2;
-                        [Building buildingWithType:(COIN_FLIP() ? BUILDING_TOWER : BUILDING_BLOCKY) x:x + 1 y:y + 1 height:height width:width depth:depth seed:RandomInt() color:building_color];
+                        [Building buildingWithType:highType() x:x + 1 y:y + 1 height:height width:width depth:depth seed:RandomInt() color:building_color world:self];
 					}
 					break;
 				}
@@ -449,81 +440,86 @@ static void addSmallBuildings()
 	}
 }
 
-static void addBigBuildings()
+-(void) addBigBuildings
 {
 	//Scan over the center area of the map and place the big buildings 
 	int attempts = 0;
-	while (g_skyscrapers < 50 && attempts < 350) {
+	while (_counts.skyscraper < 50 && attempts < 350) {
 		int sx = (WORLD_HALF / 2) + (RandomLong() % WORLD_HALF);
 		int sy = (WORLD_HALF / 2) + (RandomLong() % WORLD_HALF);
-		if (!claimed (sx, sy, 1,1)) {
-			do_building (find_plot (sx, sy));
-			g_skyscrapers++;
+		if (! [self claimed:makePlot(sx, sy, 1,1)]) {
+			[self doBuildingWithPlot:[self findPlotAtX:sx z:sy]];
+			_counts.skyscraper++;
 		}
 		attempts++;
 	}
 }
 
-static void doReset (void)
-{	
-//	//Re-init Random to make the same city each time. Helpful when running tests.
-//	RandomInit (6);
-	g_reset_needed = false;
-	g_skyscrapers = g_logo_index   = g_scene_begin  = 0;
-	g_tower_count = g_blocky_count = g_modern_count = 0;
-	EntityClear ();
-	LightClear ();
-	CarClear ();
-	TextureReset ();
-	
-	//Pick a tint for the bloom
-	g_bloom_color = get_light_color(0.5f + float(RandomLongR(10)) / 20.0f, 0.75f);
-	memset(g_world, 0, WORLD_SIZE * WORLD_SIZE);
-
-        // Build a road network and garnish it with streetlights.
-    g_hot_zone = buildRoads();
-    buildStreetlights();
-        // Add large, detailed buildings near the center of the map, and smaller blurry buildings further away from the camera.
-    addBigBuildings();
-    addSmallBuildings();
-}
 
 /*-----------------------------------------------------------------------------
  This will return a random color which is suitible for light sources, taken
  from a narrow group of hues. (Yellows, oranges, blues.)
  -----------------------------------------------------------------------------*/
 
-GLrgba WorldLightColor (unsigned index)
+-(GLrgba) lightColorAtIndex:(GLuint) index
 {
 	index %= LIGHT_COLOR_COUNT;
 	return glRgbaFromHsl (light_colors[index].hue, light_colors[index].sat, light_colors[index].lum);	
 }
 
 
-char WorldCell (int x, int y)
+-(char)cellAtRow:(int) x column:(int) y
 {
-	return g_world[CLAMP (x, 0,WORLD_SIZE - 1)][CLAMP (y, 0, WORLD_SIZE - 1)];	
+	return _world[CLAMP(x, 0, WORLD_SIZE - 1)][CLAMP(y, 0, WORLD_SIZE - 1)];	
 }
 
-GLrgba WorldBloomColor() { return g_bloom_color;  }
-int WorldLogoIndex    () { return g_logo_index++; }
-GLbbox WorldHotZone   () { return g_hot_zone;     }
-void WorldTerm        () { }
+-(GLrgba) bloomColor { return _bloomColor;  }
+-(GLuint) logoIndex  { return _logoIndex++; }
+-(GLbbox) hotZone    { return _hotZone;     }
 
-void WorldReset (void)
+-(void) term
+{
+}
+
+-(void) reset
 {
 	//If we're already fading out, then this is the developer hammering on the "rebuild" button.  Let's hurry things up for the nice person...
-	if (g_fade_state == FADE_OUT) 
-		doReset ();
+	if (_fade == FADE_OUT)
+		[self fullReset];
     
 	//If reset is called but the world isn't ready, then don't bother fading out. The program probably just started.
-	g_fade_state = FADE_OUT;
-	g_fade_start = GetTickCount ();
+	_fade = FADE_OUT;
+	_fadeStart = GetTickCount();
+}
+
+
+-(void) fullReset
+{
+        //Re-init Random to make the same city each time. Helpful when running tests.
+//    RandomInit (6);
+	_resetNeeded = false;
+	_logoIndex = _sceneBegin = 0;
+	EntityClear ();
+	LightClear ();
+	[self.cars clear];
+	TextureReset ();
+	
+        //Pick a tint for the bloom
+	_bloomColor = get_light_color(0.5f + float(RandomLongR(10)) / 20.0f, 0.75f);
+	memset(_world, 0, WORLD_SIZE * WORLD_SIZE);
+    _counts.reset();
+    
+        // Build a road network and garnish it with streetlights.
+    _hotZone = [self buildRoads];
+    [self buildStreetlights];
+        // Add large, detailed buildings near the center of the map, and smaller blurry buildings further away from the camera.
+    [self addBigBuildings];
+    [self addSmallBuildings];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void WorldRender ()
+-(void) render
 {
 	if (!SHOW_DEBUG_GROUND) 
 		return;
@@ -546,79 +542,89 @@ void WorldRender ()
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-float WorldFade (void) { return g_fade_current; }
-GLulong WorldSceneBegin() { return g_scene_begin; }
+-(float) fadeCurrent  { return _fadeCurrent; }
+-(GLulong) sceneBegin { return _sceneBegin; }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 // How GLlong since this current iteration of the city went on display,
-GLulong WorldSceneElapsed()
+-(GLulong) sceneElapsed
 {
-	GLulong elapsed = (!EntityReady () || !WorldSceneBegin ()) ? 1
-                                                                     : GetTickCount () - (WorldSceneBegin());
+	GLulong elapsed = (!EntityReady () || !self.sceneBegin) ? 1
+                                                              : GetTickCount () - self.sceneBegin;
 	return std::max(elapsed, 1ul);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void WorldUpdate (void)
+-(void) update
 {	
-	GLulong now = GetTickCount ();
-	if (g_reset_needed) {
-		doReset (); //Now we've faded out the scene, rebuild it
+	GLulong now = GetTickCount();
+	if (_resetNeeded) {
+		[self fullReset]; //Now we've faded out the scene, rebuild it
 	}
-	if (g_fade_state != FADE_IDLE) {
-		if (g_fade_state == FADE_WAIT && TextureReady () && EntityReady ()) {
-			g_fade_state = FADE_IN;
-			g_fade_start = now;
-			g_fade_current = 1.0f;
+	if (_fade != FADE_IDLE) {
+		if (_fade == FADE_WAIT && TextureReady () && EntityReady ()) {
+			_fade = FADE_IN;
+			_fadeStart = now;
+			_fadeCurrent = 1.0f;
 		}    
-		GLulong fade_delta = now - g_fade_start;
+		GLulong fade_delta = now - _fadeStart;
 		//See if we're done fading in or out
-		if (fade_delta > FADE_TIME && g_fade_state != FADE_WAIT) {
-			if (g_fade_state == FADE_OUT) {
-				g_reset_needed = true;
-				g_fade_state = FADE_WAIT;
-				g_fade_current = 1.0f;
+		if (fade_delta > FADE_TIME && _fade != FADE_WAIT) {
+			if (_fade == FADE_OUT) {
+				_resetNeeded = YES;
+				_fade = FADE_WAIT;
+				_fadeCurrent = 1.0f;
 			} else {
-				g_fade_state = FADE_IDLE;
-				g_fade_current = 0.0f;
-				g_start_time = time (NULL);
-				g_scene_begin = GetTickCount ();
+				_fade = FADE_IDLE;
+				_fadeCurrent = 0.0f;
+				_startTime = time (NULL);
+				_sceneBegin = GetTickCount ();
 			}
 		} else {
-			g_fade_current = (float)fade_delta / FADE_TIME;
-			if (g_fade_state == FADE_IN)
-				g_fade_current = 1.0f - g_fade_current;
-			if (g_fade_state == FADE_WAIT)
-				g_fade_current = 1.0f;
+			_fadeCurrent = (float)fade_delta / FADE_TIME;
+			if (_fade == FADE_IN)
+				_fadeCurrent = 1.0f - _fadeCurrent;
+			if (_fade == FADE_WAIT)
+				_fadeCurrent = 1.0f;
 		}
-		if (!TextureReady ())
-			g_fade_current = 1.0f;
+		if (! TextureReady())
+			_fadeCurrent = 1.0f;
 	} 
-	if (g_fade_state == FADE_IDLE && !TextureReady ()) {
-		g_fade_state = FADE_IN;
-		g_fade_start = now;
+	if (_fade == FADE_IDLE && ! TextureReady()) {
+		_fade = FADE_IN;
+		_fadeStart = now;
 	}
-	if (g_fade_state == FADE_IDLE && WorldSceneElapsed () > RESET_INTERVAL)
-		WorldReset ();
+	if (_fade == FADE_IDLE && _sceneElapsed > RESET_INTERVAL)
+		[self reset];
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void WorldInit (void)
+-(id) init 
 {
-	g_last_update = GetTickCount ();
-	
-	for (int i = 0; i < CARS; i++)
-        CarAdd();
-    
-    SkyInit();
-	
-	WorldReset ();
-	g_fade_state = FADE_OUT;
-	g_fade_start = 0;
+    self = [super init];
+    if(self) {
+        _lastUpdate = GetTickCount ();
+        _fade = FADE_IDLE;
+        _logoIndex = 0;
+        _fadeStart = 0;
+        _startTime = 0;
+        
+        _cars = [[Cars alloc] initWithWorld:self];
+        
+        SkyInit();
+        
+        [self reset];
+        _fade = FADE_OUT;
+        _fadeStart = 0;
+    }
+    return self;
 }
+
+@end
+
 
 int MakePrimitive::nestCount = 0;
 int MakeDisplayList::nestCount = 0;
@@ -637,9 +643,11 @@ MakePrimitive::~MakePrimitive()
 	--nestCount;
 }
 
-MakeDisplayList::MakeDisplayList(GLint name, GLenum mode)
+MakeDisplayList::MakeDisplayList(GLint name, GLenum mode, const char * location)
 {
-	assert(nestCount == 0);	assert(glIsList(name));
+    if(nestCount != 0) NSLog(@"MakeDisplayList %s: Nest count is %d", location, nestCount);
+    if(! glIsList(name)) NSLog(@"MakeDisplayList %s: name %d is not a list name", location, name);
+//	assert(nestCount == 0);	assert(glIsList(name));
 	pwNewList(name, mode);
 	++nestCount;
 }

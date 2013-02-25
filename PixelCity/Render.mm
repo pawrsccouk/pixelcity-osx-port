@@ -16,7 +16,6 @@
 #import "entity.h"
 #import "car.h"
 #import "camera.h"
-#import "ini.h"
 #import "light.h"
 #import "render.h"
 #import "sky.h"
@@ -50,23 +49,10 @@ static const char g_help[] =
 
 static const size_t HELP_SIZE = sizeof(g_help);
 
-enum EffectType
-{
-	EFFECT_NONE,
-	EFFECT_BLOOM,
-	EFFECT_BLOOM_RADIAL,
-	EFFECT_COLOR_CYCLE,
-	EFFECT_GLASS_CITY,
-	EFFECT_DEBUG,
-	EFFECT_DEBUG_OVERBLOOM,
-    
-	EFFECT_COUNT,
-};
-
 static float g_render_aspect, g_fog_distance;
 static int   g_render_width, g_render_height, g_letterbox_offset;
 static bool  g_letterbox;
-static EffectType g_effect;
+static EffectType g_effect = EFFECT_NONE;
 static bool g_terminating = false;
 
 static unsigned g_current_fps, g_frames;
@@ -212,11 +198,11 @@ static void drawDebugEffect()
 }
 
 	//Psychedelic bloom
-static void drawBloomRadialEffect()
+static void drawBloomRadialEffect(const GLrgba &bloomColor)
 {
     pwEnable (GL_BLEND);
     MakePrimitive mp(GL_QUADS);
-    GLrgba color = WorldBloomColor () * BLOOM_SCALING * 2;
+    GLrgba color = bloomColor * BLOOM_SCALING * 2;
     color.glColor3();
     for (int i = 0; i <= 100; i+=10) {
         glTexCoord2f (0, 0);  glVertex2i (-i, i + g_render_height);
@@ -253,10 +239,10 @@ static void drawColorCycleEffect()
 }
 
 	//Simple bloom effect
-static void drawBloomEffect()
+static void drawBloomEffect(const GLrgba &bloomColor)
 {
     MakePrimitive mp(GL_QUADS);
-    GLrgba color = WorldBloomColor () * BLOOM_SCALING;
+    GLrgba color = bloomColor * BLOOM_SCALING;
     color.glColor3();
 	int bloom_radius = 15, bloom_step  = bloom_radius / 3;
     for (int x = -bloom_radius; x <= bloom_radius; x += bloom_step) {
@@ -272,10 +258,10 @@ static void drawBloomEffect()
 }
 
 	//This will punish that uppity GPU. Good for testing low frame rate behavior.
-static void drawDebugOverbloomEffect()
+static void drawDebugOverbloomEffect(const GLrgba &bloomColor)
 {
     MakePrimitive mp(GL_QUADS);
-    GLrgba color = WorldBloomColor () * 0.01f;
+    GLrgba color = bloomColor * 0.01f;
     color.glColor3();
     for (int x = -50; x <= 50; x+=5) {
         for (int y = -50; y <= 50; y+=5) {
@@ -287,7 +273,7 @@ static void drawDebugOverbloomEffect()
     }
 }
 
-static void doEffects(EffectType type)
+static void doEffects(EffectType type, World *world)
 {
     if (!TextureReady ())
 		return;
@@ -317,17 +303,17 @@ static void doEffects(EffectType type)
             
             switch (type) {
                 case EFFECT_DEBUG:            drawDebugEffect();            break;
-                case EFFECT_BLOOM_RADIAL:     drawBloomRadialEffect();      break;
+                case EFFECT_BLOOM_RADIAL:     drawBloomRadialEffect(world.bloomColor);      break;
                 case EFFECT_COLOR_CYCLE:      drawColorCycleEffect();       break;
-                case EFFECT_BLOOM:            drawBloomEffect();            break;
-                case EFFECT_DEBUG_OVERBLOOM:  drawDebugOverbloomEffect(); 	break;
+                case EFFECT_BLOOM:            drawBloomEffect(world.bloomColor);            break;
+                case EFFECT_DEBUG_OVERBLOOM:  drawDebugOverbloomEffect(world.bloomColor); 	break;
                 default:
                     break;
             }
             
                 //Do the fade to / from darkness used to hide scene transitions
             if(LOADING_SCREEN) {
-                float fade = WorldFade ();
+                float fade = world.fadeCurrent;
                 if (fade > 0.0f)
                     fadeDisplay(fade);
                 
@@ -414,15 +400,49 @@ void RenderResize (int width, int height)
 	pwMatrixMode (GL_MODELVIEW);
 }
 
+static NSString *showStatus(GLenum status)
+{
+    NSDictionary *dict =
+    @{
+    @(GL_FRAMEBUFFER_COMPLETE)                 : @"GL_FRAMEBUFFER_COMPLETE",
+    @(GL_FRAMEBUFFER_UNDEFINED)                : @"GL_FRAMEBUFFER_UNDEFINED",
+    @(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)    : @"GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT",
+    @(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) : @"GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT",
+    @(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER)   : @"GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER",
+    @(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER)   : @"GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER",
+    @(GL_FRAMEBUFFER_UNSUPPORTED)              : @"GL_FRAMEBUFFER_UNSUPPORTED",
+    @(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE)   : @"GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE",
+    @(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE)   : @"GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE",
+//    @(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS) : @"GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS",
+    @(0)                                       : @"Error retrieving framebuffer info"
+    };
+    NSString *statusStr = dict[@(status)];
+    if(! statusStr)
+        statusStr = [NSString stringWithFormat:@"Unknown error %@ from checkFramebufferStatus", @(status)];
+    return statusStr;
+}
+
+// Dump some diagnostics about the current opengl context to fix debugging issues.
+static void printOpenGLDiagnostics(NSString *location)
+{
+    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if(status != GL_FRAMEBUFFER_COMPLETE)
+        NSLog(@"Status = %@", showStatus(status));
+    
+    NSOpenGLContext *glContext = [NSOpenGLContext currentContext];
+    NSLog(@"%@: OpenGL context is %@, attached to view %@", location, glContext, glContext.view);
+}
+
 void RenderInit (int width, int height)
 {
 	DebugLog("RenderInit");
     
-    g_effect         = EffectType(IniInt("Effect"));
     g_fog_distance   = WORLD_HALF;
     
         //clear the viewport so the user isn't looking at trash while the program starts
 	pwViewport (0, 0, width, height);
+    printOpenGLDiagnostics(@"RenderInit");
+    
 	pwClearColor (0.0f, 0.0f, 0.0f, 1.0f);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -431,7 +451,6 @@ void RenderInit (int width, int height)
 void RenderSetFPS(bool showFPS)
 {
 	g_show_fps = showFPS;
-	IniIntSet ("ShowFPS", g_show_fps ? 1 : 0);
 }
 
 bool RenderFog () {	return g_show_fog;	}
@@ -439,7 +458,6 @@ bool RenderFog () {	return g_show_fog;	}
 void RenderSetFog(bool fog)
 {	
 	g_show_fog = fog;
-	IniIntSet ("ShowFog", g_show_fog ? 1 : 0);
 }
 
 float RenderFogDistance () { return g_fog_distance; }
@@ -447,13 +465,11 @@ float RenderFogDistance () { return g_fog_distance; }
 extern "C" void RenderSetNormalized(bool norm)
 {
     g_show_normalized = norm;
-    IniIntSet("ShowNormalized", g_show_normalized ? 1 : 0);
 }
 
 extern "C" void RenderSetLetterbox(bool letterbox)
 {
 	g_letterbox = letterbox;
-	IniIntSet ("Letterbox", g_letterbox ? 1 : 0);
 }
 
 bool RenderWireframe () {  return g_show_wireframe;	}
@@ -461,7 +477,6 @@ bool RenderWireframe () {  return g_show_wireframe;	}
 void RenderSetWireframe(bool wireframe)
 {	
 	g_show_wireframe = wireframe;
-	IniIntSet ("Wireframe", g_show_wireframe ? 1 : 0);
 }
 
 bool RenderFlat () { return g_flat;	}
@@ -469,7 +484,6 @@ bool RenderFlat () { return g_flat;	}
 void RenderSetFlat(bool flat)
 {
 	g_flat = flat;
-	IniIntSet ("Flat", g_flat ? 1 : 0);
 }
 
 void RenderSetHelpMode(bool helpMode)
@@ -478,10 +492,14 @@ void RenderSetHelpMode(bool helpMode)
         // This is transient and always defaults to Off.
 }
 
-void RenderEffectCycle ()
+void RenderSetEffect(EffectType type)
 {
-	g_effect = EffectType((g_effect + 1) % EFFECT_COUNT);
-	IniIntSet ("Effect", g_effect);
+	g_effect = type;
+}
+
+EffectType RenderEffect()
+{
+    return g_effect;
 }
 
 void RenderTerminate()
@@ -492,7 +510,7 @@ void RenderTerminate()
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #pragma mark -
 
-void RenderUpdate (int width, int height)		
+void RenderUpdate (World *world, int width, int height)
 {
     if(g_terminating) return;   // Stop if we are in the process of shutting down.
 
@@ -500,7 +518,7 @@ void RenderUpdate (int width, int height)
 	g_render_height = height;
 	g_frames++;
     
-	TextureUpdate(g_flat, isBloom());
+	TextureUpdate(world, g_flat, isBloom());
 	glReportError("AppUpdate:After TextureUpdate");
 
 	do_fps();
@@ -515,7 +533,7 @@ void RenderUpdate (int width, int height)
 		pwViewport (0, g_letterbox_offset, g_render_width, g_render_height);
     
 	if (LOADING_SCREEN && TextureReady () && !EntityReady ()) {
-		doEffects (EFFECT_NONE);
+		doEffects (EFFECT_NONE, world);
 		return;
 	}
 	pwHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -554,7 +572,7 @@ void RenderUpdate (int width, int height)
 	if (g_show_fog)
         drawFog();
 
-	WorldRender ();
+	[world render];
     
 	if (g_effect == EFFECT_GLASS_CITY) {
         setupGlassCityEffect(pos);
@@ -570,7 +588,7 @@ void RenderUpdate (int width, int height)
 	EntityRender (g_flat);
     
 	if (!LOADING_SCREEN) {
-		GLlong elapsed = 3000 - WorldSceneElapsed();
+		GLlong elapsed = 3000 - world.sceneElapsed;
 		if (elapsed >= 0 && elapsed <= 3000) {
 			drawFogFX(float(elapsed) / 3000.0f);
 			pwDisable(GL_TEXTURE_2D);
@@ -582,7 +600,7 @@ void RenderUpdate (int width, int height)
 	if (EntityReady ())
 		LightRender ();
 
-	CarRender ();
+	[world.cars render];
 
 	if (RenderWireframe()) {
 		pwDisable (GL_TEXTURE_2D);
@@ -590,12 +608,12 @@ void RenderUpdate (int width, int height)
 		EntityRender(g_flat);
 	}
 
-	doEffects(g_effect);
+	doEffects(g_effect, world);
     
 	if (g_show_fps)     //Framerate tracker
 		RenderPrintOverlayText(1, "FPS=%d : Entities=%d : polys=%d",
-                               g_current_fps, EntityCount () + LightCount () + CarCount (),
-                               EntityPolyCount () + LightCount () + CarCount ());
+                               g_current_fps, EntityCount () + LightCount () + world.cars.count,
+                               EntityPolyCount () + LightCount () + world.cars.count);
     
 	if (g_show_help)    //Show the help overlay
 		do_help ();

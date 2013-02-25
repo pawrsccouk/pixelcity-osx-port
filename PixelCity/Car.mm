@@ -18,6 +18,30 @@
 #import "World.h"
 #import "camera.h"
 
+typedef BOOL CarMap[WORLD_SIZE][WORLD_SIZE];
+typedef GLvector2 AngleMap[360];
+@interface Cars ()
+{
+    NSArray *_cars;
+    CarMap   _carmap;
+    AngleMap _angles;
+    BOOL     _anglesDone;
+    GLulong  _nextUpdate;
+    __weak World *_world;
+}
+
+-(id)initWithWorld:(World*)world;
+
+-(BOOL) spaceAtRow:   (GLint) row column:(GLint) column;
+-(BOOL) carAtRow:     (GLint) row column:(GLint) column;
+-(void) setSpaceAtRow:(GLint) row column:(GLint) column;
+-(void) setCarAtRow:  (GLint) row column:(GLint) column;
+
+-(GLvector2) angleAt:(GLint) pos;
+-(void)setAngle:(GLvector2) angle atIndex:(GLint) pos;
+
+@end
+
 @interface Car : NSObject
 {
     GLvector _position, _drivePosition;
@@ -26,11 +50,15 @@
     int      _drive_angle,  _change, _stuck;
     GLuint   _row, _col;
     float    _speed, _max_speed;
+    
+    __weak Cars *_parent;
+    __weak World *_world;
 }
 
--(void) Render;
--(void) Update;
--(void) Park;
+-(id) initWithParent:(Cars*)parent world:(World*) world;
+-(void) render;
+-(void) update;
+-(void) park;
 
 @end 
 
@@ -39,55 +67,66 @@
 
 static const int DEAD_ZONE = 200, STUCK_TIME = 230, UPDATE_INTERVAL = 50; //milliseconds
 static const float MOVEMENT_SPEED = 0.61f,  CAR_SIZE = 3.0f;
-
-static GLvector direction[] = 
-{
-  GLvector( 0.0f, 0.0f, -1.0f),
-  GLvector( 1.0f, 0.0f,  0.0f),
-  GLvector( 0.0f, 0.0f,  1.0f),
-  GLvector(-1.0f, 0.0f,  0.0f),
-};
-
+static const int CARS = 500;    //Controls the density of cars.
 static const int dangles[] = { 0, 90, 180, 270 };
-static GLvector2 angles[360];
-static bool    angles_done;
-
-static NSMutableArray *all_cars = [NSMutableArray array];
-
-static int     count;
-static unsigned char carmap[WORLD_SIZE][WORLD_SIZE];
-static GLulong next_update;
+static const GLvector directions[] = {
+    GLvector( 0.0f, 0.0f, -1.0f),
+    GLvector( 1.0f, 0.0f,  0.0f),
+    GLvector( 0.0f, 0.0f,  1.0f),
+    GLvector(-1.0f, 0.0f,  0.0f)
+};
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #pragma mark - Global Interface
 
-size_t CarCount ()
+@implementation Cars
+@synthesize count = _count;
+
+
+-(id)initWithWorld:(World *)world
 {
-  return count;
+    self = [super init];
+    if(self) {
+        _count = 0;
+        memset(_carmap, 0, sizeof(_carmap));
+        _cars = nil;
+        _world = world;
+        [self populate];
+    }
+    return self;
 }
 
-void CarAdd()
+-(NSUInteger) count
 {
-    [all_cars addObject:[[Car alloc] init]];
-    count++;
+  return _count;
+}
+
+-(void) populate
+{
+    NSMutableArray *allCars = [[NSMutableArray alloc] initWithCapacity:CARS];
+    for(int i = 0; i < CARS; i++) {
+        [allCars addObject:[[Car alloc] initWithParent:self world:_world]];
+        _count++;
+    }
+    _cars = allCars;
 }
 
 
-void CarClear ()
+-(void) clear
 {
-    for(Car *car in all_cars)
-        [car Park];
-    memset(carmap, 0, sizeof(carmap));
-    count = 0;
+    for(Car *car in _cars)
+        [car park];
+    memset(_carmap, 0, sizeof(_carmap));
+    _count = 0;
 }
 
 
-void CarRender ()
+-(void) render
 {
-  if (!angles_done) {
+  if (! _anglesDone) {
     for (int i = 0 ;i < 360; i++) {
-      angles[i].x = cosf ((float)i * DEGREES_TO_RADIANS) * CAR_SIZE;
-      angles[i].y = sinf ((float)i * DEGREES_TO_RADIANS) * CAR_SIZE;
+      _angles[i].x = cosf ((float)i * DEGREES_TO_RADIANS) * CAR_SIZE;
+      _angles[i].y = sinf ((float)i * DEGREES_TO_RADIANS) * CAR_SIZE;
     }
   }
   pwDepthMask (GL_FALSE);
@@ -96,50 +135,62 @@ void CarRender ()
   pwBlendFunc (GL_ONE, GL_ONE);
   pwBindTexture (GL_TEXTURE_2D, 0);
   pwBindTexture(GL_TEXTURE_2D, TextureId (TEXTURE_HEADLIGHT));
-  for(Car *car in all_cars)
-      [car Render];
+  for(Car *car in _cars)
+      [car render];
   pwDepthMask (GL_TRUE);
 }
 
 
 
-void CarUpdate ()
+-(void) update
 {
     if (!TextureReady () || !EntityReady ())
         return;
     GLulong now = GetTickCount ();
-    if (next_update > now)
+    if (_nextUpdate > now)
         return;
-    next_update = now + UPDATE_INTERVAL;
-    for(Car *car in all_cars)
-        [car Update];
+    _nextUpdate = now + UPDATE_INTERVAL;
+    for(Car *car in _cars)
+        [car update];
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+-(BOOL)spaceAtRow:   (GLint)row column:(GLint)column  { return ! _carmap[row][column]; }
+-(BOOL)carAtRow:     (GLint)row column:(GLint)column  { return   _carmap[row][column]; }
+-(void)setCarAtRow:  (GLint)row column:(GLint)column { _carmap[row][column] = YES; }
+-(void)setSpaceAtRow:(GLint)row column:(GLint)column { _carmap[row][column] = NO;  }
 
+-(GLvector2)angleAt:(GLint)pos { return _angles[pos]; }
+-(void)setAngle:(GLvector2) angle atIndex:(GLint)pos { _angles[pos] = angle; }
+
+@end
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 @implementation Car
 
 
--(id)init
+-(id)initWithParent:(Cars *)parent world:(World*)world
 {
     self = [super init];
-    if(self)
+    if(self) {
         _ready = false;
+        _parent = parent;
+        _world  = world;
+    }
     return self;
 }
 
--(void) Park { _ready = false; }
+-(void) park { _ready = false; }
 
--(BOOL) PlaceOnMap
+-(BOOL) placeOnMap
 {
     NSAssert1(!_ready, @"Car %@ is marked as ready in PlaceOnMap.", self);
         //if the car isn't ready, we need to place it somewhere on the map
     _row = DEAD_ZONE + RandomIntR(WORLD_SIZE - DEAD_ZONE * 2);
     _col = DEAD_ZONE + RandomIntR(WORLD_SIZE - DEAD_ZONE * 2);
     
-    if(   (carmap[_row][_col] > 0)                     //if there is already a car here, forget it.
-       || (! (WorldCell (_row, _col) & CLAIM_ROAD))    //if this spot is not a road, forget it
+    if([_parent carAtRow:_row column:_col]             //if there is already a car here, forget it.
+       || (! ([_world cellAtRow:_row column:_col] & CLAIM_ROAD))    //if this spot is not a road, forget it
        || (! Visible(glVector(float(_row), 0.0f, float(_col)))) )
         return NO;
     
@@ -148,37 +199,34 @@ void CarUpdate ()
     _drivePosition = _position;
     _ready = true;
     
-    _direction = directionFromLane(_row, _col);
+    _direction = directionFromLane(_world, _row, _col);
     
     _drive_angle = dangles[_direction];
     _max_speed   = float(4 + RandomLongR(6)) / 10.0f;
     _speed       = 0.0f;
     _change      = 3;
     _stuck       = 0;
-    carmap[_row][_col]++;
+    [_parent setCarAtRow:_row column:_col];
     return YES;
 }
 
     // If the car is not ready (because it's not been placed at all, or it's placing was invalid and it was removed from the board)
     // Then place it at random on the board. Otherwise, check if it is in an invalid position or is stuck and if so mark it not ready
     // and remove it. If it is still on the board after all this, then move it in whatever direction it was facing.
--(void) Update
+-(void) update
 {
         //If the car isn't ready, place it on the map and get it moving
     GLvector old_pos, camera = CameraPosition();
     if (!_ready)
-        if(! [self PlaceOnMap])
+        if(! [self placeOnMap])
             return;     // The place failed. This car slot will be blank.
-    
-    NSAssert3(carmap[_row][_col] == 0 || carmap[_row][_col] == 1,
-              @"Car at position (%d,%d) has %d on the board", _row, _col, carmap[_row][_col]);
-    
+
         //take the car off the map and move it
-    carmap[_row][_col]--;
+    [_parent setSpaceAtRow:_row column:_col];
     old_pos = _position;
     _speed += _max_speed * 0.05f;
     _speed = MIN(_speed, _max_speed);
-    _position = _position + (direction[_direction] * MOVEMENT_SPEED * _speed);
+    _position = _position + (directions[_direction] * MOVEMENT_SPEED * _speed);
     
         // Check if the car is out of range, or some other reason to hide it for this iteration.
     if(shouldRemoveCar(_row, _col, _position, camera, _stuck)) {
@@ -191,7 +239,7 @@ void CarUpdate ()
     if (new_row != _row || new_col != _col) {
            // see if the new position places us on top of another car.
            // If so, then undo any move and increment the stuck counter. When this gets too big, the car will be removed next update.
-        if (carmap[new_row][new_col]) { 
+        if ([_parent carAtRow:new_row column:new_col]) {
             _position = old_pos;
             _speed = 0.0f;
             _stuck++;
@@ -204,12 +252,11 @@ void CarUpdate ()
         }
     }
     _drivePosition = (_drivePosition + _position) / 2.0f;
-        //place the car back on the map
-    carmap[_row][_col]++;
+    [_parent setCarAtRow:_row column:_col];    //place the car back on the map
 }
 
 
--(void) Render
+-(void) render
 {
 	if (!_ready || !Visible (_drivePosition))
 		return;
@@ -223,10 +270,10 @@ void CarUpdate ()
 	float top = _front ? CAR_SIZE : 0.0f;
     pwBegin(GL_QUADS);
     @try {
-        GLvertex(GLvector(pos.x + angles[angle].x, -CAR_SIZE, pos.z + angles[angle].y), GLvector2(0, 0), color).apply();
-        GLvertex(GLvector(pos.x - angles[angle].x, -CAR_SIZE, pos.z - angles[angle].y), GLvector2(1, 0), color).apply();
-        GLvertex(GLvector(pos.x - angles[angle].x,  top     , pos.z - angles[angle].y), GLvector2(1, 1), color).apply();
-        GLvertex(GLvector(pos.x + angles[angle].x,  top     , pos.z + angles[angle].y), GLvector2(0, 1), color).apply();
+        GLvertex(GLvector(pos.x + [_parent angleAt:angle].x, -CAR_SIZE, pos.z + [_parent angleAt:angle].y), GLvector2(0, 0), color).apply();
+        GLvertex(GLvector(pos.x - [_parent angleAt:angle].x, -CAR_SIZE, pos.z - [_parent angleAt:angle].y), GLvector2(1, 0), color).apply();
+        GLvertex(GLvector(pos.x - [_parent angleAt:angle].x,  top     , pos.z - [_parent angleAt:angle].y), GLvector2(1, 1), color).apply();
+        GLvertex(GLvector(pos.x + [_parent angleAt:angle].x,  top     , pos.z + [_parent angleAt:angle].y), GLvector2(0, 1), color).apply();
     }
     @finally { pwEnd(); }
 }
@@ -235,12 +282,12 @@ void CarUpdate ()
 #pragma mark - Support functions
 
     // Identify the direction of the car by finding out which lane it is in.
-static RoadDirection directionFromLane(int row, int col)
+static RoadDirection directionFromLane(World *world, int row, int col)
 {
-    if(WorldCell(row, col) & MAP_ROAD_NORTH)  return NORTH;
-    if(WorldCell(row, col) & MAP_ROAD_EAST )  return EAST;
-    if(WorldCell(row, col) & MAP_ROAD_SOUTH)  return SOUTH;
-    if(WorldCell(row, col) & MAP_ROAD_WEST )  return WEST;
+    if([world cellAtRow:row column:col] & MAP_ROAD_NORTH)  return NORTH;
+    if([world cellAtRow:row column:col] & MAP_ROAD_EAST )  return EAST;
+    if([world cellAtRow:row column:col] & MAP_ROAD_SOUTH)  return SOUTH;
+    if([world cellAtRow:row column:col] & MAP_ROAD_WEST )  return WEST;
     assert(false);
     return NORTH;
 }

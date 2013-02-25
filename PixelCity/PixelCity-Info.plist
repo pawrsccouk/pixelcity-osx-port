@@ -29,7 +29,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2013 Patrick Wallace. All rights reserved.</string>
 	<key>NSMainNibFile</key>
-	<string>MainMenu</string>
+	<string>PixelCityViewController</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

@@ -7,7 +7,6 @@ static const int VERSION_REVISION =   10;
 
 static const bool SCREENSAVER    = true;  //Best to disable screensaver mode when working on the program. // PAW - was true
 static const bool LOADING_SCREEN = true;  //Do we hide scene building behing a loading screen or show it? // PAW - was true
-static const int CARS            = 500;    //Controls the density of cars.
 static const int WORLD_EDGE      = 200;    //The "dead zone" along the edge of the world, with super-low detail.
 
 static const GLlong RESET_INTERVAL  =  (SCREENSAVER ? 120000 : 999999); //milliseconds    //How often to rebuild the city
@@ -37,16 +36,19 @@ enum RoadDirection
 #ifdef __cplusplus
 extern "C" {
 #endif	
+
+@class World;
+
         // Write diagnostic information to the console.
 	void DebugLog(const char* str, ...);
 
 // Milliseconds since computer started.
 	GLulong GetTickCount();
 
-	void AppUpdate(int width, int height);
-	void AppInit(int width, int height);
+	World *AppInit(int width, int height);
+	void AppUpdate(World *world, int width, int height);
 	void AppResize(int width, int height);
-	void AppTerm();
+	void AppTerm(World *world);
 
 /*
 HWND  WinHwnd (void);

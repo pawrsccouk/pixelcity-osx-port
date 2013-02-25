@@ -33,14 +33,16 @@ static const int BUILDING_COUNT  =  ((TEXTURE_BUILDING9 - TEXTURE_BUILDING1) + 1
 extern "C" {
 #endif
 
+@class World;
+
 unsigned  TextureFromName (char* name);
 unsigned  TextureId (TextureType texType);
-void      TextureInit (void);
+void      TextureInit (World *world);
 void      TextureTerm (void);
 GLuint    TextureRandomBuilding (GLulong index);
 bool      TextureReady ();
 void      TextureReset (void);
-void      TextureUpdate (bool showFlat, bool showBloom);
+void      TextureUpdate (World *world, bool showFlat, bool showBloom);
 
     // PAW: Return the texture ID of one of a set of pre-defined logos.
     // Shamus' code worked by creating one large logo texture, and then getting each logo to map a different sub-rect of it.

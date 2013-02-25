@@ -39,17 +39,18 @@ static const float ONE_SEGMENT          = (1.0f / SEGMENTS_PER_TEXTURE);
 
 @implementation Building
 
-+(id)buildingWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color
++(id)buildingWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color world:(World*) world
 {
-    return [[Building alloc] initWithType:type x:x y:y height:height width:width depth:depth seed:seed color:color];
+    return [[Building alloc] initWithType:type x:x y:y height:height width:width depth:depth seed:seed color:color world:world];
 }
 
--(id)initWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color
+-(id)initWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color world:(World*) world
 {
     self = [super init];
     if(self) {
+        _world = world;
         _color = color.colorWithAlpha(0.1f);
-        _trim_color = WorldLightColor(seed);
+        _trim_color = [world lightColorAtIndex:seed];
         _x = x;
         _y = y;
         _width = width;
@@ -240,7 +241,7 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
                 end   = glVector (left - logo_offset, back );
                 break;
         }
-        [d CreateLogoWithStart:start end:end base:bottom seed:WorldLogoIndex() color:_trim_color];
+        [d CreateLogoWithStart:start end:end base:bottom seed:_world.logoIndex color:_trim_color];
         _have_logo = true;
     } else if (addon == ADDON_TRIM) {
         Deco *d =  [[Deco alloc] init];
@@ -611,7 +612,7 @@ static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
         start = glVector (pos.x, pos.z);
         end = glVector (p.position.x, p.position.z);
         d = [[Deco alloc] init];
-        [d CreateLogoWithStart:start end:end base:(float)_height seed:WorldLogoIndex () color:RANDOM_COLOR()];
+        [d CreateLogoWithStart:start end:end base:(float)_height seed:_world.logoIndex color:RANDOM_COLOR()];
       }
     } else if (skip_counter != 1)
       windows++;

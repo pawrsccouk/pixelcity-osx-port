@@ -1,17 +1,29 @@
 
-GLrgba    WorldBloomColor ();
-char      WorldCell (int x, int y);
-GLrgba    WorldLightColor (unsigned index);
-int       WorldLogoIndex ();
-GLbbox    WorldHotZone ();
-void      WorldInit (void);
-float     WorldFade (void);
-void      WorldRender ();
-void      WorldReset (void);
-GLulong WorldSceneBegin ();
-GLulong WorldSceneElapsed ();
-void      WorldTerm (void);
-void      WorldUpdate (void);
+@class Cars;
+
+@interface World : NSObject
+{
+}
+
+-(id)      init;
+
+@property (nonatomic, readonly) GLrgba bloomColor;
+@property (nonatomic, readonly) GLuint logoIndex;
+@property (nonatomic, readonly) Cars  *cars;
+@property (nonatomic, readonly) GLbbox hotZone;
+@property (nonatomic, readonly) float fadeCurrent;
+@property (nonatomic, readonly) GLulong  fadeStart;
+@property (nonatomic, readonly) GLulong sceneBegin, sceneElapsed;
+
+-(char) cellAtRow:(int)row column:(int)column;
+-(GLrgba)    lightColorAtIndex: (GLuint) index;
+
+-(void)      render;
+-(void)      reset;
+-(void)      term;
+-(void)      update;
+
+@end
 
 
 // PAW: Helper classes for display-list rendering and primitive creation. 
@@ -26,32 +38,10 @@ struct MakePrimitive
 struct MakeDisplayList
 {
 	static int nestCount;	// debug variable used to check we are not nesting.
-	MakeDisplayList(GLint name, GLenum mode);
+	MakeDisplayList(GLint name, GLenum mode, const char *location);
 	~MakeDisplayList();
 };	
 
-// Generic template class to handle creating/setting something in the constructor
-// and deleting/unsetting it when it goes out of scope.
-// Templated so that std::ptr_fun, std::bind2nd etc will work.
-
-// Not working, and I can't find out why right now.
-//template <class _Arg, class _Result>
-//struct RAII
-//{
-//    RAII( std::unary_function<_Arg, _Result> createFunction, std::unary_function<_Arg, _Result> releaseFunction)
-//    : _releaseFn(releaseFunction)
-//    {
-//        createFunction();
-//    }
-//    
-//    ~RAII()
-//    {
-//        _releaseFn();
-//    }
-//
-//private:
-//    std::unary_function<_Arg, _Result> _releaseFn;
-//};
 
 struct PWMatrixStacker
 {

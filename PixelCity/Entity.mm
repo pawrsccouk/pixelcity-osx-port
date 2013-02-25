@@ -64,7 +64,7 @@ static void do_compile ()
 	if (!cell_list[x][y].list_textured)
 		cell_list[x][y].list_textured = glGenLists(1);
 	{
-    	MakeDisplayList mdl(cell_list[x][y].list_textured, GL_COMPILE);
+    	MakeDisplayList mdl(cell_list[x][y].list_textured, GL_COMPILE, "do_compile (textured)");
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
         for(Entity *ent in allEntities) {
 			GLvector pos = ent.center;
@@ -81,7 +81,7 @@ static void do_compile ()
 		cell_list[x][y].list_flat = glGenLists(1);
     
 	{
-        MakeDisplayList mdl(cell_list[x][y].list_flat, GL_COMPILE);
+        MakeDisplayList mdl(cell_list[x][y].list_flat, GL_COMPILE, "do_compile flat");
 		pwEnable (GL_CULL_FACE);
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
         for(Entity *ent in allEntities) {
@@ -96,7 +96,7 @@ static void do_compile ()
 	if (!cell_list[x][y].list_flat_wireframe)
 		cell_list[x][y].list_flat_wireframe = glGenLists(1);
 	{
-        MakeDisplayList mdl(cell_list[x][y].list_flat_wireframe, GL_COMPILE);
+        MakeDisplayList mdl(cell_list[x][y].list_flat_wireframe, GL_COMPILE, "do_compile wireframe");
 		pwEnable (GL_CULL_FACE);
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
         for(Entity *ent in allEntities) {
@@ -112,7 +112,7 @@ static void do_compile ()
 		cell_list[x][y].list_alpha = glGenLists(1);
     
 	{
-        MakeDisplayList mdl(cell_list[x][y].list_alpha, GL_COMPILE);
+        MakeDisplayList mdl(cell_list[x][y].list_alpha, GL_COMPILE, "do_compile alpha");
 		cell_list[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
 		pwDepthMask (GL_FALSE);
 		pwEnable (GL_BLEND);
@@ -253,10 +253,10 @@ void EntityClear ()
 	for (int x = 0; x < GRID_SIZE; x++) {
 		for (int y = 0; y < GRID_SIZE; y++) {
 			cell* pcell = &(cell_list[x][y]);
-			if(pcell->list_textured       > 0) { MakeDisplayList mdl(pcell->list_textured      , GL_COMPILE);  }
-			if(pcell->list_alpha          > 0) { MakeDisplayList mdl(pcell->list_alpha         , GL_COMPILE);  }
-			if(pcell->list_flat_wireframe > 0) { MakeDisplayList mdl(pcell->list_flat_wireframe, GL_COMPILE);  }
-			if(pcell->list_flat           > 0) { MakeDisplayList mdl(pcell->list_flat          , GL_COMPILE);  }
+			if(pcell->list_textured       > 0) { pwNewList(pcell->list_textured      , GL_COMPILE);  pwEndList();  }
+			if(pcell->list_alpha          > 0) { pwNewList(pcell->list_alpha         , GL_COMPILE);  pwEndList();  }
+			if(pcell->list_flat_wireframe > 0) { pwNewList(pcell->list_flat_wireframe, GL_COMPILE);  pwEndList();  }
+			if(pcell->list_flat           > 0) { pwNewList(pcell->list_flat          , GL_COMPILE);  pwEndList();  }
 		}
 	}
 	glReportError("EntityClear END");

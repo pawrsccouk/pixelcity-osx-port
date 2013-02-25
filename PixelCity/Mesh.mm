@@ -126,7 +126,7 @@
 -(void) Compile
 {
 	assert(glIsList(_list));
-	MakeDisplayList mdl(_list, GL_COMPILE);
+	MakeDisplayList mdl(_list, GL_COMPILE, "Mesh Compile");
     [self Render];
 	_compiled = true;
 }
