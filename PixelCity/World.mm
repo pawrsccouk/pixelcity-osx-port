@@ -25,6 +25,7 @@
 #import "visible.h"
 #import "win.h"
 #import "world.h"
+#import "Camera.h"
 
 using namespace std;
 
@@ -480,13 +481,15 @@ static plot makePlot(int x, int z, int width, int depth)
 
 -(void) term
 {
+    [self.textures term];
+    [self.renderer terminate];
 }
 
 -(void) reset
 {
 	//If we're already fading out, then this is the developer hammering on the "rebuild" button.  Let's hurry things up for the nice person...
 	if (_fade == FADE_OUT)
-		[self fullReset];
+		[self rebuildContent];
     
 	//If reset is called but the world isn't ready, then don't bother fading out. The program probably just started.
 	_fade = FADE_OUT;
@@ -494,7 +497,7 @@ static plot makePlot(int x, int z, int width, int depth)
 }
 
 
--(void) fullReset
+-(void) rebuildContent
 {
         //Re-init Random to make the same city each time. Helpful when running tests.
 //    RandomInit (6);
@@ -562,7 +565,7 @@ static plot makePlot(int x, int z, int width, int depth)
 {	
 	GLulong now = GetTickCount();
 	if (_resetNeeded) {
-		[self fullReset]; //Now we've faded out the scene, rebuild it
+		[self rebuildContent]; //Now we've faded out the scene, rebuild it
 	}
 	if (_fade != FADE_IDLE) {
 		if (_fade == FADE_WAIT && self.textures.ready && self.entities.ready) {
@@ -603,21 +606,26 @@ static plot makePlot(int x, int z, int width, int depth)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(id) init 
+-(id) initWithViewSize:(const CGSize &) size
 {
     self = [super init];
     if(self) {
-        _lastUpdate = GetTickCount ();
+        RandomInit(time(NULL));
+
+        _lastUpdate = GetTickCount();
         _fade = FADE_IDLE;
         _logoIndex = 0;
         _fadeStart = 0;
         _startTime = 0;
         
+        _renderer = [[Renderer alloc] initWithWorld:self viewSize:size];
         _cars     = [[Cars     alloc] initWithWorld:self];
         _lights   = [[Lights   alloc] initWithWorld:self];
         _entities = [[Entities alloc] initWithWorld:self];
         _sky      = [[Sky      alloc] initWithWorld:self];
         _textures = [[Textures alloc] initWithWorld:self];
+        _camera   = [[Camera   alloc] initWithWorld:self];
+        _visibilityGrid = [[VisibilityGrid alloc] initWithWorld:self];
 
         [self reset];
         _fade = FADE_OUT;

@@ -24,6 +24,7 @@ void pwPopAttrib(void) { glPopAttrib(); glReportError("glPopAttrib"); }
 void pwEnable (GLenum i) {	glEnable (i);	glReportError("glEnable");  }
 void pwDisable(GLenum i) {	glDisable(i);	glReportError("glDisable");  }
 
+void pwGetIntegerv(GLenum pname, GLint *params) { glGetIntegerv(pname, params); glReportError("glGetIntegerv"); }
 void pwMatrixMode(GLenum i)	{ glMatrixMode(i);	glReportError("glMatrixMode"); }
 void pwLoadIdentity()		{ glLoadIdentity();	glReportError("glLoadIdentity"); }
 void pwDepthMask(GLboolean b) { assert(b == GL_TRUE || b == GL_FALSE); glDepthMask(b); glReportError("glDepthMask"); }

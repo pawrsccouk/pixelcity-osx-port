@@ -187,28 +187,29 @@ struct Cell
 
 -(void) render:(BOOL) showFlat
 {
-    //Draw all textured objects
-	int       polymode[2];
-	glGetIntegerv (GL_POLYGON_MODE, &polymode[0]);
-	bool wireframe = polymode[0] != GL_FILL;
-	if (showFlat)
+        //Draw all textured objects
+    VisibilityGrid *visibilityGrid = self.world.visibilityGrid;
+    auto isWireframe = ^{ int polymode[2];  glGetIntegerv (GL_POLYGON_MODE, &polymode[0]); return polymode[0] != GL_FILL; };
+	
+    if (showFlat)
 		pwDisable (GL_TEXTURE_2D);
 	
     for (int x = 0; x < GRID_SIZE; x++)
-		for (int y = 0; y < GRID_SIZE; y++)
-			if( Visible(x,y) && (_cellList[x][y].list_textured > 0) )
-                pwCallList (_cellList[x][y].list_textured);
+		for (int z = 0; z < GRID_SIZE; z++)
+			if( [visibilityGrid visibleAtX:x Z:z] && (_cellList[x][z].list_textured > 0) )
+                pwCallList (_cellList[x][z].list_textured);
 
         //draw all flat colored objects
 	pwBindTexture(GL_TEXTURE_2D, 0);
 	pwColor3f (0, 0, 0);
+    bool wireframe = isWireframe();
 	for (int x = 0; x < GRID_SIZE; x++) 
-		for (int y = 0; y < GRID_SIZE; y++) 
-			if (Visible (x, y)) {
+		for (int z = 0; z < GRID_SIZE; z++)
+			if ([visibilityGrid visibleAtX:x Z:z]) {
 				if (wireframe) {
-					if(_cellList[x][y].list_flat_wireframe > 0) { pwCallList(_cellList[x][y].list_flat_wireframe); }
+					if(_cellList[x][z].list_flat_wireframe > 0) { pwCallList(_cellList[x][z].list_flat_wireframe); }
 				} else {
-					if(_cellList[x][y].list_flat           > 0) { pwCallList(_cellList[x][y].list_flat          ); }
+					if(_cellList[x][z].list_flat           > 0) { pwCallList(_cellList[x][z].list_flat          ); }
 				}
 			}
 
@@ -217,9 +218,9 @@ struct Cell
     pwColor3f(0.0f, 0.0f, 0.0f);
     pwEnable (GL_BLEND);
     for (int x = 0; x < GRID_SIZE; x++)
-        for (int y = 0; y < GRID_SIZE; y++)
-            if( Visible(x, y) && (_cellList[x][y].list_alpha > 0) )
-                pwCallList(_cellList[x][y].list_alpha);
+        for (int z = 0; z < GRID_SIZE; z++)
+            if( [visibilityGrid visibleAtX:x Z:z] && (_cellList[x][z].list_alpha > 0) )
+                pwCallList(_cellList[x][z].list_alpha);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/

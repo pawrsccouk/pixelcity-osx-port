@@ -1,5 +1,6 @@
 #import "entity.h"
 #import "GLrgba.h"
+#import "Win.h"
 
 enum BuildingType
 {
@@ -12,23 +13,14 @@ enum BuildingType
 @class Mesh, World;
 
 @interface Building : Entity
-{
-  int           _x, _y, _width, _depth, _height;
-  GLulong _texture_type, _seed, _roof_tiers;
-  GLrgba        _color, _trim_color;
-  Mesh         *_mesh, *_mesh_flat;
-  BOOL          _have_lights, _have_trim, _have_logo;
-  __weak World *_world;
-}
-
--(void)CreateSimple;
--(void)CreateBlocky;
--(void)CreateModern;
--(void)CreateTower;
   
--(float)ConstructWallWithX:(int) start_x Y:(int)start_y Z:(int) start_z
-                       direction:(int) direction length:(int) length height:(int) height 
-                       windowGroups:(GLulong) wgroup UVStart:(float) uvStart blankCorners:(BOOL) blankCorners;
+-(float)constructWallWithPosition:(const GLvector3 &) position
+                        direction:(RoadDirection) direction
+                           length:(int) length
+                           height:(int) height
+                     windowGroups:(GLulong) wgroup
+                          UVStart:(float)   uvStart
+                     blankCorners:(BOOL)    blankCorners;
 
 -(void)ConstructSpikeWithLeft:(int) left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;
 -(void)ConstructCubeWithLeft:(int)  left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;

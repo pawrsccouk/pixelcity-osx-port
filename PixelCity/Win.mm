@@ -26,56 +26,24 @@ static const float MOUSE_MOVEMENT = 0.5f;
 #import "RenderAPI.h"
 #import <sys/time.h>
 
-static bool quit = false;
-
-void AppQuit ()
-{
-  quit = true;
-}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void AppUpdate (World *world, int width, int height)
+void AppUpdate (World *world, const CGSize &size)
 {    
-	CameraUpdate (world);
+	[world.camera update];
 	[world.entities update];
 	[world update];
         //cleanup and restore the viewport after TextureUpdate()
-	RenderResize (width, height);     
-	VisibleUpdate();    
+    Renderer *renderer = world.renderer;
+	[renderer resize:size];
+	[world.visibilityGrid update];
 	[world.cars update];
-	RenderUpdate (world, width, height);
+	[renderer update:size];
 	glReportError("AppUpdate");
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-World *AppInit(int width, int height)
-{
-	DebugLog("AppInit");
-    World *world = [[World alloc] init];
-    RandomInit (time (NULL));
-    CameraInit ();
-    RenderInit (width, height);
-    return world;
-}
-
-
-
-void AppTerm (World *world)
-{
-	DebugLog("AppTerm");
-    [world.textures term];
-    [world term];
-    RenderTerminate();
-}
-
-void AppResize(int width, int height)
-{
-	RenderResize(width, height);
-}
-
-
 
 
 // PAW: Replacement for Windows function that returns time since computer was started in milliseconds.

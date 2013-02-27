@@ -57,43 +57,11 @@
 
  
 #import "GLCheck.h"
-
 #import <OpenGL/OpenGL.h>
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 #import <OpenGL/glext.h>
-
 #import <string.h>
-
-// -------------------------
-
-// local CF dictionary routines
-
-//static GLlong _getDictLong (CFDictionaryRef refDict, CFStringRef key)
-//{
-//  GLlong int_value;
-//  CFNumberRef num_value = (CFNumberRef)CFDictionaryGetValue(refDict, key);
-//  if (!num_value) // if can't get a number for the dictionary
-//    return -1;  // fail
-//  // or if cant convert it
-//  if (!CFNumberGetValue(num_value, kCFNumberLongType, &int_value)) 
-//    return -1; // fail
-//  return int_value; // otherwise return the GLlong value
-//}
-//
-//static double _getDictDouble (CFDictionaryRef refDict, CFStringRef key)
-//{
-//  double double_value;
-//  CFNumberRef num_value = (CFNumberRef)CFDictionaryGetValue(refDict, key);
-//  if (!num_value) // if can't get a number for the dictionary
-//    return -1;  // fail
-//  // or if cant convert it
-//  if (!CFNumberGetValue(num_value, kCFNumberDoubleType, &double_value)) 
-//    return -1; // fail
-//  return double_value; // otherwise return the GLlong value
-//}
-//
-// -------------------------
 
 static short getBitsPerPixel(CGDisplayModeRef displayMode)
 {
@@ -137,11 +105,7 @@ unsigned char HaveOpenGLCapsChanged (GLCaps aDisplayCaps[],
  
     // get current geometry
     {
-      CGRect displayRect = CGDisplayBounds (activeDspys[i]);
-      
-      // get mode dictionary
-//      CFDictionaryRef dispMode = CGDisplayCurrentMode (activeDspys[i]);
-      
+      CGRect displayRect = CGDisplayBounds (activeDspys[i]);      
       CGDisplayModeRef dispMode = CGDisplayCopyDisplayMode(activeDspys[i]);
       short bitsPerPixel = getBitsPerPixel(dispMode);
       double refreshRate = CGDisplayModeGetRefreshRate(dispMode);
@@ -257,7 +221,6 @@ void CheckOpenGLCaps (CGDisplayCount maxDspys,
       CGDisplayModeRelease(dispMode);
 
 //      // get mode dictionary
-//      CFDictionaryRef dispMode = CGDisplayCurrentMode (dspys[i]); 
       dCaps[i].deviceWidth = (GLlong) displayRect.size.width;
       dCaps[i].deviceHeight = (GLlong) displayRect.size.height;   
       dCaps[i].deviceOriginX = (GLlong) displayRect.origin.x;   

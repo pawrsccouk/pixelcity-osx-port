@@ -105,7 +105,8 @@ static const int SKY_HALF = (SKY_GRID / 2);
         pwPushMatrix();
         @try {
             pwLoadIdentity();
-            GLvector angle = CameraAngle (), position = CameraPosition ();
+            Camera *camera = self.world.camera;
+            GLvector angle = camera.angle, position = camera.position;
             pwRotatef (angle.x, 1.0f, 0.0f, 0.0f);
             pwRotatef (angle.y, 0.0f, 1.0f, 0.0f);
             pwRotatef (angle.z, 0.0f, 0.0f, 1.0f);

@@ -38,9 +38,9 @@ public:
     bool    operator== (const GLrgba& c) const;
     std::ostream &operator<<(std::ostream &os) const;
     
-        // Populate the array with the colour values sutable for passing to glColor3fv or glColor4fv
-    void copyRGB (float output[3]) const;
-    void copyRGBA(float output[4]) const;
+//        // Populate the array with the colour values sutable for passing to glColor3fv or glColor4fv
+//    void copyRGB (float output[3]) const;
+//    void copyRGBA(float output[4]) const;
 
         // Return a colour which is a copy of this one, but with the specified alpha value. Defaults to fully opaque.
     GLrgba colorWithAlpha(float newAlpha = 1.0f) const;

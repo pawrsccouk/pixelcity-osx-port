@@ -33,33 +33,14 @@ enum RoadDirection
   WEST
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif	
-
 @class World;
 
-        // Write diagnostic information to the console.
-	void DebugLog(const char* str, ...);
+    // Write diagnostic information to the console.
+void DebugLog(const char* str, ...);
 
-// Milliseconds since computer started.
-	GLulong GetTickCount();
+    // Milliseconds since computer started.
+GLulong GetTickCount();
 
-	World *AppInit(int width, int height);
-	void AppUpdate(World *world, int width, int height);
-	void AppResize(int width, int height);
-	void AppTerm(World *world);
+void AppUpdate(World *world, const CGSize &viewSize);
 
-/*
-HWND  WinHwnd (void);
-void  WinPopup (char* message, ...);
-void  WinTerm (void);
-bool  WinInit (void);
-int   WinWidth (void);
-int   WinHeight (void);
-void  WinMousePosition (int* x, int* y);
-*/
 
-#ifdef __cplusplus
-}
-#endif

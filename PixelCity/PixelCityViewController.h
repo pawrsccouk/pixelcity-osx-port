@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "RenderAPI.h"
+#import "Render.h"
 
 @interface PixelCityViewController : NSViewController <NSWindowDelegate>
 {

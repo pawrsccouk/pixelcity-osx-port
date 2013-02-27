@@ -47,9 +47,7 @@ static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the give
 
 -(void) Render
 {
-    float rgb[3] = {};
-    _color.copyRGB(rgb);
-    glColor3fv(rgb);
+    _color.glColor3();
     [_mesh Render];
 }
 

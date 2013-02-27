@@ -11,13 +11,15 @@
 #import "GLCheck.h"
 #import "win.h"
 #import "ini.h"
-#import "RenderAPI.h"
+#import "Render.h"
 #import "Model.h"
 #import "World.h"
 #import "texture.h"
 
 @interface PixelCityViewController ()
-
+{
+}
+@property (nonatomic, readonly) BasicOpenGLView *glView;    // self.view with a cast.
 @end
 
 static BOOL fDebugLog = NO;
@@ -40,6 +42,8 @@ void DebugLog(const char* str, ...)
 
 
 @implementation PixelCityViewController
+
+-(BasicOpenGLView*) glView { return (BasicOpenGLView*)self.view; }
 
 -(void)setView:(NSView *)view
 {
@@ -72,7 +76,7 @@ void DebugLog(const char* str, ...)
 	IniIntSet ("Effect", effect);
 }
 
-static void loadAndInit(NSMenuItem *item, BOOL *flag, const char *settingName, void (*fn)(bool))
+static void loadAndInit(NSMenuItem *item, BOOL *flag, const char *settingName, void (^fn)(BOOL))
 {
     (*flag) = IniInt(settingName) != 0;
     [item setState:(*flag) ? NSOnState : NSOffState];
@@ -81,31 +85,30 @@ static void loadAndInit(NSMenuItem *item, BOOL *flag, const char *settingName, v
 
 -(void) initApp
 {
+    Renderer *renderer = self.glView.world.renderer;
         //load in our settings
-    loadAndInit(letterboxToggleMenuItem, &fLetterbox, "Letterbox", RenderSetLetterbox);
-    loadAndInit(wireframeToggleMenuItem, &fWireframe, "Wireframe", RenderSetWireframe);
-    loadAndInit(fogToggleMenuItem      , &fFog      , "ShowFog"  , RenderSetFog);
-    loadAndInit(flatToggleMenuItem     , &fFlat     , "Flat"     , RenderSetFlat);
-    loadAndInit(FPSToggleMenuItem      , &fFPS      , "ShowFPS"  , RenderSetFPS);
-    effect     = (EffectType)IniInt("Effect");
-    RenderSetEffect(effect);
+    loadAndInit(letterboxToggleMenuItem, &fLetterbox, "Letterbox", ^(BOOL b){ renderer.letterbox = b; } );
+    loadAndInit(wireframeToggleMenuItem, &fWireframe, "Wireframe", ^(BOOL b){ renderer.wireframe = b; } );
+    loadAndInit(fogToggleMenuItem      , &fFog      , "ShowFog"  , ^(BOOL b){ renderer.fog  = b; } );
+    loadAndInit(flatToggleMenuItem     , &fFlat     , "Flat"     , ^(BOOL b){ renderer.flat = b; } );
+    loadAndInit(FPSToggleMenuItem      , &fFPS      , "ShowFPS"  , ^(BOOL b){ renderer.fps  = b; } );
     
-    fDebugLog  = fHelp = fNormalize = NO;
-    fAnimate = YES;
-    RenderSetHelpMode(fHelp);
-    RenderSetNormalized(fNormalize);
+    fDebugLog = NO;
+    renderer.helpMode   = fHelp      = NO;
+    renderer.normalized = fNormalize = NO;
+    renderer.effect     = effect     = EffectType(IniInt("Effect"));
 
         // start animation timer
 	timer = [NSTimer timerWithTimeInterval:(1.0f / 60.0f) target:self selector:@selector(animationTick:) userInfo:nil repeats:YES];
 	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode]; // ensure timer fires during resize
     
-    ((BasicOpenGLView*)self.view).animating = fAnimate;
+    self.glView.animating = fAnimate = YES;
 }
 
 -(void) animationTick:(NSTimer*)timer
 {
-    [(BasicOpenGLView*)self.view animationTick];
+    [self.glView animationTick];
 }
 
 #pragma mark - IB Actions
@@ -113,7 +116,7 @@ static void loadAndInit(NSMenuItem *item, BOOL *flag, const char *settingName, v
     // Dump logs and debug info to the console.
 -(IBAction) info: (id) sender
 {
-    NSLog(@"%@", ((BasicOpenGLView*)self.view).world.entities);
+    NSLog(@"%@", self.glView.world.entities);
 }
 
 
@@ -127,41 +130,41 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
 
 -(IBAction) animate:(id) sender
 {
-    toggleFlag(animateMenuItem, ^(bool b) { ((BasicOpenGLView*)self.view).animating = b; }, &fAnimate);
+    toggleFlag(animateMenuItem, ^(bool b) { self.glView.animating = b; }, &fAnimate);
 }
 
 -(IBAction)toggleWireframe:(id)sender
 {
-    toggleFlag(wireframeToggleMenuItem, ^(bool b) { RenderSetWireframe(b); }, &fWireframe);
+    toggleFlag(wireframeToggleMenuItem, ^(bool b) { self.glView.world.renderer.wireframe = b; }, &fWireframe);
 }
 
 -(IBAction)nextEffect:(id)sender
 {
     effect = EffectType((effect + 1) % EFFECT_COUNT);
-	RenderSetEffect(effect);
+	self.glView.world.renderer.effect = effect;
 }
 
 -(IBAction) toggleLetterbox: (id) sender
 {
-    toggleFlag(letterboxToggleMenuItem, ^(bool b) { RenderSetLetterbox(b); }, &fLetterbox);
+    toggleFlag(letterboxToggleMenuItem, ^(bool b) { self.glView.world.renderer.letterbox = b; }, &fLetterbox);
         // PAW: I think I'm supposed to change the window size to match the letterbox size here.
 	NSSize size = [self.view bounds].size;
-	AppResize(size.width, size.height);
+    [self.glView.world.renderer resize:size];
 }
 
 -(IBAction) toggleFPS:(id) sender
 {
-    toggleFlag(FPSToggleMenuItem, ^(bool b) {  RenderSetFPS(b); }, &fFPS);
+    toggleFlag(FPSToggleMenuItem, ^(bool b) {  self.glView.world.renderer.fps = b; }, &fFPS);
 }
 
 -(IBAction) toggleFog:(id) sender
 {
-    toggleFlag(fogToggleMenuItem, ^(bool b) { RenderSetFog(b); }, &fFog);
+    toggleFlag(fogToggleMenuItem, ^(bool b) { self.glView.world.renderer.fog = b; }, &fFog);
 }
 
 -(IBAction) toggleFlat:(id) sender
 {
-    toggleFlag(flatToggleMenuItem, ^(bool b) { RenderSetFlat(b); }, &fFlat);
+    toggleFlag(flatToggleMenuItem, ^(bool b) { self.glView.world.renderer.flat = b; }, &fFlat);
 }
 
 -(IBAction)toggleDebugLog:(id)sender
@@ -171,12 +174,12 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
 
 -(IBAction) toggleHelp:(id) sender
 {
-    toggleFlag(helpToggleMenuItem, ^(bool b) { RenderSetHelpMode(b); }, &fHelp);
+    toggleFlag(helpToggleMenuItem, ^(bool b) { self.glView.world.renderer.helpMode = b; }, &fHelp);
 }
 
 -(IBAction)toggleNormalized:(id)sender
 {
-    toggleFlag(normalizeToggleMenuItem, ^(bool b) { RenderSetNormalized(b); }, &fNormalize);
+    toggleFlag(normalizeToggleMenuItem, ^(bool b) { self.glView.world.renderer.normalized = b; }, &fNormalize);
 }
 
 -(void)resetWorld:(id)sender
@@ -188,7 +191,7 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
 
 -(void)windowWillClose:(NSNotification *)notification
 {
-    RenderTerminate();  // Stop any OpenGL renders and wait for the window to be closed.
+    [self.glView.world term];  // Stop any OpenGL renders while we wait for the window to be closed.
     [self saveSettings];
 }
 

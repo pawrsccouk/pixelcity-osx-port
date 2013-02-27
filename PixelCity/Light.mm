@@ -157,16 +157,19 @@ static const short MAX_SIZE = 5;
 
 -(void)render
 {
-	if (!Visible (_cell_x, _cell_z))
+	if (![self.world.visibilityGrid visibleAtX:_cell_x Z:_cell_z])
 		return;
-	GLvector camera = CameraAngle(), camera_position = CameraPosition();
+
+    Camera *camera = self.world.camera;
+	GLvector camera_angle = camera.angle, camera_position = camera.position;
     
-	if( (fabs (camera_position.x - _position.x) > RenderFogDistance ())
-	||  (fabs (camera_position.z - _position.z) > RenderFogDistance ())
+    float fogDistance = self.world.renderer.fogDistance;
+	if( (fabs (camera_position.x - _position.x) > fogDistance)
+	||  (fabs (camera_position.z - _position.z) > fogDistance)
 	|| (_blink && (GetTickCount () % _blink_interval) > 200) )
 		return;
 
-	int angle = (int)MathAngle1 (camera.y);
+	int angle = (int)MathAngle1(camera_angle.y);
 	GLvector2 offset = [self.world.lights angleAtX:_size y:angle];
 	GLvector pos = _position;
 	

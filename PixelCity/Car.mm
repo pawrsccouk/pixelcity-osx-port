@@ -51,9 +51,8 @@ typedef GLvector2 AngleMap[360];
     float    _speed, _max_speed;
     
     __weak Cars *_parent;
-    __weak World *_world;
 }
-
+@property (nonatomic, readonly) __weak World *world;
 -(id) initWithParent:(Cars*)parent world:(World*) world;
 -(void) render;
 -(void) update;
@@ -168,7 +167,7 @@ static const GLvector directions[] = {
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 @implementation Car
-
+@synthesize world = _world;
 
 -(id)initWithParent:(Cars *)parent world:(World*)world
 {
@@ -192,7 +191,7 @@ static const GLvector directions[] = {
     
     if([_parent carAtRow:_row column:_col]             //if there is already a car here, forget it.
        || (! ([_world cellAtRow:_row column:_col] & CLAIM_ROAD))    //if this spot is not a road, forget it
-       || (! Visible(glVector(float(_row), 0.0f, float(_col)))) )
+       || (! [self.world.visibilityGrid visibleAtPosition:glVector(_row, 0.0f, _col)]) )
         return NO;
     
         //good spot. place the car
@@ -217,7 +216,7 @@ static const GLvector directions[] = {
 -(void) update
 {
         //If the car isn't ready, place it on the map and get it moving
-    GLvector old_pos, camera = CameraPosition();
+    GLvector old_pos, camera = self.world.camera.position;
     if (!_ready)
         if(! [self placeOnMap])
             return;     // The place failed. This car slot will be blank.
@@ -230,7 +229,7 @@ static const GLvector directions[] = {
     _position = _position + (directions[_direction] * MOVEMENT_SPEED * _speed);
     
         // Check if the car is out of range, or some other reason to hide it for this iteration.
-    if(shouldRemoveCar(_row, _col, _position, camera, _stuck)) {
+    if(shouldRemoveCar(_row, _col, _position, camera, _stuck, self.world.visibilityGrid, self.world.renderer.fogDistance)) {
         _ready = false;
         return;
     }
@@ -259,7 +258,7 @@ static const GLvector directions[] = {
 
 -(void) render
 {
-	if (!_ready || !Visible (_drivePosition))
+	if (!_ready || ! [self.world.visibilityGrid visibleAtPosition:_drivePosition])
 		return;
 
 	int angle = (360 - int(MathAngle2(_position.x, _position.z, _drivePosition.x, _drivePosition.z))) % 360;
@@ -303,12 +302,12 @@ static BOOL facingCamera(RoadDirection direction, const GLvector &camera, const 
         :                         (camera.x < position.x);
 }
 
-static BOOL shouldRemoveCar(float row, float col, const GLvector &position, const GLvector &camera, int stuck)
+static BOOL shouldRemoveCar(float row, float col, const GLvector &position, const GLvector &camera, int stuck, VisibilityGrid *visibilityGrid, float fogDistance)
 {
     // Remove if: the car has moved out of view, the car is far away, or the car gets too close to the edge of the map.
     // We use manhattan units because buildings almost always block views of cars on the diagonal.
-    return ((  ! Visible(glVector(row, 0.0f, col)))
-       || (fabs(camera.x - position.x) + fabs(camera.z - position.z) > RenderFogDistance())
+    return ((! [visibilityGrid visibleAtPosition:glVector(row, 0.0f, col)])
+       || (fabs(camera.x - position.x) + fabs(camera.z - position.z) > fogDistance)
        || (position.x < DEAD_ZONE || position.x > (WORLD_SIZE - DEAD_ZONE))
        || (position.z < DEAD_ZONE || position.z > (WORLD_SIZE - DEAD_ZONE))
        || (stuck >= STUCK_TIME) );

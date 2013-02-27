@@ -1,11 +1,11 @@
 
-@class Cars, Entities, Lights, Textures, Sky;
+@class Cars, Entities, Lights, Textures, Sky, Camera, VisibilityGrid, Renderer;
 
 @interface World : NSObject
 {
 }
 
--(id)      init;
+-(id)      initWithViewSize:(const CGSize &) viewSize;
 
 @property (nonatomic, readonly) GLrgba bloomColor;
 @property (nonatomic, readonly) GLuint logoIndex;
@@ -15,6 +15,9 @@
 @property (nonatomic, readonly) Lights   *lights;
 @property (nonatomic, readonly) Textures *textures;
 @property (nonatomic, readonly) Sky      *sky;
+@property (nonatomic, readonly) Camera   *camera;
+@property (nonatomic, readonly) Renderer *renderer;
+@property (nonatomic, readonly) VisibilityGrid *visibilityGrid;
 
 @property (nonatomic, readonly) GLbbox hotZone;
 @property (nonatomic, readonly) float fadeCurrent;

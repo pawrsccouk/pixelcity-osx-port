@@ -1,32 +1,27 @@
 
-GLvector CameraAngle (void);
-void  CameraAngleSet (const GLvector &new_angle);
-GLvector CameraPosition (void);
-void  CameraPositionSet (const GLvector &new_pos);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 @class World;
 
-void  CameraAutoToggle ();
-float CameraDistance (void);
-void  CameraDistanceSet (float new_distance);
-void  CameraInit (void);
-void  CameraNextBehavior (void);
-void  CameraReset ();
-void  CameraUpdate (World *world);
-void  CameraTerm (void);
+@interface Camera : NSObject
 
-void  CameraForward (float delta);
-void  CameraPan (float delta_x);
-void  CameraPitch (float delta_y);
-void  CameraYaw (float delta_x);
-void  CameraVertical (float val);
-void  CameraLateral (float val);
-void  CameraMedial (float val);
+@property (nonatomic) GLvector angle, position, movement;
+@property (nonatomic) float distance;
+@property (nonatomic, readonly) World *world;
 
-#ifdef __cplusplus
-}
-#endif
+-(id) initWithWorld:(World *) world;
+
+-(void) autoToggle;
+-(void) nextBehavior;
+-(void) reset;
+-(void) update;
+
+-(void) forward:(float) delta;
+-(void) pan:    (float) delta_x;
+-(void) pitch:  (float) delta_y;
+-(void) yaw:    (float) delta_x;
+
+-(void) vertical:(float) val;
+-(void) lateral: (float) val;
+-(void) medial:  (float) val;
+
+@end
+

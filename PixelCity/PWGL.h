@@ -46,7 +46,7 @@ void pwPolygonMode(GLenum face, GLenum mode);
 void pwPushAttrib (GLbitfield mask);
 void pwPopAttrib (void);
 void pwGenTextures(GLsizei n, GLuint *textures);
-
+void pwGetIntegerv(GLenum pname, GLint *params);
 void pwTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
 void pwTexParameteri(GLenum target, GLenum pname, GLenum param);
 void pwCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);

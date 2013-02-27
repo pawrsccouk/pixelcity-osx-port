@@ -42,89 +42,90 @@ static const int MAX_PITCH     = 85,
                  CAMERA_CHANGE_INTERVAL = 15,
                  CAMERA_CYCLE_LENGTH    = (CAMERA_MODES * CAMERA_CHANGE_INTERVAL);
 
-static GLvector angle, position, auto_angle, auto_position;
-//static float    distance;
-static GLvector movement /* = {0.0f, 0.0f, 0.0f}*/;
-static bool     cam_auto = true;	// PAW: hit 'C' to turn off.
-static float    tracker;
-static int      camera_behavior;
-static GLulong last_update, last_move;
+@interface Camera ()
+{
+    GLvector _auto_angle, _position, _auto_position;
+    BOOL     _cam_auto;
+    float    _tracker;
+    int      _camera_behavior;
+    GLulong  _last_update, _last_move;
+}
+@end
+
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+@implementation Camera
+@synthesize angle = _angle, movement = _movement;
+
 static GLvector flycam_position (GLulong t, World *world)
 {
-  GLulong   leg;
-  float       delta;
   GLvector    start, end;
-  GLbbox      hot_zone;
-
-  hot_zone = world.hotZone;
-  t %= FLYCAM_CIRCUT; 
-  leg = t / FLYCAM_LEG;
-  delta = (float)(t % FLYCAM_LEG) / FLYCAM_LEG;
-  switch (leg) {
+  GLbbox      hot_zone = world.hotZone;
+  GLulong t2 = t % FLYCAM_CIRCUT;
+  switch(t2 / FLYCAM_LEG) {
   case 0:
     start = glVector (hot_zone.min.x, 25.0f, hot_zone.min.z);
-    end = glVector (hot_zone.min.x, 60.0f, hot_zone.max.z);
+    end   = glVector (hot_zone.min.x, 60.0f, hot_zone.max.z);
     break;
   case 1:
     start = glVector (hot_zone.min.x, 60.0f, hot_zone.max.z);
-    end = glVector (hot_zone.max.x, 25.0f, hot_zone.max.z);
+    end   = glVector (hot_zone.max.x, 25.0f, hot_zone.max.z);
     break;
   case 2:
     start = glVector (hot_zone.max.x, 25.0f, hot_zone.max.z);
-    end = glVector (hot_zone.max.x, 60.0f, hot_zone.min.z);
+    end   = glVector (hot_zone.max.x, 60.0f, hot_zone.min.z);
     break;
   case 3:
     start = glVector (hot_zone.max.x, 60.0f, hot_zone.min.z);
-    end = glVector (hot_zone.min.x, 25.0f, hot_zone.min.z);
+    end   = glVector (hot_zone.min.x, 25.0f, hot_zone.min.z);
     break;
   }
-  delta = MathScalarCurve (delta);
-  return glVectorInterpolate (start, end, delta);
+  return glVectorInterpolate (start, end, MathScalarCurve(float(t2 % FLYCAM_LEG) / FLYCAM_LEG));
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static void do_auto_cam (World *world)
+-(void) doAutoCam
 {
     GLulong now = GetTickCount ();
-    GLulong elapsed = now - last_update;
+    World *world = self.world;
+    
+    GLulong elapsed = now - _last_update;
     elapsed = std::min(elapsed, 50ul); //limit to 1/20th second worth of time
     if (elapsed == 0)
         return;
     
-    last_update = now;
+    _last_update = now;
     
 #if SCREENSAVER
     int behavior = (time(NULL) % CAMERA_CYCLE_LENGTH) / CAMERA_CHANGE_INTERVAL;
 #else
-    int behavior = camera_behavior;
+    int behavior = _camera_behavior;
 #endif
 
-    tracker += (float)elapsed / 300.0f;
+    _tracker += (float)elapsed / 300.0f;
     GLvector  target;
     switch (behavior) {
         case CAMERA_ORBIT_INWARD:
-            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 150.0f;
-            auto_position.y = 60.0f;
-            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 150.0f;
+            _auto_position.x = WORLD_HALF + sinf (_tracker * DEGREES_TO_RADIANS) * 150.0f;
+            _auto_position.y = 60.0f;
+            _auto_position.z = WORLD_HALF + cosf (_tracker * DEGREES_TO_RADIANS) * 150.0f;
             target = glVector (WORLD_HALF, 40, WORLD_HALF);
             break;
             
         case CAMERA_ORBIT_OUTWARD:
-            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 250.0f;
-            auto_position.y = 60.0f;
-            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 250.0f;
+            _auto_position.x = WORLD_HALF + sinf (_tracker * DEGREES_TO_RADIANS) * 250.0f;
+            _auto_position.y = 60.0f;
+            _auto_position.z = WORLD_HALF + cosf (_tracker * DEGREES_TO_RADIANS) * 250.0f;
             target = glVector (WORLD_HALF, 30, WORLD_HALF);
             break;
             
         case CAMERA_ORBIT_ELLIPTICAL: {
-            float dist = 150.0f + sinf (tracker * DEGREES_TO_RADIANS / 1.1f) * 50;
-            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * dist;
-            auto_position.y = 60.0f;
-            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * dist;
+            float dist = 150.0f + sinf (_tracker * DEGREES_TO_RADIANS / 1.1f) * 50;
+            _auto_position.x = WORLD_HALF + sinf (_tracker * DEGREES_TO_RADIANS) * dist;
+            _auto_position.y = 60.0f;
+            _auto_position.z = WORLD_HALF + cosf (_tracker * DEGREES_TO_RADIANS) * dist;
             target = glVector (WORLD_HALF, 50, WORLD_HALF);
         }
             break;
@@ -132,195 +133,171 @@ static void do_auto_cam (World *world)
         case CAMERA_FLYCAM1:
         case CAMERA_FLYCAM2:
         case CAMERA_FLYCAM3:
-            auto_position = (flycam_position (now, world) + flycam_position(now + 4000, world)) / 2.0f;
+            _auto_position = (flycam_position (now, world) + flycam_position(now + 4000, world)) / 2.0f;
             target = flycam_position(now + FLYCAM_CIRCUT_HALF - ONE_SECOND * 3, world);
             break;
             
         case CAMERA_SPEED:
-            auto_position = (flycam_position(now, world) + flycam_position(now + 500, world)) / 2.0f;
+            _auto_position = (flycam_position(now, world) + flycam_position(now + 500, world)) / 2.0f;
             target = flycam_position(now + ONE_SECOND * 5, world);
-            auto_position.y /= 2;
+            _auto_position.y /= 2;
             target.y /= 2;
             break;
             
         case CAMERA_SPIN:
         default:
-            target.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 300.0f;
+            target.x = WORLD_HALF + sinf (_tracker * DEGREES_TO_RADIANS) * 300.0f;
             target.y = 30.0f;
-            target.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 300.0f;
-            auto_position.x = WORLD_HALF + sinf (tracker * DEGREES_TO_RADIANS) * 50.0f;
-            auto_position.y = 60.0f;
-            auto_position.z = WORLD_HALF + cosf (tracker * DEGREES_TO_RADIANS) * 50.0f;
+            target.z = WORLD_HALF + cosf (_tracker * DEGREES_TO_RADIANS) * 300.0f;
+            _auto_position.x = WORLD_HALF + sinf (_tracker * DEGREES_TO_RADIANS) * 50.0f;
+            _auto_position.y = 60.0f;
+            _auto_position.z = WORLD_HALF + cosf (_tracker * DEGREES_TO_RADIANS) * 50.0f;
     }
-    float dist = MathDistance (auto_position.x, auto_position.z, target.x, target.z);
-    auto_angle.y = MathAngle1 (-MathAngle2 (auto_position.x, auto_position.z, target.x, target.z));
-    auto_angle.x = 90.0f + MathAngle2 (0, auto_position.y, dist, target.y);
+    float dist = MathDistance (_auto_position.x, _auto_position.z, target.x, target.z);
+    _auto_angle.y = MathAngle1 (-MathAngle2 (_auto_position.x, _auto_position.z, target.x, target.z));
+    _auto_angle.x = 90.0f + MathAngle2 (0, _auto_position.y, dist, target.y);
 }
 
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraAutoToggle ()
+-(void) autoToggle
 {
-  cam_auto = !cam_auto;
+    _cam_auto = !_cam_auto;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraNextBehavior ()
+-(void) nextBehavior
 {
-
-  camera_behavior++;
-  camera_behavior %= CAMERA_MODES;
-
+    _camera_behavior = (_camera_behavior + 1) % CAMERA_MODES;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraYaw (float delta)
+-(void) yaw:(float)delta
 {
-
-  angle.y -= delta;
-
+    _angle.y -= delta;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraPitch (float delta)
+-(void) pitch:(float)delta
 {
-
-  angle.x -= delta;
-
+    _angle.x -= delta;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraPan (float delta)
+-(void) pan:(float) delta
 {
-
-  float           move_x, move_y;
-
-  move_x = (float)sin (-angle.y * DEGREES_TO_RADIANS) / 10.0f;
-  move_y = (float)cos (-angle.y * DEGREES_TO_RADIANS) / 10.0f;
-  position.x -= move_y * delta;
-  position.z -= -move_x * delta;
-
+  _position.x -=  float(cos(-_angle.y * DEGREES_TO_RADIANS) / 10.0f) * delta;
+  _position.z -= -float(sin(-_angle.y * DEGREES_TO_RADIANS) / 10.0f) * delta;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraForward (float delta)
+-(void) forward:(float) delta
 {
-
-  float           move_x, move_y;
-
-  move_y = (float)sin (-angle.y * DEGREES_TO_RADIANS) / 10.0f;
-  move_x = (float)cos (-angle.y * DEGREES_TO_RADIANS) / 10.0f;
-  position.x -= move_y * delta;
-  position.z -= move_x * delta;
-
+  _position.x -= float(sin (-_angle.y * DEGREES_TO_RADIANS)) / 10.0f * delta;
+  _position.z -= float(cos (-_angle.y * DEGREES_TO_RADIANS)) / 10.0f * delta;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraVertical (float val)
+-(void) vertical:(float) val
 {
-
-  movement.y += val;
-  last_move = GetTickCount ();
-
+  _movement.y += val;
+  _last_move = GetTickCount ();
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraLateral (float val)
+-(void) lateral:(float) val
 {
-
-  movement.x += val;
-  last_move = GetTickCount ();
-
+  _movement.x += val;
+  _last_move = GetTickCount ();
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraMedial (float val)
+-(void) medial:(float)val
 {
+  _movement.z += val;
+  _last_move = GetTickCount ();
+}
 
-  movement.z += val;
-  last_move = GetTickCount ();
-
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+-(GLvector) position
+{
+    return _cam_auto ? _auto_position : _position;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-GLvector CameraPosition (void)
+-(void) setPosition:(GLvector) position
 {
-    return cam_auto ? auto_position : position;
+    _position = position;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraPositionSet (const GLvector &new_pos)
+-(void)reset
 {
-  position = new_pos;
+    _position = GLvector(WORLD_HALF, 50.0f, WORLD_HALF);
+    _angle    = GLvector(0, 0, 0);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraReset ()		
+-(GLvector)angle
 {
-
-  position.y = 50.0f;
-  position.x = WORLD_HALF;
-  position.z = WORLD_HALF;
-  angle.x = 0.0f;
-  angle.y = 0.0f;
-  angle.z = 0.0f;
+  return _cam_auto ? _auto_angle : _angle;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-GLvector CameraAngle (void)
+-(void)setAngle:(GLvector) newAngle
 {
-  return cam_auto ? auto_angle : angle;
+  _angle = GLvector(CLAMP(newAngle.x, -80.0f, 80.0f), newAngle.y, newAngle.z);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraAngleSet (const GLvector &newAngle)
+-(id)initWithWorld:(World *)world
 {
-  angle = newAngle;
-  angle.x = CLAMP(angle.x, -80.0f, 80.0f);
+    self = [super init];
+    if(self) {
+        _cam_auto = YES;
+        _movement = GLvector(0, 0, 0);
+        _world   = world;
+        [self reset];
+    }
+    return self;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-void CameraInit (void)		
-{
-	CameraReset();
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-void CameraUpdate (World *world)
-{
-	DebugLog("Camera Update: Movement = (%lf, %lf)", movement.x, movement.y);
-	
-    CameraPan (movement.x);
-    CameraForward (movement.z);
-    position.y += movement.y / 10.0f;
-    movement = movement * ((GetTickCount () - last_move > 1000) ? 0.9f : 0.99f);
+-(void)update
+{	
+    [self pan:_movement.x];
+    [self forward:_movement.z];
+    _position = GLvector(_position.x, _position.y + _movement.y / 10.0f, _position.z);
+    _movement = _movement * ((GetTickCount () - _last_move > 1000) ? 0.9f : 0.99f);
 
     if (SCREENSAVER)
-        cam_auto = true;
+        _cam_auto = true;
 
-    if (cam_auto)
-        do_auto_cam(world);
+    if (_cam_auto)
+        [self doAutoCam];
 
-    if (angle.y < 0.0f)
-        angle.y = 360.0f - float(fmod(fabs(angle.y), 360.0f));
-    angle.y = float(fmod(angle.y, 360.0f));
-    angle.x = CLAMP<float>(angle.x, -MAX_PITCH, MAX_PITCH);
+    if (_angle.y < 0.0f)
+        _angle.y = 360.0f - float(fmod(fabs(_angle.y), 360.0f));
+    _angle.y = float(fmod(_angle.y, 360.0f));
+    _angle.x = CLAMP<float>(_angle.x, -MAX_PITCH, MAX_PITCH);
 }
+
+@end
+
 
 

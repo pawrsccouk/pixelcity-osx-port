@@ -249,7 +249,7 @@
 	GLulong start = GetTickCount ();
 	// Since we make textures by drawing into the viewport, we can't make them bigger than the current view.
 	_size = _desired_size;
-	int max_size = RenderMaxTextureSize ();
+	int max_size = self.world.renderer.maxTextureSize;
 	while (_size > max_size)
 		_size /= 2;
 	pwBindTexture(GL_TEXTURE_2D, _glid);
@@ -556,6 +556,7 @@ static void window (int x, int y, int size, TextureType tt, GLrgba color)
 
 static void doBloom(World *world, Texture *t, bool showFlat)
 {
+    float fogDistance = world.renderer.fogDistance;
 	pwBindTexture(GL_TEXTURE_2D, 0);
 	pwViewport(0, 0, t.size , t.size);
 	pwCullFace (GL_BACK);
@@ -567,8 +568,8 @@ static void doBloom(World *world, Texture *t, bool showFlat)
 	pwCullFace (GL_BACK);
 	pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	pwEnable (GL_FOG);
-	pwFogf (GL_FOG_START, RenderFogDistance () / 2);
-	pwFogf (GL_FOG_END, RenderFogDistance ());
+	pwFogf (GL_FOG_START, fogDistance / 2);
+	pwFogf (GL_FOG_END  , fogDistance);
 	pwPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	pwClearColor (0.0f, 0.0f, 0.0f, 0.0f);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

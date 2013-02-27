@@ -10,7 +10,7 @@
 #import "GLCheck.h"
 #import "win.h"
 #import "ini.h"
-#import "RenderAPI.h"
+#import "Render.h"
 #import "Model.h"
 #import "World.h"
 #import "texture.h"
@@ -18,47 +18,22 @@
 #pragma mark ---- OpenGL Capabilities ----
 
 // GL configuration info globals. See GLCheck.h for more info
-GLCaps * gDisplayCaps = NULL; // array of GLCaps
-CGDisplayCount gNumDisplays = 0;
 
-static void getCurrentCaps (void)
+@interface BasicOpenGLView ()
 {
-    auto getNumDisplays = ^{ CGDisplayCount numDisplays = 0; CheckOpenGLCaps(0, NULL, &numDisplays); return numDisplays; };
-
- 	// Check for existing opengl caps here
-	// This can be called again with same display caps array when display configurations are changed and
-	//   your info needs to be updated.  Note, if you are doing dynmaic allocation, the number of displays
-	//   may change and thus you should always reallocate your display caps array.
-    
-	if (gDisplayCaps && HaveOpenGLCapsChanged(gDisplayCaps, gNumDisplays)) { // see if caps have changed
-		free (gDisplayCaps);
-		gDisplayCaps = NULL;
-	}
-    
-	if (!gDisplayCaps) { // if we do not have caps
-		gNumDisplays = getNumDisplays();
-		gDisplayCaps = (GLCaps*)malloc(sizeof(GLCaps) * gNumDisplays);
-		CheckOpenGLCaps(gNumDisplays, gDisplayCaps, &gNumDisplays);
-//		initCapsTexture (gDisplayCaps, gNumDisplays); // (re)init the texture for printing caps
-	}
+    GLCaps * _displayCaps;          // array of GLCaps
+    CGDisplayCount _displayCount;
 }
+@end
+
 
 #pragma mark - Utilities
 
-static CFAbsoluteTime gStartTime = 0.0f;
-
-// set app start time
-static void setStartTime (void)
-{	
-	gStartTime = CFAbsoluteTimeGetCurrent ();
-}
-
-
-
 // return float elpased time in seconds since app start
-static CFAbsoluteTime getElapsedTime (void)
-{	
-	return CFAbsoluteTimeGetCurrent () - gStartTime;
+static CFAbsoluteTime getElapsedTime(void)
+{
+    static CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
+	return CFAbsoluteTimeGetCurrent () - startTime;
 }
 
 
@@ -85,6 +60,28 @@ void glReportError(const char* strLocation)
 
 #pragma mark - OpenGL Support
 
+-(void) getCurrentCaps
+{
+    auto getNumDisplays = ^{ CGDisplayCount numDisplays = 0; CheckOpenGLCaps(0, NULL, &numDisplays); return numDisplays; };
+    
+        // Check for existing opengl caps here
+        // This can be called again with same display caps array when display configurations are changed and
+        //   your info needs to be updated.  Note, if you are doing dynmaic allocation, the number of displays
+        //   may change and thus you should always reallocate your display caps array.
+    
+	if (_displayCaps && HaveOpenGLCapsChanged(_displayCaps, _displayCount)) { // see if caps have changed
+		free (_displayCaps);
+		_displayCaps = NULL;
+	}
+    
+	if (!_displayCaps) { // if we do not have caps
+		_displayCount = getNumDisplays();
+		_displayCaps = (GLCaps*)malloc(sizeof(GLCaps) * _displayCount);
+		CheckOpenGLCaps(_displayCount, _displayCaps, &_displayCount);
+	}
+}
+
+
 // pixel format definition
 + (NSOpenGLPixelFormat*) basicPixelFormat
 {
@@ -107,18 +104,15 @@ void glReportError(const char* strLocation)
     [self.openGLContext setValues:&swapInt forParameter:NSOpenGLCPSwapInterval]; // set to vbl sync
     
     [self.openGLContext makeCurrentContext];
-//    NSLog(@"OpenGL context is %@, attached to view %@", self.openGLContext, self.openGLContext.view);
-    
+
             // init GL stuff here
     NSRect r = [self bounds];
-    self.world = AppInit(r.size.width, r.size.height);
+    self.world = [[World alloc] initWithViewSize:r.size];
     [self.openGLContext flushBuffer];
-    AppResize(r.size.width, r.size.height);
+    [self.world.renderer resize:r.size];
     glReportError("prepareOpenGL");    
     
-	setStartTime (); // get app start time
-	getCurrentCaps (); // get current GL capabilites for all displays
-	
+	[self getCurrentCaps];               // get current GL capabilites for all displays
 	_time = CFAbsoluteTimeGetCurrent();  // set animation time start time
 }
 
@@ -126,7 +120,7 @@ void glReportError(const char* strLocation)
 - (void) resizeGL
 {
 	NSRect rectView = [self bounds];
-	AppResize(rectView.size.width, rectView.size.height);
+    [world.renderer resize:rectView.size];
 	glReportError("resizeGL");
 }
 
@@ -148,69 +142,6 @@ void glReportError(const char* strLocation)
     }
 }
 
-static const int MAX_CACHED_GL_STRINGS = 100;
-
--(void)drawOverlayText:(NSString*)overlayText
-{
-    [[self openGLContext] makeCurrentContext];
-    NSRect bounds = self.bounds;
-        // Cache the glString objects by the text, so they don't need to be regenerated each time.
-        // The text is mostly boilerplate and there isn't that much of it.
-        // May need to revisit this if we start displaying a lot of arbitrary text.
-    static NSMutableDictionary *cachedStrings;
-    static CGSize lastSize = { 0, 0 }, boundsSize = { bounds.size.width, bounds.size.height };
-    if(!cachedStrings) cachedStrings = [NSMutableDictionary dictionary];
-    if(lastSize.width <= 0 || lastSize.height <= 0) lastSize = boundsSize;
-    
-        // Clear the cache if the image size has changed or if the cache has gotten too large.
-    if( (! CGSizeEqualToSize(lastSize, boundsSize)) || (cachedStrings.count > MAX_CACHED_GL_STRINGS) ) {
-        [cachedStrings removeAllObjects];
-        lastSize = { bounds.size.width, bounds.size.height };
-    }
-    
-    GLString *glString = [cachedStrings objectForKey:overlayText];
-    if(! glString) {
-        glString = [[GLString alloc] initWithString:overlayText attributes:@{
-                    NSForegroundColorAttributeName : [NSColor whiteColor],
-                    NSFontAttributeName            : [NSFont fontWithName: @"Helvetica-Bold" size: 14.0f] }
-                                          textColor:[NSColor whiteColor]
-                                           boxColor:[NSColor clearColor]
-                                        borderColor:[NSColor clearColor]];
-        
-        [glString useDynamicFrame];
-        [cachedStrings setObject:glString forKey:overlayText];
-    }
-    
-    pwMatrixMode (GL_PROJECTION);
-    pwPushMatrix();
-    @try {
-        pwLoadIdentity();
-        glOrtho(0, bounds.size.width, bounds.size.height, 0, 0.1f, 2048);	glReportError("glOrtho");
-        
-        pwMatrixMode (GL_MODELVIEW);
-        pwPushMatrix ();
-        @try {
-            pwLoadIdentity();
-            pwTranslatef(0, 0, -1.0f);
-            pwDisable(GL_BLEND);
-            pwDisable(GL_FOG);
-            pwDisable(GL_TEXTURE_2D);
-            pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            [glString drawAtPoint:bounds.origin];
-        }
-        @finally {
-            pwPopMatrix();
-            glMatrixMode(GL_PROJECTION);
-        }
-    }
-    @finally {
-        pwPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-    }
-}
-
-
 
 #pragma mark - Method Overrides
 
@@ -223,7 +154,7 @@ static const int MAX_CACHED_GL_STRINGS = 100;
     
 	// setup viewport and prespective
 	NSRect r = [self bounds];
-	AppUpdate(self.world, r.size.width, r.size.height);
+	AppUpdate(self.world, r.size);
 
 	if (self.inLiveResize && ! self.animating)
 		glFlush();
@@ -242,7 +173,7 @@ static const int MAX_CACHED_GL_STRINGS = 100;
 	[super update];
     
 	if (! self.inLiveResize)
-		getCurrentCaps(); // this call checks to see if the current config changed in a reasonably lightweight way to prevent expensive re-allocations
+		[self getCurrentCaps]; // this call checks to see if the current config changed in a reasonably lightweight way to prevent expensive re-allocations
 
 	glReportError("update");
 }
@@ -253,6 +184,8 @@ static const int MAX_CACHED_GL_STRINGS = 100;
 {
 	self = [super initWithFrame:frameRect pixelFormat:[BasicOpenGLView basicPixelFormat]];
     if(self) {
+        _displayCaps = NULL;
+        _displayCount = 0;
     }
     return self;
 }
@@ -268,29 +201,19 @@ static const int MAX_CACHED_GL_STRINGS = 100;
     [super awakeFromNib];
 }
 
+-(void)dealloc
+{
+    if(_displayCaps)
+        free(_displayCaps);
+    _displayCaps = NULL;
+    
+    [world term];
+}
+
 @end
 
 
 
-void RenderPrintOverlayText(int line, const char *fmt, ...)
-{
-        // Find the BasicOpenGLView object we should be drawing into, and pass the message on to that.
-        // This is needed to link the objectless C call here to the openGL window.
-        // (Note the screensaver creates multiple opengl views, so I can't just use a global to hold one).
-
-    NSView *view = [NSOpenGLContext currentContext].view;
-    if(view && [view isKindOfClass:[BasicOpenGLView class]]) {
-    
-        NSString *text, *fmtText = [NSString stringWithUTF8String:fmt];
-        va_list args;
-        va_start(args, fmt);
-        @try { text = [[NSString alloc] initWithFormat:fmtText arguments:args]; }
-        @finally {  va_end(args); }
-    
-        [(BasicOpenGLView*)view drawOverlayText:text];
-    }
-    else NSLog(@"RenderPrintOverlayText: View %@ was not a BasicOpenGLView. Not drawing.", view);
-}
 
 
 

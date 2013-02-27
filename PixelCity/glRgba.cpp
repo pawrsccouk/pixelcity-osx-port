@@ -214,18 +214,18 @@ bool GLrgba::operator==(const GLrgba& c) const
   return (red() == c.red() && green() == c.green() && blue() == c.blue());
 }
 
-void GLrgba::copyRGB(float output[3]) const
-{
-    output[0] = red();
-    output[1] = green();
-    output[2] = blue();
-}
-
-void GLrgba::copyRGBA(float output[4]) const
-{
-    copyRGB(output); // 0=R, 1=G, 2=B
-    output[3] = alpha();
-}
+//void GLrgba::copyRGB(float output[3]) const
+//{
+//    output[0] = red();
+//    output[1] = green();
+//    output[2] = blue();
+//}
+//
+//void GLrgba::copyRGBA(float output[4]) const
+//{
+//    copyRGB(output); // 0=R, 1=G, 2=B
+//    output[3] = alpha();
+//}
 
 GLrgba GLrgba::colorWithAlpha(float newAlpha) const { return GLrgba(red(), green(), blue(), newAlpha); }
 
