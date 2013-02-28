@@ -435,6 +435,7 @@
 				GCC_PREFIX_HEADER = "PixelCity/PixelCity-Prefix.pch";
 				INFOPLIST_FILE = "PixelCity/PixelCity-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				"OTHER_CPLUSPLUSFLAGS[arch=*]" = "-DPW_DEBUG_OPENGL";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

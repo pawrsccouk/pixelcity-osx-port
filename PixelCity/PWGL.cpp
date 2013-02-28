@@ -8,6 +8,8 @@
 
 #import "PWGL.h"
 
+#ifdef PW_DEBUG_OPENGL
+
 void pwBegin(GLenum mode)	{ glBegin(mode); }	// note: glGetError() (hence glReportError()) is not legal inside a glBegin/glEnd pair.
 void pwEnd()				{ glEnd();			glReportError("glEnd");		}
 
@@ -71,3 +73,7 @@ void pwCallList(GLuint list) { glCallList(list); }
 void pwVertex2f(GLfloat x, GLfloat y) { glVertex2f(x, y); }
 void pwVertex3f(GLfloat x, GLfloat y, GLfloat z) { glVertex3f(x, y, z); }
 void pwTexCoord2f(GLfloat s, GLfloat t) { glTexCoord2f(s, t); }
+
+#endif
+
+

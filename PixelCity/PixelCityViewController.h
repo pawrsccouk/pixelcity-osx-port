@@ -29,8 +29,6 @@
     __weak IBOutlet NSMenuItem * helpToggleMenuItem;
     __weak IBOutlet NSMenuItem * normalizeToggleMenuItem;
     __weak IBOutlet NSMenuItem * debugLogToggleMenuItem;
-    
-    __weak IBOutlet BasicOpenGLView *secondView;
 }
 
     // Menu action events.
