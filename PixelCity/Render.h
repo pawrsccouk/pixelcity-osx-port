@@ -24,15 +24,14 @@ typedef enum EffectType
 @property (nonatomic) EffectType effect;
 @property (nonatomic) BOOL flat, fog, fps, wireframe, helpMode, letterbox, normalized;
 
-    // Return the number of fonts that this system will show. Used to determine the <font> parameter to RenderPrintIntoTexture.
-//@property (nonatomic, readonly) GLint fontCount;
 
--(id)initWithWorld:(World*) world viewSize:(CGSize) viewSize;
--(void)resize:(CGSize) size;
--(void)update:(CGSize) size;
+-(id)initWithWorld:(World*) world
+          viewSize:(CGSize) viewSize;
 
+-(void)resize:(CGSize) viewSize;
 
--(void) dump;
+    // Draws the current view to the OpenGL context.
+-(void) draw;
 
     // The window is about to close, so don't do any more rendering.
 -(void)terminate;
@@ -40,7 +39,12 @@ typedef enum EffectType
     // Create a texture containing a line of text, and then display it over the main screen.
     // line = 0 means the top of the screen, line = 1 is the next line down and so on.
     // fmt + varargs are passed to sprintf.
--(void)  printOverlayTextAtLine:(int) line format:(const char *)fmt, ...;
+-(void)  printOverlayTextAtLine:(int) line
+                         format:(const char *)fmt, ...;
+
+    // Print some debugging information on the debug output stream.
+-(void) dump;
+
 
 @end
 

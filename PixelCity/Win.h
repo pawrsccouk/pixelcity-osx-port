@@ -34,13 +34,19 @@ enum RoadDirection
 };
 
 @class World;
-
-    // Write diagnostic information to the console.
-void DebugLog(const char* str, ...);
-
     // Milliseconds since computer started.
 GLulong GetTickCount();
 
-void AppUpdate(World *world, const CGSize &viewSize);
+
+
+    // Write diagnostic information to the console.
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void DebugLog(const char* str, ...);
+
+
+
 
 

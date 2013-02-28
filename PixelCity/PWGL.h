@@ -38,6 +38,7 @@ void pwFogf(GLenum name, GLfloat param);
 void pwFogfv(GLenum name, const GLfloat* params);
 void pwBegin(GLenum mode);
 void pwEnd();
+void pwDeleteLists(GLuint lists, GLsizei range); 
 void pwNewList(GLint name, GLenum mode);
 void pwEndList();
 void pwLineWidth(GLfloat f);

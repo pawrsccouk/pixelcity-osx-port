@@ -7,11 +7,11 @@
 //
 
 #import "PWGL.h"
-#import <cassert>
 
 void pwBegin(GLenum mode)	{ glBegin(mode); }	// note: glGetError() (hence glReportError()) is not legal inside a glBegin/glEnd pair.
 void pwEnd()				{ glEnd();			glReportError("glEnd");		}
 
+void pwDeleteLists(GLuint lists, GLsizei range) { glDeleteLists(lists, range); glReportError("glDeleteLists"); }
 void pwNewList(GLint name, GLenum mode) { glNewList(name, mode);	glReportError("glNewList"); }
 void pwEndList()						{ glEndList();				glReportError("glEndList"); }
 
@@ -27,7 +27,7 @@ void pwDisable(GLenum i) {	glDisable(i);	glReportError("glDisable");  }
 void pwGetIntegerv(GLenum pname, GLint *params) { glGetIntegerv(pname, params); glReportError("glGetIntegerv"); }
 void pwMatrixMode(GLenum i)	{ glMatrixMode(i);	glReportError("glMatrixMode"); }
 void pwLoadIdentity()		{ glLoadIdentity();	glReportError("glLoadIdentity"); }
-void pwDepthMask(GLboolean b) { assert(b == GL_TRUE || b == GL_FALSE); glDepthMask(b); glReportError("glDepthMask"); }
+void pwDepthMask(GLboolean b) { glDepthMask(b); glReportError("glDepthMask"); }
 void pwRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) { glRotatef(angle, x, y, z); glReportError("glRotatef"); }
 void pwTranslatef(GLfloat x, GLfloat y, GLfloat z) {  glTranslatef (x, y, z); glReportError("glTranslatef"); }
 void pwViewport(GLint x, GLint y, GLsizei w, GLsizei h) { glViewport(x, y, w, h);	glReportError("glViewport"); }

@@ -42,8 +42,14 @@ static CFAbsoluteTime getElapsedTime(void)
 void glReportError(const char* strLocation)
 {
     static NSString *lastError = nil;
-    
+        
 	for(GLenum err = glGetError(); err != GL_NO_ERROR; err = glGetError()) {
+    
+//        BOOL loopForever = YES;
+//        while(loopForever) {
+//            sleep(1);
+//        }
+    
         NSString *error = [NSString stringWithFormat:@"Error [%s] in [%s]", gluErrorString(err), strLocation];
         if((lastError == nil) || ! [lastError isEqualToString:error]) {
             lastError = error;
@@ -56,7 +62,7 @@ void glReportError(const char* strLocation)
 
 
 @implementation BasicOpenGLView
-@synthesize animating, world;
+@synthesize animating, world, setupCallback;
 
 #pragma mark - OpenGL Support
 
@@ -114,11 +120,16 @@ void glReportError(const char* strLocation)
     
 	[self getCurrentCaps];               // get current GL capabilites for all displays
 	_time = CFAbsoluteTimeGetCurrent();  // set animation time start time
+    
+    if(self.setupCallback) {
+        self.setupCallback();
+    }
 }
 
 
 - (void) resizeGL
 {
+    [self.openGLContext makeCurrentContext];
 	NSRect rectView = [self bounds];
     [world.renderer resize:rectView.size];
 	glReportError("resizeGL");
@@ -128,11 +139,6 @@ void glReportError(const char* strLocation)
 - (void)animationTick
 {
 	BOOL shouldDraw = self.animating;
-    
-        // Screensaver sometimes tries to draw into an empty view.
-        // If so, we get invalid framebuffer errors. So prevent drawing in that case.
-    if(! self.openGLContext.view)
-        shouldDraw = NO;
     
 	_time = CFAbsoluteTimeGetCurrent (); //reset time in all cases
     
@@ -150,17 +156,19 @@ void glReportError(const char* strLocation)
 
 - (void) drawRect:(NSRect)rect
 {
-    [[self openGLContext] makeCurrentContext];
+    [self.openGLContext makeCurrentContext];
     
-	// setup viewport and prespective
+        // Move the world along by one tick, and then draw it into the GL context.
 	NSRect r = [self bounds];
-	AppUpdate(self.world, r.size);
+    [self.world update:r.size];
+    [self.world draw];
 
-	if (self.inLiveResize && ! self.animating)
+	if (self.inLiveResize && ! self.animating) {
 		glFlush();
-	else
+    }
+	else {
 		[[self openGLContext] flushBuffer];
-
+    }
 	glReportError("drawRect");
 }
 
@@ -172,9 +180,9 @@ void glReportError(const char* strLocation)
 {
 	[super update];
     
-	if (! self.inLiveResize)
+	if (! self.inLiveResize) {
 		[self getCurrentCaps]; // this call checks to see if the current config changed in a reasonably lightweight way to prevent expensive re-allocations
-
+    }
 	glReportError("update");
 }
 

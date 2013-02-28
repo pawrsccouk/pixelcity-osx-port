@@ -26,6 +26,7 @@
 #import "win.h"
 #import "world.h"
 #import "Camera.h"
+#import <sys/time.h>
 
 using namespace std;
 
@@ -38,30 +39,6 @@ typedef enum FadeType {
 	FADE_IDLE, FADE_OUT, FADE_WAIT, FADE_IN,
 } FadeType;
 
-struct HSL
-{
-	float hue, sat, lum;
-};
-
-static const HSL light_colors[] =
-{ 
-	0.04f,  0.9f,  0.93f,   //Amber / pink
-	0.055f, 0.95f, 0.93f,   //Slightly brighter amber 
-	0.08f,  0.7f,  0.93f,   //Very pale amber
-	0.07f,  0.9f,  0.93f,   //Very pale orange
-	0.1f,   0.9f,  0.85f,   //Peach
-	0.13f,  0.9f,  0.93f,   //Pale Yellow
-	0.15f,  0.9f,  0.93f,   //Yellow
-	0.17f,  1.0f,  0.85f,   //Saturated Yellow
-	0.55f,  0.9f,  0.93f,   //Cyan
-	0.55f,  0.9f,  0.93f,   //Cyan - pale, almost white
-	0.6f,   0.9f,  0.93f,   //Pale blue
-	0.65f,  0.9f,  0.93f,   //Pale Blue II, The Palening
-	0.65f,  0.4f,  0.99f,   //Pure white. Bo-ring.
-	0.65f,  0.0f,  0.8f,    //Dimmer white.
-	0.65f,  0.0f,  0.6f,    //Dimmest white.
-}; 
-static const size_t LIGHT_COLOR_COUNT = (sizeof(light_colors)/sizeof(HSL));
 
 struct BuildingCounts {
     GLuint modern, tower, blocky, skyscraper;
@@ -87,13 +64,6 @@ struct BuildingCounts {
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-static GLrgba get_light_color (float sat, float lum)
-{
-	int index = RandomIntR(LIGHT_COLOR_COUNT);
-	return glRgbaFromHsl (light_colors[index].hue, sat, lum);
-}
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 -(void) claimPlot:(plot) plot value:(int) val
 {
@@ -188,7 +158,7 @@ static plot makePlot(int x, int z, int width, int depth)
 {
 	//now we know how big the rectangle plot is. 
 	int area = p.width * p.depth;
-	GLrgba color = [self lightColorAtIndex:RandomInt()];
+	GLrgba color = [self.lights randomLightColor], trimColor = [self.lights randomLightColor];
 	int seed = RandomInt();
 	//Make sure the plot is big enough for a building
 	if (p.width < 10 || p.depth < 10)
@@ -225,7 +195,16 @@ static plot makePlot(int x, int z, int width, int depth)
 		int height = 45 + RandomIntR(10);
 		_counts.modern++;
 		_counts.skyscraper++;
-		b = [[Building alloc] initWithType:BUILDING_MODERN x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color world:self];
+		b = [Building buildingWithType:BUILDING_MODERN
+                                     x:p.x
+                                     y:p.z
+                                height:height
+                                 width:p.width
+                                 depth:p.depth
+                                  seed:seed
+                                 color:color
+                             trimColor:trimColor
+                                 world:self];
 		return;
 	}
 	
@@ -234,7 +213,16 @@ static plot makePlot(int x, int z, int width, int depth)
 		 int height = 20 + RandomIntR(10);
 		 _counts.blocky++;
 		 _counts.skyscraper++;
-		 b = [[Building alloc] initWithType:BUILDING_BLOCKY x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color world:self];
+		 b = [Building buildingWithType:BUILDING_BLOCKY
+                                      x:p.x
+                                      y:p.z
+                                 height:height
+                                  width:p.width
+                                  depth:p.depth
+                                   seed:seed
+                                  color:color
+                              trimColor:trimColor
+                                  world:self];
 		 return;
 	 }
 	
@@ -252,11 +240,19 @@ static plot makePlot(int x, int z, int width, int depth)
 		_counts.modern++;
 	}
 	int height = 45 + RandomIntR(10);
-	b = [[Building alloc] initWithType:type x:p.x y:p.z height:height width:p.width depth:p.depth seed:seed color:color world:self];
+	b = [Building buildingWithType:type
+                                 x:p.x
+                                 y:p.z
+                            height:height
+                             width:p.width
+                             depth:p.depth
+                              seed:seed
+                             color:color
+                         trimColor:trimColor
+                             world:self];
 	_counts.skyscraper++;
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 -(int) buildLightStripAtX:(int) x1 z:(int) z1 direction:(int) direction
 {
@@ -413,7 +409,7 @@ static plot makePlot(int x, int z, int width, int depth)
 				if (! [self claimed:p])
                 {
 					[self claimPlot:p value:CLAIM_BUILDING];
-					GLrgba building_color = [self lightColorAtIndex:RandomInt()];
+					GLrgba building_color = [self.lights randomLightColor];
                         //if we're out of the hot zone, use simple buildings
 					if (x < self.hotZone.min.x || x > self.hotZone.max.x || y < self.hotZone.min.z || y > self.hotZone.max.z)
                     {
@@ -425,7 +421,15 @@ static plot makePlot(int x, int z, int width, int depth)
 						height = 15 + RandomIntR(15);
 						width -=2;
 						depth -=2;
-                        [Building buildingWithType:highType() x:x + 1 y:y + 1 height:height width:width depth:depth seed:RandomInt() color:building_color world:self];
+                        [Building buildingWithType:highType()
+                                                 x:x + 1
+                                                 y:y + 1
+                                            height:height
+                                             width:width
+                                             depth:depth
+                                              seed:RandomInt()
+                                             color:building_color
+                                             world:self];
 					}
 					break;
 				}
@@ -457,19 +461,6 @@ static plot makePlot(int x, int z, int width, int depth)
 	}
 }
 
-
-/*-----------------------------------------------------------------------------
- This will return a random color which is suitible for light sources, taken
- from a narrow group of hues. (Yellows, oranges, blues.)
- -----------------------------------------------------------------------------*/
-
--(GLrgba) lightColorAtIndex:(GLuint) index
-{
-	index %= LIGHT_COLOR_COUNT;
-	return glRgbaFromHsl (light_colors[index].hue, light_colors[index].sat, light_colors[index].lum);	
-}
-
-
 -(char)cellAtRow:(int) x column:(int) y
 {
 	return _world[CLAMP(x, 0, WORLD_SIZE - 1)][CLAMP(y, 0, WORLD_SIZE - 1)];	
@@ -481,7 +472,6 @@ static plot makePlot(int x, int z, int width, int depth)
 
 -(void) term
 {
-    [self.textures term];
     [self.renderer terminate];
 }
 
@@ -496,6 +486,13 @@ static plot makePlot(int x, int z, int width, int depth)
 	_fadeStart = GetTickCount();
 }
 
+static GLrgba get_light_color (Lights *lights, float sat, float lum)
+{
+    HSL hsl = [lights randomLightColorHSL];
+	return glRgbaFromHsl(hsl.hue, sat, lum);
+}
+
+
 
 -(void) rebuildContent
 {
@@ -509,7 +506,7 @@ static plot makePlot(int x, int z, int width, int depth)
 	[self.textures reset];
 	
         //Pick a tint for the bloom
-	_bloomColor = get_light_color(0.5f + float(RandomLongR(10)) / 20.0f, 0.75f);
+	_bloomColor = get_light_color(self.lights, 0.5f + float(RandomLongR(10)) / 20.0f, 0.75f);
 	memset(_world, 0, WORLD_SIZE * WORLD_SIZE);
     _counts.reset();
     
@@ -523,10 +520,11 @@ static plot makePlot(int x, int z, int width, int depth)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(void) render
+-(void) renderDebugTrafficLanes
 {
 	if (!SHOW_DEBUG_GROUND) 
 		return;
+
 	//Render a single texture over the city that shows traffic lanes
 	pwDepthMask (GL_FALSE);
 	pwDisable (GL_CULL_FACE);
@@ -534,12 +532,14 @@ static plot makePlot(int x, int z, int width, int depth)
 	pwEnable (GL_TEXTURE_2D);
 	glColor3f (1,1,1);
 	pwBindTexture (GL_TEXTURE_2D, 0);
-	{	MakePrimitive mp(GL_QUADS);
+    pwBegin(GL_QUADS);
+	@try{
 		glTexCoord2f (0, 0);   glVertex3f ( 0, 0, 0);
 		glTexCoord2f (0, 1);   glVertex3f ( 0, 0,  1024);
 		glTexCoord2f (1, 1);   glVertex3f ( 1024, 0, 1024);
 		glTexCoord2f (1, 0);   glVertex3f ( 1024, 0, 0);
 	}
+    @finally { pwEnd(); }
 	pwDepthMask (GL_TRUE);
 }
 
@@ -561,20 +561,17 @@ static plot makePlot(int x, int z, int width, int depth)
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(void) update
-{	
+-(BOOL) updateFade
+{
 	GLulong now = GetTickCount();
-	if (_resetNeeded) {
-		[self rebuildContent]; //Now we've faded out the scene, rebuild it
-	}
 	if (_fade != FADE_IDLE) {
 		if (_fade == FADE_WAIT && self.textures.ready && self.entities.ready) {
 			_fade = FADE_IN;
 			_fadeStart = now;
 			_fadeCurrent = 1.0f;
-		}    
+		}
 		GLulong fade_delta = now - _fadeStart;
-		//See if we're done fading in or out
+            //See if we're done fading in or out
 		if (fade_delta > FADE_TIME && _fade != FADE_WAIT) {
 			if (_fade == FADE_OUT) {
 				_resetNeeded = YES;
@@ -595,13 +592,41 @@ static plot makePlot(int x, int z, int width, int depth)
 		}
 		if (! self.textures.ready)
 			_fadeCurrent = 1.0f;
-	} 
+	}
 	if (_fade == FADE_IDLE && ! self.textures.ready) {
 		_fade = FADE_IN;
 		_fadeStart = now;
 	}
-	if (_fade == FADE_IDLE && _sceneElapsed > RESET_INTERVAL)
-		[self reset];
+	return (_fade == FADE_IDLE && _sceneElapsed > RESET_INTERVAL);
+}
+
+-(void) update:(const CGSize &) viewSize
+{
+        // Update all the actors in the scene.
+	[self.camera update];
+	[self.entities update];
+
+	if (_resetNeeded) {
+		[self rebuildContent]; //Now we've faded out the scene, rebuild it
+	}
+    
+    if([self updateFade]) {
+        [self reset];
+    }
+        //cleanup and restore the viewport after TextureUpdate()
+    Renderer *renderer = self.renderer;
+	[renderer resize:viewSize];
+	[self.visibilityGrid update];
+	[self.cars update];
+    [self.renderer resize:viewSize];
+	glReportError("World update:");
+}
+
+
+-(void) draw
+{
+	[self.renderer draw];
+	glReportError("World draw:");
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -636,59 +661,12 @@ static plot makePlot(int x, int z, int width, int depth)
 
 @end
 
-
-int MakePrimitive::nestCount = 0;
-int MakeDisplayList::nestCount = 0;
-
-MakePrimitive::MakePrimitive(GLenum type)
+    // PAW: Replacement for Windows function that returns time since computer was started in milliseconds.
+    // gettimeofday returns it in microseconds, so we need to convert the result.
+GLulong GetTickCount()
 {
-	assert(nestCount == 0);
-	pwBegin(type);
-	++nestCount;
-}
-
-MakePrimitive::~MakePrimitive()
-{
-	assert(nestCount == 1);
-	pwEnd();
-	--nestCount;
-}
-
-MakeDisplayList::MakeDisplayList(GLint name, GLenum mode, const char * location)
-{
-    if(nestCount != 0) NSLog(@"MakeDisplayList %s: Nest count is %d", location, nestCount);
-    if(! glIsList(name)) NSLog(@"MakeDisplayList %s: name %d is not a list name", location, name);
-//	assert(nestCount == 0);	assert(glIsList(name));
-	pwNewList(name, mode);
-	++nestCount;
-}
-
-MakeDisplayList::~MakeDisplayList()
-{	
-	assert(nestCount == 1);
-	pwEndList();
-	--nestCount;
-}
-
-
-PWMatrixStacker::PWMatrixStacker()
-{
-    pwPushMatrix();
-}
-
-PWMatrixStacker::~PWMatrixStacker()
-{
-    pwPopMatrix();
-}
-
-DebugRep::DebugRep(const char* location)
-: _location(location)
-{
-	DebugLog("Entered %s", _location);
-}
-
-DebugRep::~DebugRep()
-{
-	DebugLog("Left %s", _location);
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (((tv.tv_sec * 1000 * 1000) + tv.tv_usec) / 1000);
 }
 

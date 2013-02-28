@@ -4,11 +4,15 @@
 @interface World : NSObject
 {
 }
+#pragma mark - Properties
 
--(id)      initWithViewSize:(const CGSize &) viewSize;
-
-@property (nonatomic, readonly) GLrgba bloomColor;
-@property (nonatomic, readonly) GLuint logoIndex;
+@property (nonatomic, readonly) GLrgba  bloomColor;
+@property (nonatomic, readonly) GLuint  logoIndex;
+@property (nonatomic, readonly) GLbbox  hotZone;
+@property (nonatomic, readonly) float   fadeCurrent;
+@property (nonatomic, readonly) GLulong fadeStart;
+@property (nonatomic, readonly) GLulong sceneBegin;
+@property (nonatomic, readonly) GLulong sceneElapsed;
 
 @property (nonatomic, readonly) Cars     *cars;
 @property (nonatomic, readonly) Entities *entities;
@@ -19,51 +23,55 @@
 @property (nonatomic, readonly) Renderer *renderer;
 @property (nonatomic, readonly) VisibilityGrid *visibilityGrid;
 
-@property (nonatomic, readonly) GLbbox hotZone;
-@property (nonatomic, readonly) float fadeCurrent;
-@property (nonatomic, readonly) GLulong  fadeStart;
-@property (nonatomic, readonly) GLulong sceneBegin, sceneElapsed;
+#pragma mark - Methods
 
--(char) cellAtRow:(int)row column:(int)column;
--(GLrgba)    lightColorAtIndex: (GLuint) index;
+-(id) initWithViewSize:(const CGSize &) viewSize;
 
--(void)      render;
--(void)      reset;
--(void)      term;
--(void)      update;
+
+    // Reset the contents of the world if necessary.
+-(void) reset;
+
+    // Start closing down the scene. Prevent any more drawing while we wait for the window to close.
+-(void) term;
+
+    // Update all the actors in the scene (move cars, change camera angle etc.)
+-(void) update:(const CGSize &) viewSize;
+
+    // Draw the scene to the OpenGL context.
+-(void) draw;
+
+    // Return the state of one of the cells on the grid.
+-(char) cellAtRow:(int) row column:(int) column;
+
+    // For debugging -draw a grid showing traffic lanes over the city.
+-(void) renderDebugTrafficLanes;
 
 @end
 
+#pragma mark - Helper classes for display-list rendering & primitive creation. 
 
-// PAW: Helper classes for display-list rendering and primitive creation. 
 // Avoid stack overflows by using RAII.
-struct MakePrimitive
-{
-	static int nestCount;	// debug variable used to check we are not nesting.
-	MakePrimitive(GLenum type);
-	~MakePrimitive();
-};
+//struct MakePrimitive
+//{
+//	static int nestCount;	// debug variable used to check we are not nesting.
+//	MakePrimitive(GLenum type);
+//	~MakePrimitive();
+//};
+//
+//struct MakeDisplayList
+//{
+//	static int nestCount;	// debug variable used to check we are not nesting.
+//	MakeDisplayList(GLint name, GLenum mode, const char *location);
+//	~MakeDisplayList();
+//};	
 
-struct MakeDisplayList
-{
-	static int nestCount;	// debug variable used to check we are not nesting.
-	MakeDisplayList(GLint name, GLenum mode, const char *location);
-	~MakeDisplayList();
-};	
+//
+//struct PWMatrixStacker
+//{
+//    PWMatrixStacker();
+//    ~PWMatrixStacker();
+//};
 
-
-struct PWMatrixStacker
-{
-    PWMatrixStacker();
-    ~PWMatrixStacker();
-};
-
-struct DebugRep
-{
-	const char* _location;
-	DebugRep(const char* location);
-	~DebugRep();
-};
 
 
 

@@ -41,12 +41,12 @@ struct Cube
     : _front(front), _back(back), _left(left), _right(right), _top(top), _bottom(bottom) {}
 };
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+//---------------------------------------------------------------------------------------------------------------------------------
 
 @interface Building ()
 {
-    int     _x, _y, _width, _depth, _height;
-    GLulong _texture_type, _seed, _roof_tiers;
+    int     _x, _y, _width, _depth, _height, _seed;
+    GLulong _texture_type, _roof_tiers;
     GLrgba  _color, _trim_color;
     Mesh   *_mesh, *_mesh_flat;
     BOOL    _have_lights, _have_trim, _have_logo;
@@ -68,10 +68,42 @@ struct Cube
                 width:(int) width
                 depth:(int) depth
                  seed:(int) seed
-                color:(GLrgba) color
+                color:(const GLrgba &) color
+            trimColor:(const GLrgba &) trimColor
                 world:(World*) world
 {
-    return [[Building alloc] initWithType:type x:x y:y height:height width:width depth:depth seed:seed color:color world:world];
+    return [[Building alloc] initWithType:type
+                                        x:x
+                                        y:y
+                                   height:height
+                                    width:width
+                                    depth:depth
+                                     seed:seed
+                                    color:color
+                                trimColor:trimColor
+                                    world:world];
+}
+
++(id)buildingWithType:(BuildingType) type
+                    x:(int) x
+                    y:(int) y
+               height:(int) height
+                width:(int) width
+                depth:(int) depth
+                 seed:(int) seed
+                color:(const GLrgba &) color
+                world:(World*) world
+{
+    return [self buildingWithType:type
+                                x:x
+                                y:y
+                           height:height
+                            width:width
+                            depth:depth
+                             seed:seed
+                            color:color
+                        trimColor:color
+                            world:world];
 }
 
 -(id)initWithType:(BuildingType) type
@@ -81,20 +113,21 @@ struct Cube
             width:(int) width
             depth:(int) depth
              seed:(int) seed
-            color:(GLrgba) color
+            color:(const GLrgba &) color
+        trimColor:(const GLrgba &) trimColor
             world:(World*) world
 {
     self = [super initWithWorld:world];
     if(self) {
         _color = color.colorWithAlpha(0.1f);
-        _trim_color = [world lightColorAtIndex:seed];
+        _trim_color = trimColor;
         _x = x;
         _y = y;
-        _width = width;
-        _depth = depth;
+        _width  = width;
+        _depth  = depth;
         _height = height;
         _center = glVector (float(_x + width / 2), 0.0f, float(_y + depth / 2));
-        _seed = seed;
+        _seed   = seed;
         _texture_type = RandomInt();
         _have_lights =  _have_logo = _have_trim = false;
         _roof_tiers = 0;
@@ -229,7 +262,11 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
   air conditioners or light towers.
 -----------------------------------------------------------------------------*/
 
--(void)ConstructRoofWithLeft:(float)  left right:(float) right front:(float) front back:(float) back bottom:(float) bottom
+-(void)ConstructRoofWithLeft:(float) left
+                       right:(float) right
+                       front:(float) front
+                        back:(float) back
+                      bottom:(float) bottom
 {
     int       air_conditioners = 0, i = 0;
     int       face = 0;
@@ -285,7 +322,12 @@ static GLvertex GLvertexMake(float x, float y, float z, float u, float v)
         vector_buffer[1] = glVector (left  - logo_offset, bottom, front - logo_offset);
         vector_buffer[2] = glVector (right + logo_offset, bottom, front - logo_offset);
         vector_buffer[3] = glVector (right + logo_offset, bottom, back  + logo_offset);
-        [d CreateLightTrimWithChain:vector_buffer count:4 height:(float)RandomIntR(2) + 1.0f seed:_seed color:_trim_color];
+        [d CreateLightTrimWithChain:vector_buffer
+                              count:4
+                             height:(float)RandomIntR(2) + 1.0f
+                               seed:_seed
+                              color:_trim_color
+                          trimColor:_trim_color];
     } else if (addon == ADDON_LIGHTS && !_have_lights) {
         Lights *lights = self.world.lights;
         [lights newLightWithPosition:glVector(left , (float)(bottom + 2), front) color:_trim_color size:LIGHT_SIZE blink:NO];
@@ -607,7 +649,12 @@ static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
     bool do_trim = (_height > 48 && RandomIntR(3) == 0);
     if (!logo_done && do_trim) {
         Deco *d = [[Deco alloc] initWithWorld:self.world];
-        [d CreateLightTrimWithChain:&vector_buffer[0] count:(points / 2) - 2 height:(float)cap_height / 2 seed:_seed color:RANDOM_COLOR()];
+        [d CreateLightTrimWithChain:&vector_buffer[0]
+                              count:(points / 2) - 2
+                             height:(float)cap_height / 2
+                               seed:_seed
+                              color:RANDOM_COLOR()
+                          trimColor:_trim_color];
     }
     
         //Add the outer walls
@@ -622,12 +669,12 @@ static void addToMesh(float x, float y, float z, float u, float v, Mesh *mesh)
         //add the fan to cap the top of the buildings
     fan f;
     f.index_list.push_back(points);
-    for (GLint i = 0; i < points / 2; i++)
+    for (GLint i = 0; i < points / 2; i++) {
         f.index_list.push_back(points - (1 + i * 2));
-        
-        p.position.x = _center.x;
-        p.position.z = _center.z;
-        [_mesh_flat addVertex:p];
+    }
+    p.position.x = _center.x;
+    p.position.z = _center.z;
+    [_mesh_flat addVertex:p];
     [_mesh_flat addFan:f];
     radius = radius / 2.0f;
     

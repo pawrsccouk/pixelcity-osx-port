@@ -36,7 +36,6 @@ static const int BUILDING_COUNT  =  ((TEXTURE_BUILDING9 - TEXTURE_BUILDING1) + 1
 
 -(id)   initWithWorld:(World *) world;
 
-//-(GLuint) textureFromName:(NSString*) name;
 -(GLuint) textureId:(TextureType) texType;
 -(void)   term;
 -(GLuint) randomBuilding:(GLulong) index;

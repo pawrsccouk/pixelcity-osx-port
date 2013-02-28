@@ -43,6 +43,7 @@
 
 -(id)initWithType:(TextureType) type size:(int) size mipmap:(BOOL) mipmap clamp:(BOOL) clamp masked:(BOOL) masked world:(World*) world;
 -(void) Clear;
+-(void) term;
 -(void) Rebuild;
 -(void) DrawWindows;
 -(void) DrawSky;
@@ -54,7 +55,7 @@
 @interface Textures ()
 {
     int  _buildTime;
-    NSMutableArray *_allTextures;
+    NSArray *_allTextures, *_logoTextures;
 }
 
 -(void) addBuildTime:(GLulong) timeElapsed;
@@ -62,7 +63,7 @@
 @end
 
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+//---------------------------------------------------------------------------------------------------------------------------------------------
 
 #pragma mark - Texture implementation
 
@@ -98,6 +99,14 @@
 -(void)Clear
 {
     self.ready = NO;
+}
+
+-(void)term
+{
+    if(_glid > 0) {
+        glDeleteTextures(1, &_glid);
+        _glid = 0;
+    }
 }
 
 /*-----------------------------------------------------------------------------
@@ -272,8 +281,9 @@
 	glOrtho (0, size, size, 0, 0.1f, 2048);
     
 	pwMatrixMode (GL_MODELVIEW);
-    {
-        PWMatrixStacker pushMatrix;
+    
+    pwPushMatrix();
+    @try {
         pwLoadIdentity();
         
         pwDisable (GL_CULL_FACE);
@@ -293,7 +303,8 @@
             default                 : [self DrawWindows]     ; break; //building textures
         }
     }
-    
+    @finally { pwPopMatrix(); }
+
 	//Now blit the finished image into our texture  
     bool use_framebuffer = true;
 	if (use_framebuffer) {
@@ -332,19 +343,26 @@ static void makeLattice(GLint size)
 {
     pwLineWidth (2.0f);
     glColor3f (0,0,0);
-    {	MakePrimitive mp(GL_LINES);
+    
+    glBegin(GL_LINES);
+    @try {
         glVertex2i (0, 0);  glVertex2i(size, size);	//diagonal
         glVertex2i (0, 0);  glVertex2i(0    , size);	//vertical
         glVertex2i (0, 0);  glVertex2i(size, 0    );	//vertical
     }
+    @finally { pwEnd(); }
     
-    MakePrimitive mp(GL_LINE_STRIP);
-    glVertex2i(0, 0);
-    for (int i = 0; i < size; i += 9)
-        glVertex2i((i % 2) ? 0 : i, i);
-    
-    for (int i = 0; i < size; i += 9)
-        glVertex2i(i, (i % 2) ? 0 : i);
+    glBegin(GL_LINE_STRIP);
+    @try {
+        glVertex2i(0, 0);
+        for (int i = 0; i < size; i += 9) {
+            glVertex2i( (i % 2) ? 0 : i, i);
+        }
+        for (int i = 0; i < size; i += 9) {
+            glVertex2i( i, (i % 2) ? 0 : i);
+        }
+    }
+    @finally { pwEnd(); }
 }
 
 static void makeSoftCircle(GLint halfSize)
@@ -354,16 +372,19 @@ static void makeSoftCircle(GLint halfSize)
     pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     float radius = float(halfSize) - 3;
     
-    MakePrimitive mp(GL_TRIANGLE_FAN);
-    glColor4f (1, 1, 1, 1);
-    glVertex2i (halfSize, halfSize);
-    glColor4f (0, 0, 0, 0);
-    for (int i = 0; i <= 360; i++) {
-        GLvector2 pos;
-        pos.x = sinf ((float)i * DEGREES_TO_RADIANS) * radius;
-        pos.y = cosf ((float)i * DEGREES_TO_RADIANS) * radius;
-        glVertex2i (halfSize + (int)pos.x, halfSize + (int)pos.y);
+    pwBegin(GL_TRIANGLE_FAN);
+    @try {
+        glColor4f (1, 1, 1, 1);
+        glVertex2i (halfSize, halfSize);
+        glColor4f (0, 0, 0, 0);
+        for (int i = 0; i <= 360; i++) {
+            GLvector2 pos;
+            pos.x = sinf ((float)i * DEGREES_TO_RADIANS) * radius;
+            pos.y = cosf ((float)i * DEGREES_TO_RADIANS) * radius;
+            glVertex2i (halfSize + (int)pos.x, halfSize + (int)pos.y);
+        }
     }
+    @finally { pwEnd(); }
 }
 
 static void makeLight(GLint halfSize)
@@ -371,37 +392,43 @@ static void makeLight(GLint halfSize)
     pwEnable (GL_BLEND);
     pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (int j = 0; j < 2; j++) {
-        MakePrimitive mp(GL_TRIANGLE_FAN);
-        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-        glVertex2i (halfSize, halfSize);
-        float radius = j ? 8 : (float(halfSize) / 2);
-        glColor4f (1, 1, 1, 0);
-        
-        for (int i = 0; i <= 360; i++) {
-            GLvector2 pos;
-            pos.x = sinf (float(i) * DEGREES_TO_RADIANS) * radius;
-            pos.y = cosf (float(i) * DEGREES_TO_RADIANS) * radius;
-            glVertex2i (halfSize + int(pos.x), halfSize + int(pos.y));
+        pwBegin(GL_TRIANGLE_FAN);
+        @try {
+            glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+            glVertex2i (halfSize, halfSize);
+            float radius = j ? 8 : (float(halfSize) / 2);
+            glColor4f (1, 1, 1, 0);
+            
+            for (int i = 0; i <= 360; i++) {
+                GLvector2 pos;
+                pos.x = sinf (float(i) * DEGREES_TO_RADIANS) * radius;
+                pos.y = cosf (float(i) * DEGREES_TO_RADIANS) * radius;
+                glVertex2i (halfSize + int(pos.x), halfSize + int(pos.y));
+            }
         }
+        @finally { pwEnd(); }
     }
 }
 
 static void drawrect_simple (int left, int top, int right, int bottom, const GLrgba &color)
 {
-	color.glColor3();
-	{	MakePrimitive mp(GL_QUADS);
+    pwBegin(GL_QUADS);
+	@try {
+        color.glColor3();
 		glVertex2i (left, top);
 		glVertex2i (right, top);
 		glVertex2i (right, bottom);
 		glVertex2i (left, bottom);
 	}
+    @finally { pwEnd(); }
 }
 
 
 static void drawrect_simple (int left, int top, int right, int bottom, const GLrgba &color1, const GLrgba &color2)
 {
-	color1.glColor3();
-	{	MakePrimitive mp(GL_TRIANGLE_FAN);
+    pwBegin(GL_TRIANGLE_FAN);
+	@try {
+        color1.glColor3();
 		glVertex2i ((left + right) / 2, (top + bottom) / 2);
 		color2.glColor3();
 		glVertex2i(left, top);
@@ -410,6 +437,7 @@ static void drawrect_simple (int left, int top, int right, int bottom, const GLr
 		glVertex2i(left, bottom);
 		glVertex2i(left, top);
 	}
+    @finally { pwEnd(); }
 }
 
 
@@ -426,31 +454,39 @@ static void drawrect (int left, int top, int right, int bottom, GLrgba color)
 	color.glColor3();
     
 	if (left == right) { //in low resolution, a "rect" might be 1 pixel wide
-		{	MakePrimitive mp(GL_LINES);
+        pwBegin(GL_LINES);
+		@try {
 			glVertex2i(left, top);
 			glVertex2i(left, bottom);
 		}
+        @finally { pwEnd(); }
 	}
 	if (top == bottom) { //in low resolution, a "rect" might be 1 pixel wide
-		{	MakePrimitive mp(GL_LINES);
+        pwBegin(GL_LINES);
+		@try {
 			glVertex2i(left, top);
 			glVertex2i(right, top);
 		}
+        @finally { pwEnd(); }
 	}
 	else { // draw one of those fancy 2-dimensional rectangles
-		{	MakePrimitive mp(GL_QUADS);
+        pwBegin(GL_QUADS);
+		@try {
 			glVertex2i(left, top);
 			glVertex2i(right, top);
 			glVertex2i(right, bottom);
 			glVertex2i(left, bottom);
 		}
+        @finally { pwEnd(); }
 		
 		float average   = (color.red() + color.blue() + color.green()) / 3.0f;
 		int   potential = (int)(average * 255.0f);
 		
 		if (average > 0.5f) {
 			pwBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			{	MakePrimitive mp(GL_POINTS);
+			
+            pwBegin(GL_POINTS);
+            @try {
 				for(int i = left + 1; i < right - 1; i++) {
 					for(int j = top + 1; j < bottom - 1; j++) {
 						glColor4i(255, 0, RandomIntR(potential), 255);
@@ -462,6 +498,7 @@ static void drawrect (int left, int top, int right, int bottom, GLrgba color)
 					}
 				}
 			}
+            @finally { pwEnd(); }
 		}
 		int hght = (bottom - top) + (RandomIntR(3) - 1) + (RandomIntR(3) - 1);
 		for (int i = left; i < right; i++) {
@@ -473,11 +510,14 @@ static void drawrect (int left, int top, int right, int bottom, GLrgba color)
 				hght = ((bottom - top) + hght) / 2;
 			}
 			for (int j = 0; j < 1; j++) {
-                MakePrimitive mp(GL_LINES);
-                glColor4f(0, 0, 0, (float)RandomLongR(256) / 256.0f);
-                glVertex2i(i, bottom - hght);
-                glColor4f(0, 0, 0, (float)RandomLongR(256) / 256.0f);
-                glVertex2i(i, bottom);
+                pwBegin(GL_LINES);
+                @try {
+                    glColor4f(0, 0, 0, (float)RandomLongR(256) / 256.0f);
+                    glVertex2i(i, bottom - hght);
+                    glColor4f(0, 0, 0, (float)RandomLongR(256) / 256.0f);
+                    glVertex2i(i, bottom);
+                }
+                @finally { glEnd(); }
 			}
 		}
 	}
@@ -639,7 +679,15 @@ static void doBloom(World *world, Texture *t, bool showFlat)
 
 -(void)term
 {
-    [_allTextures removeAllObjects];
+    for(Texture *tex in _allTextures) {
+        [tex term];
+    }
+    
+    for(NSNumber *texId in _logoTextures) {
+        GLuint texIdi = texId.unsignedIntValue;
+        glDeleteTextures(1, &texIdi);
+    }
+    _allTextures = _logoTextures = nil;
 }
 
 -(id)initWithWorld:(World *)world
@@ -648,18 +696,22 @@ static void doBloom(World *world, Texture *t, bool showFlat)
     if(self) {
         _ready = false;
         _buildTime = 0;
-        _allTextures = [NSMutableArray array];
+        _logoTextures = makeLogos();
         
-        [_allTextures addObject:[Texture textureWithType:TEXTURE_SKY         size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
-        [_allTextures addObject:[Texture textureWithType:TEXTURE_LATTICE     size:128 mipmap:YES clamp:YES masked:YES world:world]];
-        [_allTextures addObject:[Texture textureWithType:TEXTURE_LIGHT       size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
-        [_allTextures addObject:[Texture textureWithType:TEXTURE_SOFT_CIRCLE size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
-        [_allTextures addObject:[Texture textureWithType:TEXTURE_HEADLIGHT   size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
-        [_allTextures addObject:[Texture textureWithType:TEXTURE_BLOOM       size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
-        [_allTextures addObject:[Texture textureWithType:TEXTURE_TRIM        size:TRIM_RESOLUTION mipmap:YES clamp:NO masked:NO world:world]];
+        NSMutableArray *textures = [NSMutableArray array];
+        
+        [textures addObject:[Texture textureWithType:TEXTURE_SKY         size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
+        [textures addObject:[Texture textureWithType:TEXTURE_LATTICE     size:128 mipmap:YES clamp:YES masked:YES world:world]];
+        [textures addObject:[Texture textureWithType:TEXTURE_LIGHT       size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+        [textures addObject:[Texture textureWithType:TEXTURE_SOFT_CIRCLE size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+        [textures addObject:[Texture textureWithType:TEXTURE_HEADLIGHT   size:128 mipmap:NO  clamp:NO  masked:YES world:world]];
+        [textures addObject:[Texture textureWithType:TEXTURE_BLOOM       size:512 mipmap:YES clamp:NO  masked:NO  world:world]];
+        [textures addObject:[Texture textureWithType:TEXTURE_TRIM        size:TRIM_RESOLUTION mipmap:YES clamp:NO masked:NO world:world]];
         
         for (int i = TEXTURE_BUILDING1; i <= TEXTURE_BUILDING9; i++)
-            [_allTextures addObject:[Texture textureWithType:TextureType(i) size:512 mipmap:YES clamp:NO masked:NO world:world]];
+            [textures addObject:[Texture textureWithType:TextureType(i) size:512 mipmap:YES clamp:NO masked:NO world:world]];
+
+        _allTextures = textures;
     }
     return self;
 }
@@ -674,10 +726,12 @@ static NSArray *getFontAttributes()
         
         for(NSUInteger i = 0; i < arraySize; i++) {
             NSFont *font = [NSFont fontWithName:fontNames[i] size:32];
-            if(font)
+            if(font) {
                 [fontAttribs addObject:@{
-       NSFontAttributeName            : font,
-       NSForegroundColorAttributeName : [NSColor whiteColor]}];
+                     NSFontAttributeName            : font,
+                     NSForegroundColorAttributeName : [NSColor whiteColor]
+                 }];
+            }
             else  NSLog(@"Font %@ could not be created.", fontNames[i]);
         }
     }
@@ -755,11 +809,7 @@ static NSArray *makeLogos()
 
 -(GLuint) randomLogo
 {
-    static NSArray *textures = nil;
-    if(!textures)
-        textures = makeLogos();
-    
-    return [[textures objectAtIndex:RandomIntR(GLint(textures.count))] intValue];
+    return [[_logoTextures objectAtIndex:RandomIntR(GLint(_logoTextures.count))] intValue];
 }
 
 @end

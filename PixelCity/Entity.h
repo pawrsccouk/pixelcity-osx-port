@@ -18,6 +18,7 @@
 -(void)addEntity:(Entity*) entity;
 -(void) render:(BOOL) showFlat;
 -(void) update;
+-(void) term;
 
 @end
 

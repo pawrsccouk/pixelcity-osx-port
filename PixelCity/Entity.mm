@@ -54,27 +54,31 @@ struct Cell
 	//Now group entites on the grid 
 	//make a list for the textured objects in this region
     int x = _compileX, y = _compileY;
-	if (!_cellList[x][y].list_textured)
+	if (! _cellList[x][y].list_textured) {
 		_cellList[x][y].list_textured = glGenLists(1);
-	{
-    	MakeDisplayList mdl(_cellList[x][y].list_textured, GL_COMPILE, "do_compile (textured)");
-		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
+    }
+	
+    pwNewList(_cellList[x][y].list_textured, GL_COMPILE);
+    @try {
+        _cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
         for(Entity *ent in _allEntities) {
-			GLvector pos = ent.center;
-			if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha) {
-				pwBindTexture(GL_TEXTURE_2D, ent.texture);
-				[ent Render];
-			}
-		};
-	}
+            GLvector pos = ent.center;
+            if (WORLD_TO_GRID(pos.x) == x && WORLD_TO_GRID(pos.z) == y && !ent.alpha) {
+                pwBindTexture(GL_TEXTURE_2D, ent.texture);
+                [ent Render];
+            }
+        }
+    }
+    @finally { pwEndList(); }
 	glReportError("do_compile textured entities");
 	
 	//Make a list of flat-color stuff (A/C units, ledges, roofs, etc.)
-	if (!_cellList[x][y].list_flat)
+	if (! _cellList[x][y].list_flat) {
 		_cellList[x][y].list_flat = glGenLists(1);
+    }
     
-	{
-        MakeDisplayList mdl(_cellList[x][y].list_flat, GL_COMPILE, "do_compile flat");
+    pwNewList(_cellList[x][y].list_flat, GL_COMPILE);
+	@try {
 		pwEnable (GL_CULL_FACE);
 		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
         for(Entity *ent in _allEntities) {
@@ -83,13 +87,17 @@ struct Cell
 				[ent RenderFlat:NO];
 		};
 	}
+    @finally { pwEndList(); }
 	glReportError("do_compile flat entities");
 	
+    
 	//Now a list of flat-colored stuff that will be wireframe friendly
-	if (!_cellList[x][y].list_flat_wireframe)
+	if (! _cellList[x][y].list_flat_wireframe) {
 		_cellList[x][y].list_flat_wireframe = glGenLists(1);
-	{
-        MakeDisplayList mdl(_cellList[x][y].list_flat_wireframe, GL_COMPILE, "do_compile wireframe");
+    }
+	
+    pwNewList(_cellList[x][y].list_flat_wireframe, GL_COMPILE);
+    @try {
 		pwEnable (GL_CULL_FACE);
 		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
         for(Entity *ent in _allEntities) {
@@ -98,14 +106,16 @@ struct Cell
 				[ent RenderFlat:YES];
 		};
 	}
+    @finally { pwEndList(); }
 	glReportError("do_compile Flat wireframeable entities");
 	
 	//Now a list of stuff to be alpha-blended, and thus rendered last
-	if (!_cellList[x][y].list_alpha)
+	if (! _cellList[x][y].list_alpha) {
 		_cellList[x][y].list_alpha = glGenLists(1);
+    }
     
-	{
-        MakeDisplayList mdl(_cellList[x][y].list_alpha, GL_COMPILE, "do_compile alpha");
+    pwNewList(_cellList[x][y].list_alpha, GL_COMPILE);
+	@try {
 		_cellList[x][y].pos = glVector (GRID_TO_WORLD(x), 0.0f, (float)y * GRID_RESOLUTION);
 		pwDepthMask (GL_FALSE);
 		pwEnable (GL_BLEND);
@@ -119,7 +129,8 @@ struct Cell
 			}
 		};
 		pwDepthMask (GL_TRUE);
-	}	
+	}
+    @finally { pwEndList(); }
 	glReportError("do_compile Alpha-blended entities");
 	
 
@@ -191,39 +202,51 @@ struct Cell
     VisibilityGrid *visibilityGrid = self.world.visibilityGrid;
     auto isWireframe = ^{ int polymode[2];  glGetIntegerv (GL_POLYGON_MODE, &polymode[0]); return polymode[0] != GL_FILL; };
 	
-    if (showFlat)
+    if (showFlat) {
 		pwDisable (GL_TEXTURE_2D);
-	
-    for (int x = 0; x < GRID_SIZE; x++)
-		for (int z = 0; z < GRID_SIZE; z++)
-			if( [visibilityGrid visibleAtX:x Z:z] && (_cellList[x][z].list_textured > 0) )
+	}
+    for (int x = 0; x < GRID_SIZE; x++) {
+		for (int z = 0; z < GRID_SIZE; z++) {
+			if( [visibilityGrid visibleAtX:x Z:z] && (_cellList[x][z].list_textured > 0) ) {
                 pwCallList (_cellList[x][z].list_textured);
+            }
+        }
+    }
 
         //draw all flat colored objects
 	pwBindTexture(GL_TEXTURE_2D, 0);
 	pwColor3f (0, 0, 0);
     bool wireframe = isWireframe();
-	for (int x = 0; x < GRID_SIZE; x++) 
-		for (int z = 0; z < GRID_SIZE; z++)
+	for (int x = 0; x < GRID_SIZE; x++) {
+		for (int z = 0; z < GRID_SIZE; z++) {
 			if ([visibilityGrid visibleAtX:x Z:z]) {
 				if (wireframe) {
-					if(_cellList[x][z].list_flat_wireframe > 0) { pwCallList(_cellList[x][z].list_flat_wireframe); }
+					if(_cellList[x][z].list_flat_wireframe > 0) {
+                        pwCallList(_cellList[x][z].list_flat_wireframe);
+                    }
 				} else {
-					if(_cellList[x][z].list_flat           > 0) { pwCallList(_cellList[x][z].list_flat          ); }
+					if(_cellList[x][z].list_flat > 0) {
+                        pwCallList(_cellList[x][z].list_flat);
+                    }
 				}
 			}
+        }
+    }
 
         //draw all alpha-blended objects
     pwBindTexture(GL_TEXTURE_2D, 0);
     pwColor3f(0.0f, 0.0f, 0.0f);
     pwEnable (GL_BLEND);
-    for (int x = 0; x < GRID_SIZE; x++)
-        for (int z = 0; z < GRID_SIZE; z++)
-            if( [visibilityGrid visibleAtX:x Z:z] && (_cellList[x][z].list_alpha > 0) )
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int z = 0; z < GRID_SIZE; z++) {
+            if( [visibilityGrid visibleAtX:x Z:z] && (_cellList[x][z].list_alpha > 0) ) {
                 pwCallList(_cellList[x][z].list_alpha);
+            }
+        }
+    }
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 
 -(void) clear
 {
@@ -231,7 +254,7 @@ struct Cell
 	_compileX = _compileY = _compileCount = 0;
 	_compiled = _sorted = NO;
 	
-	// PAW: Only generate the list once the names have been allocated with glGenList() otherwise OpenGL errors.
+	// PAW: Only regenerate the list once the names have been allocated with glGenList() otherwise OpenGL errors.
 	for (int x = 0; x < GRID_SIZE; x++) {
 		for (int y = 0; y < GRID_SIZE; y++) {
 			Cell* pcell = &(_cellList[x][y]);
@@ -241,9 +264,22 @@ struct Cell
 			if(pcell->list_flat           > 0) { pwNewList(pcell->list_flat          , GL_COMPILE);  pwEndList();  }
 		}
 	}
-	glReportError("Entities clear");
 }
 
+
+-(void) term
+{
+    auto freeList = ^(GLuint *plist) { pwDeleteLists(*plist, 1); *plist = 0; };
+	for (int x = 0; x < GRID_SIZE; x++) {
+		for (int y = 0; y < GRID_SIZE; y++) {
+			Cell* pcell = &(_cellList[x][y]);
+			if(pcell->list_textured       > 0) { freeList(&pcell->list_textured      ); }
+			if(pcell->list_alpha          > 0) { freeList(&pcell->list_alpha         ); }
+			if(pcell->list_flat_wireframe > 0) { freeList(&pcell->list_flat_wireframe); }
+			if(pcell->list_flat           > 0) { freeList(&pcell->list_flat          ); }
+		}
+	}
+}
 
 -(GLulong) count
 {
@@ -281,7 +317,8 @@ struct Cell
 @end
 
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+//----------------------------------------------------------------------------------------------------------------------------------
+#pragma mark - Entity
 
 @implementation Entity
 @synthesize center = _center, world = _world;

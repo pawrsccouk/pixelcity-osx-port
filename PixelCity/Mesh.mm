@@ -89,45 +89,55 @@
     
 	for (std::vector<quad_strip>::iterator qsi = _quad_strip.begin(); qsi < _quad_strip.end(); ++qsi)
     {
-		MakePrimitive mp(GL_QUAD_STRIP);
-        std::for_each(qsi->index_list.cbegin(), qsi->index_list.cend(), drawAtIndex);
+		pwBegin(GL_QUAD_STRIP);
+        @try { std::for_each(qsi->index_list.cbegin(), qsi->index_list.cend(), drawAtIndex); }
+        @finally { pwEnd(); }
 	}
 	
 	for (std::vector<cube>::iterator ci = _cube.begin(); ci < _cube.end(); ++ci)
     {
-		{	MakePrimitive mp(GL_QUAD_STRIP);
-            std::for_each(ci->index_list.begin(), ci->index_list.end(), drawAtIndex);
-		}
+		pwBegin(GL_QUAD_STRIP);
+        @try {   std::for_each(ci->index_list.begin(), ci->index_list.end(), drawAtIndex); }
+        @finally { pwEnd(); }
+
 		
-		{	MakePrimitive mp(GL_QUADS);
+		pwBegin(GL_QUADS);
+        @try {
 			_vertex[ci->index_list[7]].glTexCoord2();
 			_vertex[ci->index_list[7]].glVertex3();
 			_vertex[ci->index_list[5]].glVertex3();
 			_vertex[ci->index_list[3]].glVertex3();
 			_vertex[ci->index_list[1]].glVertex3();
 		}
-		
-		{   MakePrimitive mp(GL_QUADS);
+        @finally { pwEnd(); }
+            
+		pwBegin(GL_QUADS);
+		@try {
 			glTexCoord2fv(&_vertex[ci->index_list[6]].uv.x);
 			glVertex3fv  (&_vertex[ci->index_list[0]].position.x);
 			glVertex3fv  (&_vertex[ci->index_list[2]].position.x);
 			glVertex3fv  (&_vertex[ci->index_list[4]].position.x);
 			glVertex3fv  (&_vertex[ci->index_list[6]].position.x);
 		}
+        @finally { pwEnd(); }
 	}
 
 	for (std::vector<fan>::iterator fi = _fan.begin(); fi < _fan.end(); ++fi)
     {
-		MakePrimitive mp(GL_TRIANGLE_FAN);
-        std::for_each(fi->index_list.cbegin(), fi->index_list.cend(), drawAtIndex);
+		pwBegin(GL_TRIANGLE_FAN);
+        @try { std::for_each(fi->index_list.cbegin(), fi->index_list.cend(), drawAtIndex); }
+        @finally { pwEnd(); }
 	}
 }
 
 -(void) Compile
 {
 	assert(glIsList(_list));
-	MakeDisplayList mdl(_list, GL_COMPILE, "Mesh Compile");
-    [self Render];
+	pwNewList(_list, GL_COMPILE);
+    @try {
+        [self Render];
+    }
+    @finally { pwEndList(); }
 	_compiled = true;
 }
 

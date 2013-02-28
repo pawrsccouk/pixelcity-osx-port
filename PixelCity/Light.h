@@ -1,12 +1,18 @@
 @class World, Light;
 
+struct HSL
+{
+    float hue, sat, lum;
+};
+
+
     // Collection of lights. These are actually entities to be displayed rather than lights that illuminate the scene.
     // Lights should also be added to the Entities collection, as lights are also entities.
     // The convienience method newLightWithPosition:color:size:blink does this for you.
 @interface Lights : NSObject
 
 @property (nonatomic, readonly) GLulong count;
-@property (nonatomic, readonly) __weak World *world;
+@property (nonatomic, readonly, weak) World *world;
 
     // Creates a new light, adds it to the lights and entities collections and returns it.
 -(Light*) newLightWithPosition:(const GLvector &)position
@@ -24,6 +30,11 @@
 
     // Render all the lights in this collection.
 -(void) render;
+
+    // Return one of the pre-defined colours used for lights. These have been manually tweaked to look good.
+    // Returns either an RGB color (GLrgba) or a HSL struct (in case callers want to mess with the brightness etc).
+-(GLrgba) randomLightColor;
+-(HSL)    randomLightColorHSL;
 
 @end
 

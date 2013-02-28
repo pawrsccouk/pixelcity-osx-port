@@ -4,6 +4,8 @@
 
 #import "GLString.h"
 
+typedef void (^setupCallback_t)(void);
+
 @class World;
 
 
@@ -20,6 +22,10 @@
 @property (nonatomic) BOOL animating;
 @property (nonatomic, retain) World *world;
 
+    // setupCallback will be invoked when the OpenGL context is created the objects have been created.
+    // You can then use it to set individual settings for the view.
+@property (nonatomic, copy) setupCallback_t setupCallback;
+
 - (void) drawRect:(NSRect)rect;
 
 - (void) update;		// moved or resized
@@ -28,7 +34,6 @@
 - (BOOL) becomeFirstResponder;
 - (BOOL) resignFirstResponder;
 
-- (id) initWithFrame: (NSRect) frameRect;
-- (void) awakeFromNib;
+- (id) initWithFrame:(NSRect)frameRect;
 
 @end

@@ -53,6 +53,25 @@ static void addLight(float x, float y, float z, float r, float g, float b, float
 
 @end
 
+static const HSL light_colors[] =
+{
+    0.04f,  0.9f,  0.93f,   //Amber / pink
+    0.055f, 0.95f, 0.93f,   //Slightly brighter amber
+    0.08f,  0.7f,  0.93f,   //Very pale amber
+    0.07f,  0.9f,  0.93f,   //Very pale orange
+    0.1f,   0.9f,  0.85f,   //Peach
+    0.13f,  0.9f,  0.93f,   //Pale Yellow
+    0.15f,  0.9f,  0.93f,   //Yellow
+    0.17f,  1.0f,  0.85f,   //Saturated Yellow
+    0.55f,  0.9f,  0.93f,   //Cyan
+    0.55f,  0.9f,  0.93f,   //Cyan - pale, almost white
+    0.6f,   0.9f,  0.93f,   //Pale blue
+    0.65f,  0.9f,  0.93f,   //Pale Blue II, The Palening
+    0.65f,  0.4f,  0.99f,   //Pure white. Bo-ring.
+    0.65f,  0.0f,  0.8f,    //Dimmer white.
+    0.65f,  0.0f,  0.6f,    //Dimmest white.
+};
+static const size_t LIGHT_COLOR_COUNT = (sizeof(light_colors)/sizeof(HSL));
 
 @implementation Lights
 
@@ -95,6 +114,8 @@ static const short MAX_SIZE = 5;
 	if (! self.world.entities.ready)
 		return;
 
+    glReportError("Lights render BEGIN");
+
 	if (!_anglesDone)
 		for (int size = 0; size < MAX_SIZE; size++)
 			for (int i = 0 ;i < 360; i++) {
@@ -102,7 +123,10 @@ static const short MAX_SIZE = 5;
 				_angles[size][i].y = sinf (float(i) * DEGREES_TO_RADIANS) * (float(size) + 0.5f);
 			}
 
-    pwDisable(GL_FOG);      // Allow the lights to peek out of the fog.
+    if(glIsEnabled(GL_FOG)) {
+        glDisable(GL_FOG);      // Allow the lights to peek out of the fog.
+        glReportError("glDisable(GL_FOG) in Light render");
+    }
 	pwDepthMask (GL_FALSE);
 	pwEnable (GL_BLEND);
 	pwDisable (GL_CULL_FACE);
@@ -119,6 +143,23 @@ static const short MAX_SIZE = 5;
 -(GLvector2)angleAtX:(GLint)x y:(GLint)y
 {
     return _angles[x][y];
+}
+
+    //-----------------------------------------------------------------------------
+    // These will return a random color which is suitible for light sources, taken
+    // from a narrow group of hues. (Yellows, oranges, blues.)
+    // -----------------------------------------------------------------------------
+
+-(GLrgba) randomLightColor
+{
+	HSL hsl = [self randomLightColorHSL];
+	return glRgbaFromHsl(hsl.hue, hsl.sat, hsl.lum);
+}
+
+-(HSL)randomLightColorHSL
+{
+	GLuint index = RandomIntR(LIGHT_COLOR_COUNT);
+	return light_colors[index];
 }
 
 @end

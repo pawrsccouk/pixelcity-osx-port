@@ -25,13 +25,18 @@
 
 static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the given surface
 
+@interface Deco ()
+{
+    GLrgba        _color;
+    Mesh         *_mesh;
+    int           _type;
+    unsigned      _texture;
+    BOOL          _use_alpha;
+}
+@end
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 @implementation Deco
-
-
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 -(id)initWithWorld:(World *)world
 {
@@ -43,7 +48,7 @@ static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the give
     return self;
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 
 -(void) Render
 {
@@ -51,18 +56,19 @@ static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the give
     [_mesh Render];
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 
 -(void)RenderFlat:(BOOL) colored { }
 -(BOOL)alpha { return _use_alpha; }
 -(GLulong)polyCount  { return _mesh.polyCount; }
 -(GLuint) texture  { return _texture; }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
 
 static const short LIGHT_SIZE = 3;
 
--(void) CreateRadioTowerWithPosition:(GLvector) pos height:(float) height;
+-(void) CreateRadioTowerWithPosition:(GLvector) pos
+                              height:(float) height;
 {
     float offset = height / 15.0f;
     _center = pos;
@@ -86,9 +92,13 @@ static const short LIGHT_SIZE = 3;
     _texture = [self.world.textures textureId:TEXTURE_LATTICE];
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(void) CreateLogoWithStart:(const GLvector2 &)start end:(const GLvector2 &) end base:(float) bottom seed:(int) seed color:(const GLrgba &)color;
+
+-(void) CreateLogoWithStart:(const GLvector2 &)start
+                        end:(const GLvector2 &) end
+                       base:(float) bottom
+                       seed:(int)   seed
+                      color:(const GLrgba &)color;
 {
   _use_alpha = true;
   _color = color;
@@ -111,9 +121,14 @@ static const short LIGHT_SIZE = 3;
   _texture = [self.world.textures randomLogo]; // TextureId (TEXTURE_LOGOS);
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(void) CreateLightStripWithX:(float) x z:(float) z width:(float) width depth:(float) depth height:(float) height color:(GLrgba) color;
+
+-(void) CreateLightStripWithX:(float) x
+                            z:(float) z
+                        width:(float) width
+                        depth:(float) depth
+                       height:(float) height
+                        color:(GLrgba) color;
 {
   _color = color;
   _use_alpha = true;
@@ -131,9 +146,14 @@ static const short LIGHT_SIZE = 3;
   [_mesh Compile];
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
--(void) CreateLightTrimWithChain:(GLvector*) chain count:(int) count height:(float) height seed:(GLulong) seed color:(GLrgba) color;
+
+-(void) CreateLightTrimWithChain:(GLvector*) chain
+                           count:(int)       count
+                          height:(float)     height
+                            seed:(int)       seed
+                           color:(const GLrgba &) color
+                       trimColor:(const GLrgba &) trimColor;
 {
     _color = color;
     _center = glVector (0.0f, 0.0f, 0.0f);

@@ -22,13 +22,64 @@ enum BuildingType
                           UVStart:(float)   uvStart
                      blankCorners:(BOOL)    blankCorners;
 
--(void)ConstructSpikeWithLeft:(int) left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;
--(void)ConstructCubeWithLeft:(int)  left right:(int) right front:(int) front back:(int) back bottom:(int) bottom top:(int) top;
--(void)ConstructCubeWithFloatLeft:(float)  left right:(float) right front:(float) front back:(float) back bottom:(float) bottom top:(float) top;
--(void)ConstructRoofWithLeft:(float)  left right:(float) right front:(float) front back:(float) back bottom:(float) bottom;
+-(void)ConstructSpikeWithLeft:(int) left
+                        right:(int) right
+                        front:(int) front
+                         back:(int) back
+                       bottom:(int) bottom
+                          top:(int) top;
 
--(id)initWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color world:(World*) world;
-+(id)buildingWithType:(BuildingType) type x:(int) x y:(int) y height:(int) height width:(int) width depth:(int) depth seed:(int) seed color:(GLrgba) color world:(World*) world;
+-(void)ConstructCubeWithLeft:(int) left
+                       right:(int) right
+                       front:(int) front
+                        back:(int) back
+                      bottom:(int) bottom
+                         top:(int) top;
+
+-(void)ConstructCubeWithFloatLeft:(float) left
+                            right:(float) right
+                            front:(float) front
+                             back:(float) back
+                           bottom:(float) bottom
+                              top:(float) top;
+
+-(void)ConstructRoofWithLeft:(float) left
+                       right:(float) right
+                       front:(float) front
+                        back:(float) back
+                      bottom:(float) bottom;
+
+-(id)initWithType:(BuildingType) type
+                x:(int) x
+                y:(int) y
+           height:(int) height
+            width:(int) width
+            depth:(int) depth
+             seed:(int) seed
+            color:(const GLrgba &) color
+        trimColor:(const GLrgba &) trimColor
+            world:(World*) world;
+
++(id)buildingWithType:(BuildingType) type
+                    x:(int) x
+                    y:(int) y
+               height:(int) height
+                width:(int) width
+                depth:(int) depth
+                 seed:(int) seed
+                color:(const GLrgba &) color
+            trimColor:(const GLrgba &) trimColor
+                world:(World*) world;
+
++(id)buildingWithType:(BuildingType) type
+                    x:(int) x
+                    y:(int) y
+               height:(int) height
+                width:(int) width
+                depth:(int) depth
+                 seed:(int) seed
+                color:(const GLrgba &) color
+                world:(World*) world;
 
 @end
 

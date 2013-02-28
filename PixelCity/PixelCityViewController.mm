@@ -45,10 +45,6 @@ void DebugLog(const char* str, ...)
 
 -(BasicOpenGLView*) glView { return (BasicOpenGLView*)self.view; }
 
--(void)setView:(NSView *)view
-{
-    [super setView:view];
-}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -104,11 +100,13 @@ static void loadAndInit(NSMenuItem *item, BOOL *flag, const char *settingName, v
 	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode]; // ensure timer fires during resize
     
     self.glView.animating = fAnimate = YES;
+    secondView.animating = YES;
 }
 
 -(void) animationTick:(NSTimer*)timer
 {
     [self.glView animationTick];
+    [secondView animationTick];
 }
 
 #pragma mark - IB Actions
@@ -170,6 +168,7 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
 -(IBAction)toggleDebugLog:(id)sender
 {
     toggleFlag(debugLogToggleMenuItem, nil, &fDebugLog);
+    [secondView.world term];
 }
 
 -(IBAction) toggleHelp:(id) sender
@@ -184,7 +183,8 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
 
 -(void)resetWorld:(id)sender
 {
-    [((BasicOpenGLView*)self.view).world reset];
+    [self.glView.world reset];
+    [secondView.world reset];
 }
 
 #pragma mark - NSWindow delegate
@@ -192,6 +192,7 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
 -(void)windowWillClose:(NSNotification *)notification
 {
     [self.glView.world term];  // Stop any OpenGL renders while we wait for the window to be closed.
+    [secondView.world term];
     [self saveSettings];
 }
 

@@ -1,16 +1,16 @@
-/*-----------------------------------------------------------------------------
- 
- Render.cpp
- 
- 2009 Shamus Young
- 
- -------------------------------------------------------------------------------
- 
- This is the core of the gl rendering functions.  This contains the main 
- rendering function RenderUpdate (), which initiates the various 
- other renders in the other modules. 
- 
- -----------------------------------------------------------------------------*/
+//
+// 
+// Render.cpp
+// 
+// 2009 Shamus Young
+// 
+// -------------------------------------------------------------------------------
+// 
+// This is the core of the gl rendering functions.  This contains the main 
+// rendering function RenderUpdate (), which initiates the various 
+// other renders in the other modules. 
+// 
+
 
 #import "Model.h"
 #import "entity.h"
@@ -23,6 +23,7 @@
 #import "Visible.h"
 #import "Win.h"
 #import "GLString.h"
+#import "Sky.h"
 
 
 @interface Renderer ()
@@ -39,25 +40,21 @@
 @end
 
 @implementation Renderer
-@synthesize fog, flat, fps, effect, normalized, letterbox, wireframe, helpMode, world = _world;
+@synthesize fog, flat, fps;
+@synthesize effect, normalized, letterbox, wireframe, helpMode;
+@synthesize  world = _world;
 
 
 -(void) updateFps
 {
     GLulong interval = 1000;
-    if (_nextUpdate > GetTickCount())
+    if (_nextUpdate > GetTickCount()) {
         return;
+    }
     _nextUpdate = GetTickCount() + interval;
 
 	_currentFPS = _frames;
 	_frames = 0;	
-}
-
--(int) maxTextureSize
-{
-	GLint mts;
-	pwGetIntegerv(GL_MAX_TEXTURE_SIZE, &mts);
-	return std::min(mts, std::min<GLint>(_viewSize.width, _viewSize.height));
 }
 
 -(void) resize:(CGSize) size
@@ -69,13 +66,14 @@
 		_letterboxOffset = _viewSize.height / 6;
 		_viewSize.height = _viewSize.height - _letterboxOffset * 2;
 	}
-	else
+	else {
 		_letterboxOffset = 0;
+    }
 	_renderAspect = _viewSize.width / _viewSize.height;
 	float fovy = 60.0f;
-	if (_renderAspect > 1.0f)
+	if (_renderAspect > 1.0f) {
 		fovy /= _renderAspect;
-
+    }
 	pwViewport (0, _letterboxOffset, _viewSize.width, _viewSize.height);
 	pwMatrixMode (GL_PROJECTION);
 	pwLoadIdentity ();
@@ -89,8 +87,8 @@
     self = [super init];
     if(self) {
         _world = world;
-        _fogDistance = WORLD_HALF;
-        _terminating  = NO;
+        _fogDistance   = WORLD_HALF;
+        _terminating   = NO;
         self.effect    = EFFECT_NONE;
         _cachedStrings = [NSMutableDictionary dictionary];
         _lastSize      = CGSizeMake(0, 0);
@@ -103,6 +101,13 @@
         pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     return self;
+}
+
+-(int) maxTextureSize
+{
+	GLint mts;
+	pwGetIntegerv(GL_MAX_TEXTURE_SIZE, &mts);
+	return std::min(mts, std::min<GLint>(_viewSize.width, _viewSize.height));
 }
 
 
@@ -124,28 +129,26 @@
 
 #pragma mark -
 
--(void) update:(CGSize) viewSize
+-(void) draw
 {
     if(_terminating) return;   // Stop if we are in the process of shutting down.
 
-	_viewSize  = viewSize;
 	_frames++;
     
     World *world = self.world;
 	[world.textures update:world showFlat:self.flat showBloom:isBloom(self.effect)];
-	glReportError("AppUpdate:After TextureUpdate");
 
     [self updateFps];
     
-	pwViewport (0, 0, viewSize.width, viewSize.height);
+	pwViewport (0, 0, _viewSize.width, _viewSize.height);
 	pwDepthMask (GL_TRUE);
 	pwClearColor (0.0f, 0.0f, 0.0f, 1.0f);
 	pwEnable(GL_DEPTH_TEST);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-	if (self.letterbox)
+	if (self.letterbox) {
 		pwViewport (0, _letterboxOffset, _viewSize.width, _viewSize.height);
-    
+    }
 	if (LOADING_SCREEN && world.textures.ready && ! world.entities.ready) {
 		drawEffects(_viewSize, EFFECT_NONE, world);
 		return;
@@ -180,13 +183,13 @@
         //Render all the stuff in the whole entire world.
 	pwDisable (GL_FOG);
     
-    if(! self.flat)
+    if(! self.flat) {
         [world.sky render];
-    
-	if (self.fog)
+    }
+	if (self.fog) {
         drawFog(_fogDistance);
-
-	[world render];
+    }
+//	[world renderDebugTrafficLanes];
     
 	if (self.effect == EFFECT_GLASS_CITY) {
         setupGlassCityEffect(pos);
@@ -197,11 +200,11 @@
     
         // Enable or disable the normalization. This adds extra calculations but prevents errors where
         // adding scaling to the model matrix causes the lighting to be too dark.
-    (self.normalized ? glEnable : glDisable)(GL_NORMALIZE);
+    (self.normalized ? pwEnable : pwDisable)(GL_NORMALIZE);
     
 	[world.entities render:self.flat];
     
-	if (!LOADING_SCREEN) {
+	if (! LOADING_SCREEN) {
 		GLlong elapsed = 3000 - world.sceneElapsed;
 		if (elapsed >= 0 && elapsed <= 3000) {
 			drawFogFX(float(elapsed) / 3000.0f, _fogDistance);
@@ -211,9 +214,8 @@
 			[world.entities render:self.flat];
 		}
 	} 
-	if (world.entities.ready)
-		[world.lights render];
 
+    [world.lights render];
 	[world.cars render];
 
 	if (self.wireframe) {
@@ -224,13 +226,15 @@
 
 	drawEffects(_viewSize, self.effect, world);
     
-	if (self.fps)     //Framerate tracker
+	if (self.fps) {     //Framerate tracker
 		[world.renderer printOverlayTextAtLine:1 format:"FPS=%d : Entities=%d : polys=%d",
                                _currentFPS, world.entities.count + world.lights.count + world.cars.count,
                                world.entities.polyCount + world.lights.count + world.cars.count];
-    
-	if (self.helpMode)    //Show the help overlay
+    }
+	if (self.helpMode) {   //Show the help overlay
 		drawHelp(world.renderer);
+    }
+    glReportError("Render update");
 }
 
 static const int MAX_CACHED_GL_STRINGS = 100;
@@ -243,14 +247,14 @@ static const int MAX_CACHED_GL_STRINGS = 100;
         // The text is mostly boilerplate and there isn't that much of it.
         // May need to revisit this if we start displaying a lot of arbitrary text.
     
-    if(_lastSize.width <= 0 || _lastSize.height <= 0)
+    if(_lastSize.width <= 0 || _lastSize.height <= 0) {
         _lastSize = bounds.size;
-        
+    }
             // Clear the cache if the image size has changed or if the cache has gotten too large.
-        if( (! CGSizeEqualToSize(_lastSize, bounds.size)) || (_cachedStrings.count > MAX_CACHED_GL_STRINGS) ) {
-            [_cachedStrings removeAllObjects];
-            _lastSize = { bounds.size.width, bounds.size.height };
-        }
+    if( (! CGSizeEqualToSize(_lastSize, bounds.size)) || (_cachedStrings.count > MAX_CACHED_GL_STRINGS) ) {
+        [_cachedStrings removeAllObjects];
+        _lastSize = { bounds.size.width, bounds.size.height };
+    }
     
     GLString *glString = [_cachedStrings objectForKey:overlayText];
     if(! glString) {
@@ -344,8 +348,9 @@ static void drawProgressWheel(const CGPoint &center, float radius, float opacity
 	float outer = radius;
 	float inner = radius - gap * 2;
 	glColor4f (1,1,1, opacity);
-	{
-        MakePrimitive mp(GL_QUAD_STRIP);
+	
+    pwBegin(GL_QUAD_STRIP);
+    @try {
 		for (int i = 0; i <= 360; i+= 15) {
 			float angle = (float)i * DEGREES_TO_RADIANS;
 			float s = sinf (angle);
@@ -354,13 +359,14 @@ static void drawProgressWheel(const CGPoint &center, float radius, float opacity
 			glVertex2f (center.x + s * inner, center.y + c * inner);
 		}
 	}
+    @finally { pwEnd(); }
 	
         //Progress indicator
 	glColor4f (1,1,1, opacity);
 	int end_angle = (int)(360 * progress);
 	outer = radius - gap * 3;
-	{
-        MakePrimitive mp(GL_TRIANGLE_FAN);
+	pwBegin(GL_TRIANGLE_FAN);
+    @try {
 		glVertex2f (center.x, center.y);
 		for (int i = 0; i <= end_angle; i+= 3) {
 			float angle = (float)i * DEGREES_TO_RADIANS;
@@ -369,14 +375,15 @@ static void drawProgressWheel(const CGPoint &center, float radius, float opacity
 			glVertex2f (center.x + s * outer, center.y + c * outer);
 		}
 	}
+    @finally { pwEnd(); }
 	
         //Tic lines
 	pwLineWidth (2.0f);
 	outer = radius - gap * 1;
 	inner = radius - gap * 2;
 	glColor4f (0,0,0, opacity);
-	{
-        MakePrimitive mp(GL_LINES);
+    pwBegin(GL_LINES);
+	@try {
 		for (int i = 0; i <= 360; i+= 15) {
 			float angle = (float)i * DEGREES_TO_RADIANS;
 			float s = sinf (angle);
@@ -385,6 +392,7 @@ static void drawProgressWheel(const CGPoint &center, float radius, float opacity
 			glVertex2f (center.x + s * inner, center.y + c * inner);
 		}
 	}
+    @finally { pwEnd(); }
 }
 
 
@@ -431,11 +439,14 @@ static void fadeDisplay(float fade, const CGSize &viewSize)
     pwEnable (GL_BLEND);
     pwDisable (GL_TEXTURE_2D);
     glColor4f (0, 0, 0, fade);
-    MakePrimitive mp(GL_QUADS);
-    glVertex2i (0, 0);
-    glVertex2i (0, viewSize.height);
-    glVertex2i (viewSize.width, viewSize.height);
-    glVertex2i (viewSize.width, 0);
+    pwBegin(GL_QUADS);
+    @try {
+        glVertex2i (0, 0);
+        glVertex2i (0, viewSize.height);
+        glVertex2i (viewSize.width, viewSize.height);
+        glVertex2i (viewSize.width, 0);
+    }
+    @finally { pwEnd(); }
 }
 
 static void updateProgress(Entities *entities, float fade, Renderer *renderer, const CGSize &viewSize)
@@ -444,7 +455,9 @@ static void updateProgress(Entities *entities, float fade, Renderer *renderer, c
     GLrgba color(0.5f);
     CGPoint viewCenter = CGPointMake(viewSize.width / 2.0f, viewSize.height / 2.0f);
     drawProgressWheel(viewCenter, radius, fade, entities.progress);
-    [renderer printOverlayTextAtLine:1 format:"%s v%d.%d.%03d\n%1.2f%%", APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, entities.progress * 100.0f];
+    [renderer printOverlayTextAtLine:1
+                              format:"%s v%d.%d.%03d\n%1.2f%%",
+                              APP_TITLE, VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, entities.progress * 100.0f];
 }
 
 static void drawDebugEffect(const CGSize &viewSize, World *world)
@@ -476,15 +489,18 @@ static void drawDebugEffect(const CGSize &viewSize, World *world)
 static void drawBloomRadialEffect(const CGSize &viewSize, const GLrgba &bloomColor, float bloomScaling )
 {
     pwEnable (GL_BLEND);
-    MakePrimitive mp(GL_QUADS);
-    GLrgba color = bloomColor * bloomScaling * 2;
-    color.glColor3();
-    for (int i = 0; i <= 100; i+=10) {
-        glTexCoord2f (0, 0);  glVertex2i (-i, i + viewSize.height);
-        glTexCoord2f (0, 1);  glVertex2i (-i, -i);
-        glTexCoord2f (1, 1);  glVertex2i (i + viewSize.width, -i);
-        glTexCoord2f (1, 0);  glVertex2i (i + viewSize.width, i + viewSize.height);
+    glBegin(GL_QUADS);
+    @try {
+        GLrgba color = bloomColor * bloomScaling * 2;
+        color.glColor3();
+        for (int i = 0; i <= 100; i+=10) {
+            glTexCoord2f (0, 0);  glVertex2i (-i, i + viewSize.height);
+            glTexCoord2f (0, 1);  glVertex2i (-i, -i);
+            glTexCoord2f (1, 1);  glVertex2i (i + viewSize.width, -i);
+            glTexCoord2f (1, 0);  glVertex2i (i + viewSize.width, i + viewSize.height);
+        }
     }
+    @finally { pwEnd(); }
 }
 
 
@@ -501,72 +517,79 @@ static void drawColorCycleEffect(const CGSize &viewSize)
     pwEnable (GL_BLEND);
     pwBlendFunc (GL_ONE, GL_ONE);
     pwBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
-    MakePrimitive mp(GL_QUADS);
-    GLrgba color = glRgbaFromHsl (hue1, 1.0f, 0.6f);
-    color.glColor3();
-    glTexCoord2f (0, 0);  glVertex2i (0, viewSize.height);
-    color = glRgbaFromHsl (hue2, 1.0f, 0.6f);
-    color.glColor3();
-    glTexCoord2f (0, 1);  glVertex2i (0, 0);
-    color = glRgbaFromHsl (hue3, 1.0f, 0.6f);
-    color.glColor3();
-    glTexCoord2f (1, 1);  glVertex2i (viewSize.width, 0);
-    color = glRgbaFromHsl (hue4, 1.0f, 0.6f);
-    color.glColor3();
-    glTexCoord2f (1, 0);  glVertex2i (viewSize.width, viewSize.height);
+    glBegin(GL_QUADS);
+    @try {
+        glRgbaFromHsl(hue1, 1.0f, 0.6f).glColor3();
+        glTexCoord2f (0, 0);  glVertex2i(0, viewSize.height);
+        glRgbaFromHsl(hue2, 1.0f, 0.6f).glColor3();
+        glTexCoord2f (0, 1);  glVertex2i(0, 0);
+        glRgbaFromHsl(hue3, 1.0f, 0.6f).glColor3();
+        glTexCoord2f (1, 1);  glVertex2i(viewSize.width, 0);
+        glRgbaFromHsl(hue4, 1.0f, 0.6f).glColor3();
+        glTexCoord2f (1, 0);  glVertex2i(viewSize.width, viewSize.height);
+    }
+    @finally {  pwEnd();  }
 }
 
 	//Simple bloom effect
 static void drawBloomEffect(const CGSize &viewSize, const GLrgba &bloomColor, const float bloomScaling)
 {
-    MakePrimitive mp(GL_QUADS);
-    GLrgba color = bloomColor * bloomScaling;
-    color.glColor3();
-	int bloom_radius = 15, bloom_step  = bloom_radius / 3;
-    for (int x = -bloom_radius; x <= bloom_radius; x += bloom_step) {
-        for (int y = -bloom_radius; y <= bloom_radius; y += bloom_step) {
-            if (abs (x) == abs(y) && x)
-                continue;
-            glTexCoord2f(0, 0);  glVertex2i(x, y + viewSize.height);
-            glTexCoord2f(0, 1);  glVertex2i(x, y);
-            glTexCoord2f(1, 1);  glVertex2i(x + viewSize.width, y);
-            glTexCoord2f(1, 0);  glVertex2i(x + viewSize.width, y + viewSize.height);
+    glBegin(GL_QUADS);
+    @try {
+        GLrgba color = bloomColor * bloomScaling;
+        color.glColor3();
+        int bloom_radius = 15, bloom_step  = bloom_radius / 3;
+        for (int x = -bloom_radius; x <= bloom_radius; x += bloom_step) {
+            for (int y = -bloom_radius; y <= bloom_radius; y += bloom_step) {
+                if (abs (x) == abs(y) && x)
+                    continue;
+                glTexCoord2f(0, 0);  glVertex2i(x, y + viewSize.height);
+                glTexCoord2f(0, 1);  glVertex2i(x, y);
+                glTexCoord2f(1, 1);  glVertex2i(x + viewSize.width, y);
+                glTexCoord2f(1, 0);  glVertex2i(x + viewSize.width, y + viewSize.height);
+            }
         }
     }
+    @finally { pwEnd(); }
 }
 
 	//This will punish that uppity GPU. Good for testing low frame rate behavior.
 static void drawDebugOverbloomEffect(const CGSize &viewSize, const GLrgba &bloomColor)
 {
-    MakePrimitive mp(GL_QUADS);
-    GLrgba color = bloomColor * 0.01f;
-    color.glColor3();
-    for (int x = -50; x <= 50; x+=5) {
-        for (int y = -50; y <= 50; y+=5) {
-            glTexCoord2f(0, 0);  glVertex2i(x, y + viewSize.height);
-            glTexCoord2f(0, 1);  glVertex2i(x, y);
-            glTexCoord2f(1, 1);  glVertex2i(x + viewSize.width, y);
-            glTexCoord2f(1, 0);  glVertex2i(x + viewSize.width, y + viewSize.height);
+    glBegin(GL_QUADS);
+    @try {
+        GLrgba color = bloomColor * 0.01f;
+        color.glColor3();
+        for (int x = -50; x <= 50; x+=5) {
+            for (int y = -50; y <= 50; y+=5) {
+                glTexCoord2f(0, 0);  glVertex2i(x, y + viewSize.height);
+                glTexCoord2f(0, 1);  glVertex2i(x, y);
+                glTexCoord2f(1, 1);  glVertex2i(x + viewSize.width, y);
+                glTexCoord2f(1, 0);  glVertex2i(x + viewSize.width, y + viewSize.height);
+            }
         }
     }
+    @finally { pwEnd(); }
 }
 
 static void drawEffects(const CGSize &viewSize, EffectType type, World *world)
 {
-    if (! world.textures.ready)
+    if (! world.textures.ready) {
 		return;
-    
+    }
         //Now change projection modes so we can render full-screen effects
     static const float  BLOOM_SCALING = 0.07f;
 	pwMatrixMode (GL_PROJECTION);
-	{
-        PWMatrixStacker pushMatrix;
+	
+    pwPushMatrix();
+    @try {
         pwLoadIdentity ();
         glOrtho(0, viewSize.width, viewSize.height, 0, 0.1f, 2048);
         
         pwMatrixMode (GL_MODELVIEW);
-        {
-            PWMatrixStacker pushMatrix;
+        
+        pwPushMatrix();
+        @try {
             pwLoadIdentity();
             pwTranslatef(0, 0, -1.0f);
             
@@ -593,15 +616,18 @@ static void drawEffects(const CGSize &viewSize, EffectType type, World *world)
                 //Do the fade to / from darkness used to hide scene transitions
             if(LOADING_SCREEN) {
                 float fade = world.fadeCurrent;
-                if (fade > 0.0f)
+                if (fade > 0.0f) {
                     fadeDisplay(fade, viewSize);
-                
-                if (world.textures.ready && ! world.entities.ready && fade != 0.0f)
+                }
+                if (world.textures.ready && ! world.entities.ready && fade != 0.0f) {
                     updateProgress(world.entities, fade, world.renderer, viewSize);
+                }
             }
         }
+        @finally { pwPopMatrix(); }
         pwMatrixMode (GL_PROJECTION);
     }
+    @finally { pwPopMatrix(); }
     pwMatrixMode (GL_MODELVIEW);
     pwEnable(GL_DEPTH_TEST);
 }

@@ -52,7 +52,6 @@
 
 #import "GLString.h"
 #import "PWGL.h"
-#import "RenderAPI.h"
 
 // The following is a NSBezierPath category to allow
 // for rounded corners of the border
@@ -403,30 +402,33 @@ static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBit
 {
 	if (_requiresUpdate)
 		[self genTexture:GL_TEXTURE_RECTANGLE_EXT];
+    
 	if (_textureId) {
 		pwPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT); // GL_COLOR_BUFFER_BIT for glBlendFunc, GL_ENABLE_BIT for glEnable / glDisable
-		
-		pwDisable (GL_DEPTH_TEST); // ensure text is not remove by depth buffer test.
-		pwEnable (GL_BLEND); // for text fading
-		pwBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // ditto
-		pwEnable (GL_TEXTURE_RECTANGLE_EXT);
-		
-		pwBindTexture (GL_TEXTURE_RECTANGLE_EXT, _textureId);
-		pwBegin (GL_QUADS);
-			pwTexCoord2f (0.0f, 0.0f); // draw upper left in world coordinates
-			pwVertex2f (bounds.origin.x, bounds.origin.y);
-	
-			pwTexCoord2f (0.0f, _texSize.height); // draw lower left in world coordinates
-			pwVertex2f (bounds.origin.x, bounds.origin.y + bounds.size.height);
-	
-			pwTexCoord2f (_texSize.width, _texSize.height); // draw upper right in world coordinates
-			pwVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y + bounds.size.height);
-	
-			pwTexCoord2f (_texSize.width, 0.0f); // draw lower right in world coordinates
-			pwVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y);
-		pwEnd ();
-		
-		pwPopAttrib();
+		@try {
+            pwDisable (GL_DEPTH_TEST); // ensure text is not remove by depth buffer test.
+            pwEnable (GL_BLEND); // for text fading
+            pwBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // ditto
+            pwEnable (GL_TEXTURE_RECTANGLE_EXT);
+            
+            pwBindTexture (GL_TEXTURE_RECTANGLE_EXT, _textureId);
+            pwBegin (GL_QUADS);
+            @try {
+                pwTexCoord2f (0.0f, 0.0f); // draw upper left in world coordinates
+                pwVertex2f (bounds.origin.x, bounds.origin.y);
+                
+                pwTexCoord2f (0.0f, _texSize.height); // draw lower left in world coordinates
+                pwVertex2f (bounds.origin.x, bounds.origin.y + bounds.size.height);
+                
+                pwTexCoord2f (_texSize.width, _texSize.height); // draw upper right in world coordinates
+                pwVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y + bounds.size.height);
+                
+                pwTexCoord2f (_texSize.width, 0.0f); // draw lower right in world coordinates
+                pwVertex2f (bounds.origin.x + bounds.size.width, bounds.origin.y);
+            }
+            @finally { pwEnd(); }
+		}
+		@finally { pwPopAttrib(); }
 	}
 }
 
