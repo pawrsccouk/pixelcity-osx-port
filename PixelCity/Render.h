@@ -15,14 +15,16 @@ typedef enum EffectType
     EFFECT_COUNT,
 } EffectType;
 
+@class Fog;
 
 @interface Renderer : NSObject
 
-@property (nonatomic, readonly) float fogDistance;
 @property (nonatomic, readonly) int   maxTextureSize;
 @property (nonatomic, readonly, weak) World *world;
+@property (nonatomic, readonly) Fog *fog;
+
 @property (nonatomic) EffectType effect;
-@property (nonatomic) BOOL flat, fog, fps, wireframe, helpMode, letterbox, normalized;
+@property (nonatomic) BOOL flat, fps, wireframe, helpMode, letterbox, normalized;
 
 
 -(id)initWithWorld:(World*) world
@@ -40,7 +42,8 @@ typedef enum EffectType
     // line = 0 means the top of the screen, line = 1 is the next line down and so on.
     // fmt + varargs are passed to sprintf.
 -(void)  printOverlayTextAtLine:(int) line
-                         format:(const char *)fmt, ...;
+                         format:(const char *)fmt, ...
+                            __attribute__((format(printf, 2, 3)));
 
     // Print some debugging information on the debug output stream.
 -(void) dump;

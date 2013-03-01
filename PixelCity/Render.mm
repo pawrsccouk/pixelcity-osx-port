@@ -24,11 +24,12 @@
 #import "Win.h"
 #import "GLString.h"
 #import "Sky.h"
+#import "Fog.h"
 
 
 @interface Renderer ()
 {
-    float _renderAspect, _fogDistance;
+    float _renderAspect;
     GLint _letterboxOffset;
     BOOL _terminating;
     
@@ -40,8 +41,7 @@
 @end
 
 @implementation Renderer
-@synthesize fog, flat, fps;
-@synthesize effect, normalized, letterbox, wireframe, helpMode;
+@synthesize fog, flat, fps, effect, normalized, letterbox, wireframe, helpMode;
 @synthesize  world = _world;
 
 
@@ -86,8 +86,8 @@
 {
     self = [super init];
     if(self) {
-        _world = world;
-        _fogDistance   = WORLD_HALF;
+        _world         = world;
+        fog            = [[Fog alloc] init];
         _terminating   = NO;
         self.effect    = EFFECT_NONE;
         _cachedStrings = [NSMutableDictionary dictionary];
@@ -110,9 +110,6 @@
 	return std::min(mts, std::min<GLint>(_viewSize.width, _viewSize.height));
 }
 
-
-
--(float) fogDistance { return _fogDistance; }
 
 
 -(void) dump
@@ -155,7 +152,6 @@
 	}
 	pwHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	pwShadeModel(GL_SMOOTH);	
-	pwFogi (GL_FOG_MODE, GL_LINEAR);
 	pwDepthFunc(GL_LEQUAL);
     
 	pwEnable (GL_CULL_FACE);
@@ -180,15 +176,13 @@
 	pwEnable (GL_TEXTURE_2D);
 	pwPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
-        //Render all the stuff in the whole entire world.
-	pwDisable (GL_FOG);
-    
+        //Render all the stuff in the whole entire world.    
     if(! self.flat) {
         [world.sky render];
     }
-	if (self.fog) {
-        drawFog(_fogDistance);
-    }
+
+    [self.fog apply];
+
 //	[world renderDebugTrafficLanes];
     
 	if (self.effect == EFFECT_GLASS_CITY) {
@@ -207,7 +201,7 @@
 	if (! LOADING_SCREEN) {
 		GLlong elapsed = 3000 - world.sceneElapsed;
 		if (elapsed >= 0 && elapsed <= 3000) {
-			drawFogFX(float(elapsed) / 3000.0f, _fogDistance);
+			drawFogFX(float(elapsed) / 3000.0f, self.fog.start);
 			pwDisable(GL_TEXTURE_2D);
 			pwEnable(GL_BLEND);
 			pwBlendFunc(GL_ONE, GL_ONE);
@@ -227,7 +221,7 @@
 	drawEffects(_viewSize, self.effect, world);
     
 	if (self.fps) {     //Framerate tracker
-		[world.renderer printOverlayTextAtLine:1 format:"FPS=%d : Entities=%d : polys=%d",
+		[world.renderer printOverlayTextAtLine:1 format:"FPS=%d : Entities=%ld : polys=%ld",
                                _currentFPS, world.entities.count + world.lights.count + world.cars.count,
                                world.entities.polyCount + world.lights.count + world.cars.count];
     }
@@ -411,14 +405,6 @@ static void drawFogFX(float scalar, float fogDistance)
 	pwEnable (GL_FOG);
 }
 
-static void drawFog(float fogDistance)
-{
-    pwEnable (GL_FOG);
-    pwFogf (GL_FOG_START, fogDistance - 100);
-    pwFogf (GL_FOG_END  , fogDistance);
-    float color[4] = { 0.15f, 0.15f, 0.15f, 0.15f };
-    pwFogfv(GL_FOG_COLOR, color);
-}
 
 static void setupGlassCityEffect(const GLvector &pos)
 {

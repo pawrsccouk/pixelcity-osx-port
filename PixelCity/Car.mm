@@ -17,6 +17,7 @@
 #import "win.h"
 #import "World.h"
 #import "camera.h"
+#import "Fog.h"
 
 typedef BOOL CarMap[WORLD_SIZE][WORLD_SIZE];
 typedef GLvector2 AngleMap[360];
@@ -229,7 +230,7 @@ static const GLvector directions[] = {
     _position = _position + (directions[_direction] * MOVEMENT_SPEED * _speed);
     
         // Check if the car is out of range, or some other reason to hide it for this iteration.
-    if(shouldRemoveCar(_row, _col, _position, camera, _stuck, self.world.visibilityGrid, self.world.renderer.fogDistance)) {
+    if(shouldRemoveCar(_row, _col, _position, camera, _stuck, self.world.visibilityGrid, self.world.renderer.fog.start)) {
         _ready = false;
         return;
     }

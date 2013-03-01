@@ -7,6 +7,7 @@
 //
 
 #import "PixelCityViewController.h"
+#import "FogSettingsWindowController.h"
 #import "BasicOpenGLView.h"
 #import "GLCheck.h"
 #import "win.h"
@@ -15,9 +16,12 @@
 #import "Model.h"
 #import "World.h"
 #import "texture.h"
+#import "Fog.h"
 
 @interface PixelCityViewController ()
 {
+        // Panels
+    FogSettingsWindowController * _fogSettingsWindowController;
 }
 @property (nonatomic, readonly) BasicOpenGLView *glView;    // self.view with a cast.
 @end
@@ -50,7 +54,8 @@ void DebugLog(const char* str, ...)
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        [self initApp];
+            // Set up the app once the model has been created, and OpenGL initialised.
+        self.glView.setupCallback = ^{ [self setupApp]; };
     }
     
     return self;
@@ -59,45 +64,51 @@ void DebugLog(const char* str, ...)
 
 -(void)awakeFromNib
 {
-    [self initApp];
+        // Set up the app once the model has been created, and OpenGL initialised.
+    self.glView.setupCallback = ^{ [self setupApp]; };
 }
 
 -(void) saveSettings
 {
-	IniIntSet ("ShowFPS", fFPS ? 1 : 0);
-	IniIntSet ("ShowFog", fFog ? 1 : 0);
-	IniIntSet ("Letterbox", fLetterbox ? 1 : 0);
-	IniIntSet ("Wireframe", fWireframe ? 1 : 0);
-	IniIntSet ("Flat", fFlat ? 1 : 0);
-	IniIntSet ("Effect", effect);
+	IniIntSet (kShowFPS, fFPS ? 1 : 0);
+	IniIntSet (kLetterbox, fLetterbox ? 1 : 0);
+	IniIntSet (kWireframe, fWireframe ? 1 : 0);
+	IniIntSet (kFlat, fFlat ? 1 : 0);
+	IniIntSet (kEffect, effect);
 }
 
-static void loadAndInit(NSMenuItem *item, BOOL *flag, const char *settingName, void (^fn)(BOOL))
+static void loadAndInit(NSMenuItem *item, BOOL *flag, NSString *settingName, void (^fn)(BOOL))
 {
     (*flag) = IniInt(settingName) != 0;
     [item setState:(*flag) ? NSOnState : NSOffState];
     fn(*flag);
 }
 
--(void) initApp
+-(void) setupApp
 {
     Renderer *renderer = self.glView.world.renderer;
         //load in our settings
-    loadAndInit(letterboxToggleMenuItem, &fLetterbox, "Letterbox", ^(BOOL b){ renderer.letterbox = b; } );
-    loadAndInit(wireframeToggleMenuItem, &fWireframe, "Wireframe", ^(BOOL b){ renderer.wireframe = b; } );
-    loadAndInit(fogToggleMenuItem      , &fFog      , "ShowFog"  , ^(BOOL b){ renderer.fog  = b; } );
-    loadAndInit(flatToggleMenuItem     , &fFlat     , "Flat"     , ^(BOOL b){ renderer.flat = b; } );
-    loadAndInit(FPSToggleMenuItem      , &fFPS      , "ShowFPS"  , ^(BOOL b){ renderer.fps  = b; } );
+    loadAndInit(letterboxToggleMenuItem, &fLetterbox, kLetterbox, ^(BOOL b){ renderer.letterbox  = b; } );
+    loadAndInit(wireframeToggleMenuItem, &fWireframe, kWireframe, ^(BOOL b){ renderer.wireframe  = b; } );
+    loadAndInit(flatToggleMenuItem     , &fFlat     , kFlat     , ^(BOOL b){ renderer.flat = b; } );
+    loadAndInit(FPSToggleMenuItem      , &fFPS      , kShowFPS  , ^(BOOL b){ renderer.fps  = b; } );
     
     fDebugLog = NO;
     renderer.helpMode   = fHelp      = NO;
     renderer.normalized = fNormalize = NO;
-    renderer.effect     = effect     = EffectType(IniInt("Effect"));
+    renderer.effect     = effect     = EffectType(IniInt(kEffect));
 
         // start animation timer
 	timer = [NSTimer timerWithTimeInterval:(1.0f / 60.0f) target:self selector:@selector(animationTick:) userInfo:nil repeats:YES];
 	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode]; // ensure timer fires during resize
+    
+        // allow the fog settings controller to apply the saved fog settings to the app.
+    if(! _fogSettingsWindowController) {
+        _fogSettingsWindowController = [[FogSettingsWindowController alloc] initWithWindowNibName:@"FogSettingsPanel"];
+    }
+    _fogSettingsWindowController.fog = renderer.fog;
+    [_fogSettingsWindowController setupApp];
     
     self.glView.animating = fAnimate = YES;
 }
@@ -153,11 +164,6 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
     toggleFlag(FPSToggleMenuItem, ^(bool b) {  self.glView.world.renderer.fps = b; }, &fFPS);
 }
 
--(IBAction) toggleFog:(id) sender
-{
-    toggleFlag(fogToggleMenuItem, ^(bool b) { self.glView.world.renderer.fog = b; }, &fFog);
-}
-
 -(IBAction) toggleFlat:(id) sender
 {
     toggleFlag(flatToggleMenuItem, ^(bool b) { self.glView.world.renderer.flat = b; }, &fFlat);
@@ -181,6 +187,18 @@ static void toggleFlag(NSMenuItem *menuItem, void(^pbl)(bool), BOOL *pFlag)
 -(void)resetWorld:(id)sender
 {
     [self.glView.world reset];
+}
+
+#pragma mark Fog inspector
+
+static NSString* const fogMenuShowText = @"Show fog settings",  * const fogMenuHideText = @"Hide fog settings";
+
+-(IBAction)showFogSettings:(id)sender
+{
+    fFog = ! fFog;
+    fogSettingsMenuItem.title = fFog ? fogMenuHideText : fogMenuShowText;
+    _fogSettingsWindowController.fog = self.glView.world.renderer.fog;
+    [_fogSettingsWindowController showWindow:self];
 }
 
 #pragma mark - NSWindow delegate

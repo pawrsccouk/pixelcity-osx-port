@@ -23,6 +23,7 @@
 #import "visible.h"
 #import "win.h"
 #import "World.h"
+#import "Fog.h"
 
 static void addLight(float x, float y, float z, float r, float g, float b, float a, int size, bool blinks);
 
@@ -123,10 +124,8 @@ static const short MAX_SIZE = 5;
 				_angles[size][i].y = sinf (float(i) * DEGREES_TO_RADIANS) * (float(size) + 0.5f);
 			}
 
-    if(glIsEnabled(GL_FOG)) {
-        glDisable(GL_FOG);      // Allow the lights to peek out of the fog.
-        glReportError("glDisable(GL_FOG) in Light render");
-    }
+    [self.world.renderer.fog remove];   // Allow the lights to peek out of the fog.
+
 	pwDepthMask (GL_FALSE);
 	pwEnable (GL_BLEND);
 	pwDisable (GL_CULL_FACE);
@@ -204,7 +203,7 @@ static const short MAX_SIZE = 5;
     Camera *camera = self.world.camera;
 	GLvector camera_angle = camera.angle, camera_position = camera.position;
     
-    float fogDistance = self.world.renderer.fogDistance;
+    float fogDistance = self.world.renderer.fog.start;
 	if( (fabs (camera_position.x - _position.x) > fogDistance)
 	||  (fabs (camera_position.z - _position.z) > fogDistance)
 	|| (_blink && (GetTickCount () % _blink_interval) > 200) )

@@ -44,7 +44,8 @@ GLulong GetTickCount();
 #ifdef __cplusplus
 extern "C"
 #endif
-void DebugLog(const char* str, ...);
+void DebugLog(const char* str, ...)
+    __attribute__((format(printf, 1, 2)));
 
 
 

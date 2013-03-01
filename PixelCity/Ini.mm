@@ -15,60 +15,97 @@
 #import "Model.h"
 #import "ini.h"
 
+NSString *const kFogStartDistance = @"FogStartDistance",
+         *const kFogEndDistance   = @"FogEndDistance"  ,
+         *const kFogDensity = @"FogDensity",
+         *const kShowFog    = @"ShowFog"   ,
+         *const kFogMode    = @"FogMode"   ,
+         *const kFogColor   = @"FogColor"  ,
+         *const kShowFPS    = @"ShowFPS"   ,
+         *const kLetterbox  = @"Letterbox" ,
+         *const kWireframe  = @"Wireframe" ,
+         *const kFlat       = @"Flat"      ,
+         *const kEffect     = @"Effect"    ;
+
+
 static const GLint MAX_RESULT = 256;
 
 // Get the user defaults, creating and registering them if necessary.
 static NSUserDefaults* GetUserDefaults()
 {
 	static NSUserDefaults* defs = nil;
-	if(! defs) {
+	if(! defs) {    
         defs = [NSUserDefaults standardUserDefaults];
 		[defs registerDefaults:@{
-         @"PWLetterbox"  : @0    ,
-         @"PWWireframe"  : @0    ,
-         @"PWShowFPS"    : @0    ,
-         @"PWShowFog"    : @0    ,
-         @"PWEffect"     : @0    ,
-         @"PWFlat"       : @0    ,
-         @"PWWindowMaximized" : @0  ,
-         @"PWWindowWidth"     : @640,
-         @"PWWindowHeight"    : @480,
-         @"PWWindowX"         : @50 ,
-         @"PWWindowY"         : @50}];
+         @"Letterbox"  : @0    ,
+         @"Wireframe"  : @0    ,
+         @"ShowFPS"    : @0    ,
+         @"Effect"     : @0    ,
+         @"Flat"       : @0    ,
+         @"WindowMaximized" : @0  ,
+         @"WindowWidth"     : @640,
+         @"WindowHeight"    : @480,
+         @"WindowX"         : @50 ,
+         @"WindowY"         : @50,
+         kShowFog           : @1,
+         kFogMode           : @0x2601, //GL_LINEAR,
+         kFogStartDistance  : @512,
+         kFogEndDistance    : @612,
+         kFogDensity        : @1.0f,
+         kFogColor          : @"0.12 0.12 0.12 0.12"
+         }];
 	}
 	return defs;
 }
 
 
-GLlong IniInt (const char* entry)
+GLlong IniInt (NSString * key)
 {
 	NSUserDefaults* userDefaults = GetUserDefaults();
-	NSString *key = [NSString stringWithFormat:@"PW%@", [NSString stringWithUTF8String:entry]];
 	return [userDefaults integerForKey:key];
 }
 
 
-void IniIntSet (const char* entry, int val)
+void IniIntSet (NSString * key, int val)
 {
 	NSUserDefaults* userDefaults = GetUserDefaults();
-	NSString *key = [NSString stringWithFormat:@"PW%@", [NSString stringWithUTF8String:entry]];
 	[userDefaults setInteger:val forKey:key];
 }
 
 
-float IniFloat (const char* entry)
+float IniFloat (NSString * key)
 {
 	NSUserDefaults* userDefaults = GetUserDefaults();
-	NSString *key = [NSString stringWithFormat:@"PW%@", [NSString stringWithUTF8String:entry]];
 	return [userDefaults floatForKey:key];
 }
 
 
-void IniFloatSet (const char* entry, float val)
+void IniFloatSet (NSString * key, float val)
 {
 	NSUserDefaults* userDefaults = GetUserDefaults();
-	NSString *key = [NSString stringWithFormat:@"PW%@", [NSString stringWithUTF8String:entry]];
 	[userDefaults setFloat:val forKey:key];
 }
 
+NSColor *IniColor(NSString *key)
+{
+    NSUserDefaults *userDefaults = GetUserDefaults();
+    NSString *colorString = [userDefaults stringForKey:key];
+    NSScanner *scanner = [NSScanner scannerWithString:colorString];
+    float red = 1.0f, green = 1.0f, blue = 1.0f, alpha = 1.0f;
+    BOOL ok = YES;
+    ok = ok && [scanner scanFloat:&red  ];
+    ok = ok && [scanner scanFloat:&green];
+    ok = ok && [scanner scanFloat:&blue ];
+    ok = ok && [scanner scanFloat:&alpha];
+    NSCAssert(ok, @"Failed to scan string [%@] into float, float, float, float for color [%@]", colorString, key);
+    return [NSColor colorWithDeviceRed:red green:green blue:blue alpha:alpha];
+}
+
+void IniColorSet(NSString *key, NSColor *value)
+{
+    NSUserDefaults *userDefs = GetUserDefaults();
+    CGFloat red, green ,blue, alpha;
+    [value getRed:&red green:&green blue:&blue alpha:&alpha];
+    [userDefs setValue:[NSString stringWithFormat:@"%f %f %f %f", red, green, blue, alpha] forKey:key];
+}
 

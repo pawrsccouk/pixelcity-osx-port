@@ -39,6 +39,9 @@
 		5771099916C73792007D32DA /* PWGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771099816C73791007D32DA /* PWGL.cpp */; };
 		5780824616DA7F0B00D4A3B5 /* PixelCityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */; };
 		5780824716DA7F0B00D4A3B5 /* PixelCityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */; };
+		57DE77E116E1235600C18DB5 /* Fog.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57DE77E016E1235600C18DB5 /* Fog.mm */; };
+		57DE77E416E1347C00C18DB5 /* FogSettingsWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */; };
+		57DE77E616E1595700C18DB5 /* FogSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,7 +89,7 @@
 		5771097416C6E0C5007D32DA /* Mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mesh.h; sourceTree = "<group>"; };
 		5771097716C6E0D6007D32DA /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
 		5771097816C6E0D6007D32DA /* Random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Random.h; sourceTree = "<group>"; };
-		5771097916C6E0D6007D32DA /* Render.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = Render.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		5771097916C6E0D6007D32DA /* Render.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = Render.mm; sourceTree = "<group>"; };
 		5771097A16C6E0D6007D32DA /* Render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Render.h; sourceTree = "<group>"; };
 		5771097C16C6E0D6007D32DA /* Sky.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = Sky.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		5771097D16C6E0D6007D32DA /* Sky.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sky.h; sourceTree = "<group>"; };
@@ -106,6 +109,11 @@
 		5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelCityViewController.mm; sourceTree = "<group>"; };
 		5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PixelCityViewController.xib; sourceTree = "<group>"; };
 		5793ED6316CE1BDD006A46C2 /* Model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
+		57DE77DF16E1235600C18DB5 /* Fog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fog.h; sourceTree = "<group>"; };
+		57DE77E016E1235600C18DB5 /* Fog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Fog.mm; sourceTree = "<group>"; };
+		57DE77E216E1347C00C18DB5 /* FogSettingsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FogSettingsWindowController.h; sourceTree = "<group>"; };
+		57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FogSettingsWindowController.mm; sourceTree = "<group>"; };
+		57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FogSettingsPanel.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +179,9 @@
 				5771096116C6E0AF007D32DA /* Ini.mm */,
 				5771096416C6E0AF007D32DA /* Macro.h */,
 				5771092516C6DFB1007D32DA /* Supporting Files */,
+				57DE77E216E1347C00C18DB5 /* FogSettingsWindowController.h */,
+				57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */,
+				57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */,
 				5780824316DA7F0B00D4A3B5 /* PixelCityViewController.h */,
 				5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */,
 				5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */,
@@ -243,8 +254,10 @@
 			isa = PBXGroup;
 			children = (
 				5771099216C6F90D007D32DA /* MainMenu.xib */,
-				5771097916C6E0D6007D32DA /* Render.mm */,
+				57DE77DF16E1235600C18DB5 /* Fog.h */,
+				57DE77E016E1235600C18DB5 /* Fog.mm */,
 				5771097A16C6E0D6007D32DA /* Render.h */,
+				5771097916C6E0D6007D32DA /* Render.mm */,
 				5771098216C6E0D6007D32DA /* Visible.mm */,
 				5771098316C6E0D6007D32DA /* Visible.h */,
 				5771093F16C6E08B007D32DA /* BasicOpenGLView.h */,
@@ -311,6 +324,7 @@
 				5771092F16C6DFB1007D32DA /* Credits.rtf in Resources */,
 				5771099316C6F90E007D32DA /* MainMenu.xib in Resources */,
 				5780824716DA7F0B00D4A3B5 /* PixelCityViewController.xib in Resources */,
+				57DE77E616E1595700C18DB5 /* FogSettingsPanel.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,6 +361,8 @@
 				5771098F16C6E0D6007D32DA /* World.mm in Sources */,
 				5771099916C73792007D32DA /* PWGL.cpp in Sources */,
 				5780824616DA7F0B00D4A3B5 /* PixelCityViewController.mm in Sources */,
+				57DE77E116E1235600C18DB5 /* Fog.mm in Sources */,
+				57DE77E416E1347C00C18DB5 /* FogSettingsWindowController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,9 +444,9 @@
 		5771093916C6DFB2007D32DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				GCC_ENABLE_OBJC_GC = required;
+				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PixelCity/PixelCity-Prefix.pch";
 				INFOPLIST_FILE = "PixelCity/PixelCity-Info.plist";
@@ -444,9 +460,9 @@
 		5771093A16C6DFB2007D32DA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				GCC_ENABLE_OBJC_GC = required;
+				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PixelCity/PixelCity-Prefix.pch";
 				INFOPLIST_FILE = "PixelCity/PixelCity-Info.plist";

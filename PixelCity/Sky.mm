@@ -98,10 +98,11 @@ static const int SKY_HALF = (SKY_GRID / 2);
     
     pwDepthMask (GL_FALSE);
     pwPushAttrib (GL_POLYGON_BIT | GL_FOG_BIT);
-    pwPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-    pwDisable (GL_CULL_FACE);
-    pwDisable (GL_FOG);
-    {
+    @try {
+        pwPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+        pwDisable (GL_CULL_FACE);
+        pwDisable (GL_FOG);
+        
         pwPushMatrix();
         @try {
             pwLoadIdentity();
@@ -117,7 +118,7 @@ static const int SKY_HALF = (SKY_GRID / 2);
         }
         @finally { pwPopMatrix(); }
     }
-    pwPopAttrib();
+    @finally { pwPopAttrib(); }
     pwDepthMask(GL_TRUE);
     pwEnable (GL_COLOR_MATERIAL);
 }
