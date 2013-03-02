@@ -42,6 +42,7 @@
 		57DE77E116E1235600C18DB5 /* Fog.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57DE77E016E1235600C18DB5 /* Fog.mm */; };
 		57DE77E416E1347C00C18DB5 /* FogSettingsWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */; };
 		57DE77E616E1595700C18DB5 /* FogSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */; };
+		57EDA60616E2792E00C6711B /* Pixel City.iconset in Resources */ = {isa = PBXBuildFile; fileRef = 57EDA60516E2792E00C6711B /* Pixel City.iconset */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +115,7 @@
 		57DE77E216E1347C00C18DB5 /* FogSettingsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FogSettingsWindowController.h; sourceTree = "<group>"; };
 		57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FogSettingsWindowController.mm; sourceTree = "<group>"; };
 		57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FogSettingsPanel.xib; sourceTree = "<group>"; };
+		57EDA60516E2792E00C6711B /* Pixel City.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = "Pixel City.iconset"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -192,6 +194,7 @@
 		5771092516C6DFB1007D32DA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				57EDA60516E2792E00C6711B /* Pixel City.iconset */,
 				5771092616C6DFB1007D32DA /* PixelCity-Info.plist */,
 				5771092716C6DFB1007D32DA /* InfoPlist.strings */,
 				5771092A16C6DFB1007D32DA /* main.m */,
@@ -325,6 +328,7 @@
 				5771099316C6F90E007D32DA /* MainMenu.xib in Resources */,
 				5780824716DA7F0B00D4A3B5 /* PixelCityViewController.xib in Resources */,
 				57DE77E616E1595700C18DB5 /* FogSettingsPanel.xib in Resources */,
+				57EDA60616E2792E00C6711B /* Pixel City.iconset in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
