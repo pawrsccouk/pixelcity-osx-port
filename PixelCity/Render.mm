@@ -201,7 +201,7 @@
 	if (! LOADING_SCREEN) {
 		GLlong elapsed = 3000 - world.sceneElapsed;
 		if (elapsed >= 0 && elapsed <= 3000) {
-			drawFogFX(float(elapsed) / 3000.0f, self.fog.start);
+			drawFogFX(float(elapsed) / 3000.0f, WORLD_HALF);
 			pwDisable(GL_TEXTURE_2D);
 			pwEnable(GL_BLEND);
 			pwBlendFunc(GL_ONE, GL_ONE);

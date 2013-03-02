@@ -17,7 +17,6 @@
 #import "win.h"
 #import "World.h"
 #import "camera.h"
-#import "Fog.h"
 
 typedef BOOL CarMap[WORLD_SIZE][WORLD_SIZE];
 typedef GLvector2 AngleMap[360];
@@ -29,8 +28,6 @@ typedef GLvector2 AngleMap[360];
     BOOL     _anglesDone;
     GLulong  _nextUpdate;
 }
-
--(id)initWithWorld:(World*)world;
 
 -(BOOL) spaceAtRow:   (GLint) row column:(GLint) column;
 -(BOOL) carAtRow:     (GLint) row column:(GLint) column;
@@ -230,7 +227,7 @@ static const GLvector directions[] = {
     _position = _position + (directions[_direction] * MOVEMENT_SPEED * _speed);
     
         // Check if the car is out of range, or some other reason to hide it for this iteration.
-    if(shouldRemoveCar(_row, _col, _position, camera, _stuck, self.world.visibilityGrid, self.world.renderer.fog.start)) {
+    if(shouldRemoveCar(_row, _col, _position, camera, _stuck, self.world.visibilityGrid)) {
         _ready = false;
         return;
     }
@@ -303,12 +300,12 @@ static BOOL facingCamera(RoadDirection direction, const GLvector &camera, const 
         :                         (camera.x < position.x);
 }
 
-static BOOL shouldRemoveCar(float row, float col, const GLvector &position, const GLvector &camera, int stuck, VisibilityGrid *visibilityGrid, float fogDistance)
+static BOOL shouldRemoveCar(float row, float col, const GLvector &position, const GLvector &camera, int stuck, VisibilityGrid *visibilityGrid)
 {
     // Remove if: the car has moved out of view, the car is far away, or the car gets too close to the edge of the map.
     // We use manhattan units because buildings almost always block views of cars on the diagonal.
     return ((! [visibilityGrid visibleAtPosition:glVector(row, 0.0f, col)])
-       || (fabs(camera.x - position.x) + fabs(camera.z - position.z) > fogDistance)
+       || (fabs(camera.x - position.x) + fabs(camera.z - position.z) > WORLD_HALF)
        || (position.x < DEAD_ZONE || position.x > (WORLD_SIZE - DEAD_ZONE))
        || (position.z < DEAD_ZONE || position.z > (WORLD_SIZE - DEAD_ZONE))
        || (stuck >= STUCK_TIME) );

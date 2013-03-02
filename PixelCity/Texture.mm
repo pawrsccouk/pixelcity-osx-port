@@ -24,7 +24,7 @@
 #import "light.h"
 #import "Entity.h"
 #import "GLString.h"
-#import "Fog.h"
+#import "Visible.h"
 
 #pragma mark - Texture interface
 
@@ -597,7 +597,6 @@ static void window (int x, int y, int size, TextureType tt, GLrgba color)
 
 static void doBloom(World *world, Texture *t, bool showFlat)
 {
-    float fogDistance = world.renderer.fog.start;
 	pwBindTexture(GL_TEXTURE_2D, 0);
 	pwViewport(0, 0, t.size , t.size);
 	pwCullFace (GL_BACK);
@@ -609,8 +608,8 @@ static void doBloom(World *world, Texture *t, bool showFlat)
 	pwCullFace (GL_BACK);
 	pwBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	pwEnable (GL_FOG);
-	pwFogf (GL_FOG_START, fogDistance / 2);
-	pwFogf (GL_FOG_END  , fogDistance);
+	pwFogf (GL_FOG_START, WORLD_HALF / 2);
+	pwFogf (GL_FOG_END  , WORLD_HALF);
 	pwPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	pwClearColor (0.0f, 0.0f, 0.0f, 0.0f);
 	pwClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

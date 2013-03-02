@@ -203,9 +203,8 @@ static const short MAX_SIZE = 5;
     Camera *camera = self.world.camera;
 	GLvector camera_angle = camera.angle, camera_position = camera.position;
     
-    float fogDistance = self.world.renderer.fog.start;
-	if( (fabs (camera_position.x - _position.x) > fogDistance)
-	||  (fabs (camera_position.z - _position.z) > fogDistance)
+	if( (fabs (camera_position.x - _position.x) > WORLD_HALF)
+	||  (fabs (camera_position.z - _position.z) > WORLD_HALF)
 	|| (_blink && (GetTickCount () % _blink_interval) > 200) )
 		return;
 

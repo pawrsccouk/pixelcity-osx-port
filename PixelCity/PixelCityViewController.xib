@@ -40,7 +40,7 @@
 			<object class="NSWindowTemplate" id="848384406">
 				<int key="NSWindowStyleMask">271</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{469, 256}, {800, 600}}</string>
+				<string key="NSWindowRect">{{469, 256}, {1024, 768}}</string>
 				<int key="NSWTFlags">1886912512</int>
 				<string key="NSWindowTitle">PixelCity</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -48,7 +48,6 @@
 					<characters key="NS.bytes">View</characters>
 				</object>
 				<nil key="NSUserInterfaceItemIdentifier"/>
-				<string key="NSWindowContentMinSize">{213, 107}</string>
 				<object class="NSView" key="NSWindowView" id="138044111">
 					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
@@ -56,20 +55,20 @@
 						<object class="NSCustomView" id="537607890">
 							<reference key="NSNextResponder" ref="138044111"/>
 							<int key="NSvFlags">274</int>
-							<string key="NSFrameSize">{800, 600}</string>
+							<string key="NSFrameSize">{1024, 768}</string>
 							<reference key="NSSuperview" ref="138044111"/>
 							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView"/>
 							<string key="NSClassName">BasicOpenGLView</string>
 							<string key="NSExtension">NSOpenGLView</string>
 						</object>
 					</array>
-					<string key="NSFrameSize">{800, 600}</string>
+					<string key="NSFrameSize">{1024, 768}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="537607890"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
-				<string key="NSMinSize">{213, 129}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
@@ -1958,7 +1957,6 @@
 						<string key="effectCycleMenuItem">NSMenuItem</string>
 						<string key="flatToggleMenuItem">NSMenuItem</string>
 						<string key="fogSettingsMenuItem">NSMenuItem</string>
-						<string key="fogSettingsViewController">FogSettingsViewController</string>
 						<string key="helpToggleMenuItem">NSMenuItem</string>
 						<string key="infoMenuItem">NSMenuItem</string>
 						<string key="letterboxToggleMenuItem">NSMenuItem</string>
@@ -1990,10 +1988,6 @@
 						<object class="IBToOneOutletInfo" key="fogSettingsMenuItem">
 							<string key="name">fogSettingsMenuItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="fogSettingsViewController">
-							<string key="name">fogSettingsViewController</string>
-							<string key="candidateClassName">FogSettingsViewController</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="helpToggleMenuItem">
 							<string key="name">helpToggleMenuItem</string>
