@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'Pixel City Screensaver' target in the 'Pixel City Screensaver' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif

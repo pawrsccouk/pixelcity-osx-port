@@ -11,7 +11,7 @@
 
 @interface FogSettingsWindowController : NSWindowController
 {
-    IBOutlet NSButton *showFogButton;
+    IBOutlet NSButton *showFogButton, *animateColorButton;
     IBOutlet NSTextField *startField, *endField, *densityField;
     IBOutlet NSTextField *valueRangeLabel;
     IBOutlet NSPopUpButton *modeButton;
@@ -31,5 +31,6 @@
 -(IBAction) densityChanged: (id)sender;
 -(IBAction) modeChanged:    (id)sender;
 -(IBAction) fogColorChanged:(id)sender;
+-(IBAction) fogColorAnimateChanged:(id)sender;
 
 @end

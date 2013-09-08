@@ -25,7 +25,8 @@ NSString *const kFogStartDistance = @"FogStartDistance",
          *const kLetterbox  = @"Letterbox" ,
          *const kWireframe  = @"Wireframe" ,
          *const kFlat       = @"Flat"      ,
-         *const kEffect     = @"Effect"    ;
+         *const kEffect     = @"Effect"    ,
+         *const kAnimateFogColor = @"AnimateFogColor";
 
 
 static const GLint MAX_RESULT = 256;
@@ -52,7 +53,8 @@ static NSUserDefaults* GetUserDefaults()
          kFogStartDistance  : @512,
          kFogEndDistance    : @612,
          kFogDensity        : @1.0f,
-         kFogColor          : @"0.12 0.12 0.12 0.12"
+         kFogColor          : @"0.12 0.12 0.12 0.12",
+         kAnimateFogColor   : @0
          }];
 	}
 	return defs;

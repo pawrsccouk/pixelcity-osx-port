@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
+
 @interface Fog : NSObject
 
     // Can be GL_LINEAR, GL_EXP or GL_EXP2
@@ -24,8 +25,9 @@
     // Enable or disable the fog.
 @property (nonatomic) BOOL enable;
 
-    // Color of the fog.
+    // Color of the fog.  If animateColor is set, then this will cycle through colors
 @property (nonatomic) NSColor *color;
+@property (nonatomic) BOOL animateColor;
 
     // Apply the fog settings to the current opengl context
 -(void) apply;

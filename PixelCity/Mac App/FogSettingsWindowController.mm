@@ -60,6 +60,10 @@ enum ModeTags { TAG_LINEAR = 1, TAG_EXP, TAG_EXP2 };
     NSColor *fogColor = IniColor(kFogColor);
     fog.color = fogColor;
     colorWell.color = fogColor;
+    
+    BOOL animateColor = (IniInt(kAnimateFogColor) != 0);
+    fog.animateColor = animateColor;
+    animateColorButton.state = animateColor ? NSOnState : NSOffState;
 }
 
 -(void) assertParam:(id) sender ofClass:(Class) cls
@@ -124,6 +128,14 @@ enum ModeTags { TAG_LINEAR = 1, TAG_EXP, TAG_EXP2 };
     NSColorWell *well = sender;
     self.fog.color = well.color;
     IniColorSet(kFogColor, self.fog.color);
+}
+
+-(void)fogColorAnimateChanged:(id)sender
+{
+    [self assertParam:sender ofClass:NSButton.class];
+    NSButton *button = sender;
+    self.fog.animateColor = (button.state == NSOnState);
+    IniIntSet(kAnimateFogColor, self.fog.animateColor);
 }
 
 @end

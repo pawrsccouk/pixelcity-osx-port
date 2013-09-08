@@ -183,7 +183,9 @@
 
     [self.fog apply];
 
-//	[world renderDebugTrafficLanes];
+	if (SHOW_DEBUG_GROUND) {
+        [world renderDebugTrafficLanes];
+    }
     
 	if (self.effect == EFFECT_GLASS_CITY) {
         setupGlassCityEffect(pos);

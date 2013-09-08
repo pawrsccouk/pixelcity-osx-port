@@ -39,6 +39,42 @@
 		5771099916C73792007D32DA /* PWGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771099816C73791007D32DA /* PWGL.cpp */; };
 		5780824616DA7F0B00D4A3B5 /* PixelCityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */; };
 		5780824716DA7F0B00D4A3B5 /* PixelCityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */; };
+		57A537CF17DD286900D6008C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5771091E16C6DFB1007D32DA /* Cocoa.framework */; };
+		57A537D117DD286900D6008C /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57A537D017DD286900D6008C /* ScreenSaver.framework */; };
+		57A537DF17DD351900D6008C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 57A537B817DD26B100D6008C /* InfoPlist.strings */; };
+		57A537E017DD352400D6008C /* optionsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57A537BA17DD26B100D6008C /* optionsPanel.xib */; };
+		57A537E217DD352C00D6008C /* Pixel City Screensaver-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 57A537BC17DD26B100D6008C /* Pixel City Screensaver-Prefix.pch */; };
+		57A537E317DD353000D6008C /* Pixel_City_ScreensaverView.h in Headers */ = {isa = PBXBuildFile; fileRef = 57A537BD17DD26B100D6008C /* Pixel_City_ScreensaverView.h */; };
+		57A537E417DD353400D6008C /* Pixel_City_ScreensaverView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57A537BE17DD26B100D6008C /* Pixel_City_ScreensaverView.mm */; };
+		57A537E517DD353800D6008C /* thumbnail.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A537BF17DD26B100D6008C /* thumbnail.png */; };
+		57A537E617DD353B00D6008C /* thumbnail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A537C017DD26B100D6008C /* thumbnail@2x.png */; };
+		57A537E917DD39F800D6008C /* BasicOpenGLView.h in Headers */ = {isa = PBXBuildFile; fileRef = 57A537E717DD39F800D6008C /* BasicOpenGLView.h */; };
+		57A537EA17DD39F800D6008C /* BasicOpenGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57A537E817DD39F800D6008C /* BasicOpenGLView.mm */; };
+		57A537EB17DD3A6E00D6008C /* Light.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771096216C6E0AF007D32DA /* Light.mm */; };
+		57A537EC17DD3A6E00D6008C /* Mesh.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097316C6E0C5007D32DA /* Mesh.mm */; };
+		57A537ED17DD3A6E00D6008C /* Entity.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095216C6E0AF007D32DA /* Entity.mm */; };
+		57A537EE17DD3A6E00D6008C /* World.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771098616C6E0D6007D32DA /* World.mm */; };
+		57A537EF17DD3A6E00D6008C /* Texture.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097E16C6E0D6007D32DA /* Texture.mm */; };
+		57A537F017DD3A6E00D6008C /* Sky.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097C16C6E0D6007D32DA /* Sky.mm */; };
+		57A537F117DD3A6E00D6008C /* Building.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094116C6E08B007D32DA /* Building.mm */; };
+		57A537F217DD3A6E00D6008C /* Car.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094516C6E08B007D32DA /* Car.mm */; };
+		57A537F317DD3A6E00D6008C /* Deco.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094716C6E08B007D32DA /* Deco.mm */; };
+		57A537F417DD3A7D00D6008C /* Fog.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57DE77E016E1235600C18DB5 /* Fog.mm */; };
+		57A537F517DD3A7D00D6008C /* Render.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771097916C6E0D6007D32DA /* Render.mm */; };
+		57A537F617DD3A7D00D6008C /* Visible.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771098216C6E0D6007D32DA /* Visible.mm */; };
+		57A537F717DD3A7D00D6008C /* Camera.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094316C6E08B007D32DA /* Camera.mm */; };
+		57A537F817DD3A8F00D6008C /* PWGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771099816C73791007D32DA /* PWGL.cpp */; };
+		57A537F917DD3A8F00D6008C /* glBbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095416C6E0AF007D32DA /* glBbox.cpp */; };
+		57A537FA17DD3A8F00D6008C /* GLCheck.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095516C6E0AF007D32DA /* GLCheck.mm */; };
+		57A537FB17DD3A8F00D6008C /* glRgba.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095916C6E0AF007D32DA /* glRgba.cpp */; };
+		57A537FC17DD3A8F00D6008C /* GLString.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771095B16C6E0AF007D32DA /* GLString.m */; };
+		57A537FD17DD3A8F00D6008C /* glVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095C16C6E0AF007D32DA /* glVertex.cpp */; };
+		57A537FE17DD3A8F00D6008C /* glVector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095E16C6E0AF007D32DA /* glVector2.cpp */; };
+		57A537FF17DD3A8F00D6008C /* glVector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095F16C6E0AF007D32DA /* glVector3.cpp */; };
+		57A5380017DD3A8F00D6008C /* Mathx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771097116C6E0C5007D32DA /* Mathx.cpp */; };
+		57A5380117DD3A9800D6008C /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771097716C6E0D6007D32DA /* Random.cpp */; };
+		57A5380217DD3A9800D6008C /* Ini.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771096116C6E0AF007D32DA /* Ini.mm */; };
+		57A5380317DD3B9200D6008C /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5771093B16C6DFE9007D32DA /* OpenGL.framework */; };
 		57DE77E116E1235600C18DB5 /* Fog.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57DE77E016E1235600C18DB5 /* Fog.mm */; };
 		57DE77E416E1347C00C18DB5 /* FogSettingsWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */; };
 		57DE77E616E1595700C18DB5 /* FogSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */; };
@@ -51,10 +87,10 @@
 		5771092116C6DFB1007D32DA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		5771092216C6DFB1007D32DA /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		5771092316C6DFB1007D32DA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		5771092616C6DFB1007D32DA /* PixelCity-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PixelCity-Info.plist"; sourceTree = "<group>"; };
+		5771092616C6DFB1007D32DA /* PixelCity-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PixelCity-Info.plist"; path = "Mac App/PixelCity-Info.plist"; sourceTree = "<group>"; };
 		5771092816C6DFB1007D32DA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5771092A16C6DFB1007D32DA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		5771092C16C6DFB1007D32DA /* PixelCity-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PixelCity-Prefix.pch"; sourceTree = "<group>"; };
+		5771092C16C6DFB1007D32DA /* PixelCity-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "PixelCity-Prefix.pch"; path = "Mac App/PixelCity-Prefix.pch"; sourceTree = "<group>"; };
 		5771092E16C6DFB1007D32DA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		5771093B16C6DFE9007D32DA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		5771093F16C6E08B007D32DA /* BasicOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasicOpenGLView.h; sourceTree = "<group>"; };
@@ -110,12 +146,24 @@
 		5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelCityViewController.mm; sourceTree = "<group>"; };
 		5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PixelCityViewController.xib; sourceTree = "<group>"; };
 		5793ED6316CE1BDD006A46C2 /* Model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
+		57A537B917DD26B100D6008C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		57A537BA17DD26B100D6008C /* optionsPanel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = optionsPanel.xib; sourceTree = "<group>"; };
+		57A537BB17DD26B100D6008C /* Pixel City Screensaver-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Pixel City Screensaver-Info.plist"; sourceTree = "<group>"; };
+		57A537BC17DD26B100D6008C /* Pixel City Screensaver-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Pixel City Screensaver-Prefix.pch"; sourceTree = "<group>"; };
+		57A537BD17DD26B100D6008C /* Pixel_City_ScreensaverView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pixel_City_ScreensaverView.h; sourceTree = "<group>"; };
+		57A537BE17DD26B100D6008C /* Pixel_City_ScreensaverView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Pixel_City_ScreensaverView.mm; sourceTree = "<group>"; };
+		57A537BF17DD26B100D6008C /* thumbnail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = thumbnail.png; sourceTree = "<group>"; };
+		57A537C017DD26B100D6008C /* thumbnail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "thumbnail@2x.png"; sourceTree = "<group>"; };
+		57A537CE17DD286900D6008C /* Pixel City Screensaver.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Pixel City Screensaver.saver"; sourceTree = BUILT_PRODUCTS_DIR; };
+		57A537D017DD286900D6008C /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
+		57A537E717DD39F800D6008C /* BasicOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasicOpenGLView.h; sourceTree = "<group>"; };
+		57A537E817DD39F800D6008C /* BasicOpenGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BasicOpenGLView.mm; sourceTree = "<group>"; };
 		57DE77DF16E1235600C18DB5 /* Fog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fog.h; sourceTree = "<group>"; };
 		57DE77E016E1235600C18DB5 /* Fog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Fog.mm; sourceTree = "<group>"; };
 		57DE77E216E1347C00C18DB5 /* FogSettingsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FogSettingsWindowController.h; sourceTree = "<group>"; };
 		57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FogSettingsWindowController.mm; sourceTree = "<group>"; };
 		57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FogSettingsPanel.xib; sourceTree = "<group>"; };
-		57EDA60516E2792E00C6711B /* Pixel City.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = "Pixel City.iconset"; sourceTree = "<group>"; };
+		57EDA60516E2792E00C6711B /* Pixel City.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; name = "Pixel City.iconset"; path = "Mac App/Pixel City.iconset"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +173,16 @@
 			files = (
 				5771093C16C6DFE9007D32DA /* OpenGL.framework in Frameworks */,
 				5771091F16C6DFB1007D32DA /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		57A537C917DD286900D6008C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				57A5380317DD3B9200D6008C /* OpenGL.framework in Frameworks */,
+				57A537CF17DD286900D6008C /* Cocoa.framework in Frameworks */,
+				57A537D117DD286900D6008C /* ScreenSaver.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				5771091A16C6DFB1007D32DA /* PixelCity.app */,
+				57A537CE17DD286900D6008C /* Pixel City Screensaver.saver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -153,6 +212,7 @@
 			children = (
 				5771093B16C6DFE9007D32DA /* OpenGL.framework */,
 				5771091E16C6DFB1007D32DA /* Cocoa.framework */,
+				57A537D017DD286900D6008C /* ScreenSaver.framework */,
 				5771092016C6DFB1007D32DA /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -171,6 +231,8 @@
 		5771092416C6DFB1007D32DA /* PixelCity */ = {
 			isa = PBXGroup;
 			children = (
+				57A537B717DD26B100D6008C /* Screensaver */,
+				57A537B617DD264200D6008C /* Mac App */,
 				5771099616C7131B007D32DA /* Views */,
 				5771099516C712C8007D32DA /* OpenGL Support */,
 				5771099416C7124B007D32DA /* Model */,
@@ -181,12 +243,6 @@
 				5771096116C6E0AF007D32DA /* Ini.mm */,
 				5771096416C6E0AF007D32DA /* Macro.h */,
 				5771092516C6DFB1007D32DA /* Supporting Files */,
-				57DE77E216E1347C00C18DB5 /* FogSettingsWindowController.h */,
-				57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */,
-				57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */,
-				5780824316DA7F0B00D4A3B5 /* PixelCityViewController.h */,
-				5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */,
-				5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */,
 			);
 			path = PixelCity;
 			sourceTree = "<group>";
@@ -194,6 +250,7 @@
 		5771092516C6DFB1007D32DA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				57A537C717DD270900D6008C /* Mac App */,
 				57EDA60516E2792E00C6711B /* Pixel City.iconset */,
 				5771092616C6DFB1007D32DA /* PixelCity-Info.plist */,
 				5771092716C6DFB1007D32DA /* InfoPlist.strings */,
@@ -256,22 +313,72 @@
 		5771099616C7131B007D32DA /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				5771099216C6F90D007D32DA /* MainMenu.xib */,
 				57DE77DF16E1235600C18DB5 /* Fog.h */,
 				57DE77E016E1235600C18DB5 /* Fog.mm */,
 				5771097A16C6E0D6007D32DA /* Render.h */,
 				5771097916C6E0D6007D32DA /* Render.mm */,
 				5771098216C6E0D6007D32DA /* Visible.mm */,
 				5771098316C6E0D6007D32DA /* Visible.h */,
-				5771093F16C6E08B007D32DA /* BasicOpenGLView.h */,
-				5771094016C6E08B007D32DA /* BasicOpenGLView.mm */,
 				5771094316C6E08B007D32DA /* Camera.mm */,
 				5771094416C6E08B007D32DA /* Camera.h */,
 			);
 			name = Views;
 			sourceTree = "<group>";
 		};
+		57A537B617DD264200D6008C /* Mac App */ = {
+			isa = PBXGroup;
+			children = (
+				5771093F16C6E08B007D32DA /* BasicOpenGLView.h */,
+				5771094016C6E08B007D32DA /* BasicOpenGLView.mm */,
+				5771099216C6F90D007D32DA /* MainMenu.xib */,
+				57DE77E216E1347C00C18DB5 /* FogSettingsWindowController.h */,
+				57DE77E316E1347C00C18DB5 /* FogSettingsWindowController.mm */,
+				57DE77E516E1595700C18DB5 /* FogSettingsPanel.xib */,
+				5780824316DA7F0B00D4A3B5 /* PixelCityViewController.h */,
+				5780824416DA7F0B00D4A3B5 /* PixelCityViewController.mm */,
+				5780824516DA7F0B00D4A3B5 /* PixelCityViewController.xib */,
+			);
+			path = "Mac App";
+			sourceTree = "<group>";
+		};
+		57A537B717DD26B100D6008C /* Screensaver */ = {
+			isa = PBXGroup;
+			children = (
+				57A537E717DD39F800D6008C /* BasicOpenGLView.h */,
+				57A537E817DD39F800D6008C /* BasicOpenGLView.mm */,
+				57A537B817DD26B100D6008C /* InfoPlist.strings */,
+				57A537BA17DD26B100D6008C /* optionsPanel.xib */,
+				57A537BB17DD26B100D6008C /* Pixel City Screensaver-Info.plist */,
+				57A537BC17DD26B100D6008C /* Pixel City Screensaver-Prefix.pch */,
+				57A537BD17DD26B100D6008C /* Pixel_City_ScreensaverView.h */,
+				57A537BE17DD26B100D6008C /* Pixel_City_ScreensaverView.mm */,
+				57A537BF17DD26B100D6008C /* thumbnail.png */,
+				57A537C017DD26B100D6008C /* thumbnail@2x.png */,
+			);
+			path = Screensaver;
+			sourceTree = "<group>";
+		};
+		57A537C717DD270900D6008C /* Mac App */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Mac App";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		57A537CA17DD286900D6008C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				57A537E217DD352C00D6008C /* Pixel City Screensaver-Prefix.pch in Headers */,
+				57A537E317DD353000D6008C /* Pixel_City_ScreensaverView.h in Headers */,
+				57A537E917DD39F800D6008C /* BasicOpenGLView.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		5771091916C6DFB1007D32DA /* PixelCity */ = {
@@ -290,6 +397,25 @@
 			productName = PixelCity;
 			productReference = 5771091A16C6DFB1007D32DA /* PixelCity.app */;
 			productType = "com.apple.product-type.application";
+		};
+		57A537CD17DD286900D6008C /* Pixel City Screensaver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 57A537DC17DD286900D6008C /* Build configuration list for PBXNativeTarget "Pixel City Screensaver" */;
+			buildPhases = (
+				57A537C817DD286900D6008C /* Sources */,
+				57A537C917DD286900D6008C /* Frameworks */,
+				57A537CA17DD286900D6008C /* Headers */,
+				57A537CB17DD286900D6008C /* Resources */,
+				57A537CC17DD286900D6008C /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Pixel City Screensaver";
+			productName = "Pixel City Screensaver";
+			productReference = 57A537CE17DD286900D6008C /* Pixel City Screensaver.saver */;
+			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
@@ -314,6 +440,7 @@
 			projectRoot = "";
 			targets = (
 				5771091916C6DFB1007D32DA /* PixelCity */,
+				57A537CD17DD286900D6008C /* Pixel City Screensaver */,
 			);
 		};
 /* End PBXProject section */
@@ -332,7 +459,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		57A537CB17DD286900D6008C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				57A537DF17DD351900D6008C /* InfoPlist.strings in Resources */,
+				57A537E017DD352400D6008C /* optionsPanel.xib in Resources */,
+				57A537E517DD353800D6008C /* thumbnail.png in Resources */,
+				57A537E617DD353B00D6008C /* thumbnail@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		57A537CC17DD286900D6008C /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5771091616C6DFB1007D32DA /* Sources */ = {
@@ -370,6 +518,39 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		57A537C817DD286900D6008C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				57A537E417DD353400D6008C /* Pixel_City_ScreensaverView.mm in Sources */,
+				57A537EA17DD39F800D6008C /* BasicOpenGLView.mm in Sources */,
+				57A537EB17DD3A6E00D6008C /* Light.mm in Sources */,
+				57A537EC17DD3A6E00D6008C /* Mesh.mm in Sources */,
+				57A537ED17DD3A6E00D6008C /* Entity.mm in Sources */,
+				57A537EE17DD3A6E00D6008C /* World.mm in Sources */,
+				57A537EF17DD3A6E00D6008C /* Texture.mm in Sources */,
+				57A537F017DD3A6E00D6008C /* Sky.mm in Sources */,
+				57A537F117DD3A6E00D6008C /* Building.mm in Sources */,
+				57A537F217DD3A6E00D6008C /* Car.mm in Sources */,
+				57A537F317DD3A6E00D6008C /* Deco.mm in Sources */,
+				57A537F417DD3A7D00D6008C /* Fog.mm in Sources */,
+				57A537F517DD3A7D00D6008C /* Render.mm in Sources */,
+				57A537F617DD3A7D00D6008C /* Visible.mm in Sources */,
+				57A537F717DD3A7D00D6008C /* Camera.mm in Sources */,
+				57A537F817DD3A8F00D6008C /* PWGL.cpp in Sources */,
+				57A537F917DD3A8F00D6008C /* glBbox.cpp in Sources */,
+				57A537FA17DD3A8F00D6008C /* GLCheck.mm in Sources */,
+				57A537FB17DD3A8F00D6008C /* glRgba.cpp in Sources */,
+				57A537FC17DD3A8F00D6008C /* GLString.m in Sources */,
+				57A537FD17DD3A8F00D6008C /* glVertex.cpp in Sources */,
+				57A537FE17DD3A8F00D6008C /* glVector2.cpp in Sources */,
+				57A537FF17DD3A8F00D6008C /* glVector3.cpp in Sources */,
+				57A5380017DD3A8F00D6008C /* Mathx.cpp in Sources */,
+				57A5380117DD3A9800D6008C /* Random.cpp in Sources */,
+				57A5380217DD3A9800D6008C /* Ini.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
@@ -387,6 +568,14 @@
 				5771092E16C6DFB1007D32DA /* en */,
 			);
 			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		57A537B817DD26B100D6008C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57A537B917DD26B100D6008C /* en */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -452,8 +641,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "PixelCity/PixelCity-Prefix.pch";
-				INFOPLIST_FILE = "PixelCity/PixelCity-Info.plist";
+				GCC_PREFIX_HEADER = "PixelCity/Mac App/PixelCity-Prefix.pch";
+				INFOPLIST_FILE = "$(SRCROOT)/PixelCity/Mac App/PixelCity-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				"OTHER_CPLUSPLUSFLAGS[arch=*]" = "-DPW_DEBUG_OPENGL";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -468,11 +657,47 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "PixelCity/PixelCity-Prefix.pch";
-				INFOPLIST_FILE = "PixelCity/PixelCity-Info.plist";
+				GCC_PREFIX_HEADER = "PixelCity/Mac App/PixelCity-Prefix.pch";
+				INFOPLIST_FILE = "$(SRCROOT)/PixelCity/Mac App/PixelCity-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		57A537DD17DD286900D6008C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_ENABLE_OBJC_GC = unsupported;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "PixelCity/Screensaver/Pixel City Screensaver-Prefix.pch";
+				INFOPLIST_FILE = "PixelCity/Screensaver/Pixel City Screensaver-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Debug;
+		};
+		57A537DE17DD286900D6008C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_ENABLE_OBJC_GC = unsupported;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "PixelCity/Screensaver/Pixel City Screensaver-Prefix.pch";
+				INFOPLIST_FILE = "PixelCity/Screensaver/Pixel City Screensaver-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = saver;
 			};
 			name = Release;
 		};
@@ -496,6 +721,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		57A537DC17DD286900D6008C /* Build configuration list for PBXNativeTarget "Pixel City Screensaver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				57A537DD17DD286900D6008C /* Debug */,
+				57A537DE17DD286900D6008C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

@@ -1,7 +1,7 @@
 
     // Keys for the preference values
 extern NSString * const kFogStartDistance, * const kFogEndDistance, * const kFogDensity, * const kShowFog, * const kFogMode, * const kFogColor;
-extern NSString * const kShowFPS, * const kLetterbox, * const kWireframe, * const kFlat, * const kEffect;
+extern NSString * const kShowFPS, * const kLetterbox, * const kWireframe, * const kFlat, * const kEffect , * const kAnimateFogColor;
 
 #ifdef __cplusplus
 extern "C" {
