@@ -1,3 +1,7 @@
+// Created 2009 Shamus Young
+// Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+// Released under the GNU GPL v3. See file COPYING for details.
+
 static const int   SEGMENTS_PER_TEXTURE = 64;
 static const int   TRIM_RESOLUTION      = 256;
 static const int   TRIM_ROWS            = 4;

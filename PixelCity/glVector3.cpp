@@ -3,6 +3,8 @@
   glVector3.cpp
 
   2006 Shamus Young
+  Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+  Released under the GNU GPL v3. See file COPYING for details.
 
 -------------------------------------------------------------------------------
 
@@ -161,20 +163,6 @@ GLvector GLvector::operator+ (const float& c) const
   return glVector (x + c, y + c, z + c);
 }
 
-//void GLvector::operator+= (const GLvector& c)
-//{
-//  x += c.x;
-//  y += c.y;
-//  z += c.z;
-//}
-//
-//void GLvector::operator+= (const float& c)
-//{
-//  x += c;
-//  y += c;
-//  z += c;
-//}
-
 GLvector GLvector::operator- (const GLvector& c) const
 {
   return glVector (x - c.x, y - c.y, z - c.z);
@@ -184,20 +172,6 @@ GLvector GLvector::operator- (const float& c) const
 {
   return glVector (x - c, y - c, z - c);
 }
-
-//void GLvector::operator-= (const GLvector& c)
-//{
-//  x -= c.x;
-//  y -= c.y;
-//  z -= c.z;
-//}
-//
-//void GLvector::operator-= (const float& c)
-//{
-//  x -= c;
-//  y -= c;
-//  z -= c;
-//}
 
 GLvector GLvector::operator* (const GLvector& c) const
 {
@@ -209,20 +183,6 @@ GLvector GLvector::operator* (const float& c) const
   return glVector (x * c, y * c, z * c);
 }
 
-//void GLvector::operator*= (const GLvector& c)
-//{
-//  x *= c.x;
-//  y *= c.y;
-//  z *= c.z;
-//}
-//
-//void GLvector::operator*= (const float& c)
-//{
-//  x *= c;
-//  y *= c;
-//  z *= c;
-//}
-
 GLvector GLvector::operator/ (const GLvector& c) const
 {
   return glVector (x / c.x, y / c.y, z / c.z);
@@ -232,20 +192,6 @@ GLvector GLvector::operator/ (const float& c) const
 {
   return glVector (x / c, y / c, z / c);
 }
-
-//void GLvector::operator/= (const GLvector& c)
-//{
-//  x /= c.x;
-//  y /= c.y;
-//  z /= c.z;
-//}
-//
-//void GLvector::operator/= (const float& c)
-//{
-//  x /= c;
-//  y /= c;
-//  z /= c;
-//}
 
 bool GLvector::operator== (const GLvector& c) const
 {

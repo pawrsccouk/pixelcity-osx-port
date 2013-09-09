@@ -1,3 +1,6 @@
+// Created in 2013 by Patrick A Wallace
+// Released under the GNU GPL v3. See the file COPYING for details.
+
 #import <OpenGL/gl.h>
 #import <OpenGL/glext.h>
 #import <OpenGL/glu.h>
@@ -22,17 +25,11 @@ typedef void (^setupCallback_t)(void);
 @property (nonatomic) BOOL animating;
 @property (nonatomic, retain) World *world;
 
-    // setupCallback will be invoked when the OpenGL context is created the objects have been created.
+    // setupCallback will be invoked when the OpenGL context is created but before the objects have been created.
     // You can then use it to set individual settings for the view.
 @property (nonatomic, copy) setupCallback_t setupCallback;
 
 - (void) drawRect:(NSRect)rect;
-
-- (void) update;		// moved or resized
-
-- (BOOL) acceptsFirstResponder;
-- (BOOL) becomeFirstResponder;
-- (BOOL) resignFirstResponder;
 
 - (id) initWithFrame:(NSRect)frameRect;
 

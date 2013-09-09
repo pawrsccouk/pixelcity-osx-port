@@ -3,6 +3,8 @@
   Vector2.cpp
 
   2006 Shamus Young
+  Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+  Released under the GNU GPL v3. See file COPYING for details.
 
 -------------------------------------------------------------------------------
 
@@ -51,17 +53,6 @@ GLvector2 glVector(float x, float y)
   return GLvector2(x,y);
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-//GLvector2 glVectorAdd (GLvector2 val1, GLvector2 val2)
-//{
-//  GLvector2      result;
-//
-//  result.x = val1.x + val2.x;
-//  result.y = val1.y + val2.y;
-//  return result;
-//}
-
 
 /*-----------------------------------------------------------------------------
                            
@@ -73,23 +64,9 @@ GLvector2 glVectorInterpolate (GLvector2 v1, GLvector2 v2, float scalar)
                     MathInterpolate (v1.y, v2.y, scalar) );
 }  
 
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-
-//GLvector2 glVectorSubtract (GLvector2 val1, GLvector2 val2)
-//{
-//
-//  GLvector2      result;
-//
-//  result.x = val1.x - val2.x;
-//  result.y = val1.y - val2.y;
-//  return result;
-//
-//}
 
 /*-----------------------------------------------------------------------------
-+                           
+                      
 -----------------------------------------------------------------------------*/
 
 GLvector2::GLvector2()
@@ -112,18 +89,6 @@ GLvector2 GLvector2::operator+ (const float& c) const
   return glVector (x + c, y + c);
 }
 
-//void GLvector2::operator+= (const GLvector2& c)
-//{
-//  x += c.x;
-//  y += c.y;
-//}
-//
-//void GLvector2::operator+= (const float& c)
-//{
-//  x += c;
-//  y += c;
-//}
-
 GLvector2 GLvector2::operator- (const GLvector2& c) const
 {
   return glVector (x - c.x, y - c.y);
@@ -133,18 +98,6 @@ GLvector2 GLvector2::operator- (const float& c) const
 {
   return glVector (x - c, y - c);
 }
-
-//void GLvector2::operator-= (const GLvector2& c)
-//{
-//  x -= c.x;
-//  y -= c.y;
-//}
-//
-//void GLvector2::operator-= (const float& c)
-//{
-//  x -= c;
-//  y -= c;
-//}
 
 GLvector2 GLvector2::operator* (const GLvector2& c) const
 {
@@ -156,18 +109,6 @@ GLvector2 GLvector2::operator* (const float& c) const
   return glVector (x * c, y * c);
 }
 
-//void GLvector2::operator*= (const GLvector2& c)
-//{
-//  x *= c.x;
-//  y *= c.y;
-//}
-//
-//void GLvector2::operator*= (const float& c)
-//{
-//  x *= c;
-//  y *= c;
-//}
-
 GLvector2 GLvector2::operator/ (const GLvector2& c) const
 {
   return glVector (x / c.x, y / c.y);
@@ -177,18 +118,6 @@ GLvector2 GLvector2::operator/ (const float& c) const
 {
   return glVector (x / c, y / c);
 }
-
-//void GLvector2::operator/= (const GLvector2& c)
-//{
-//  x /= c.x;
-//  y /= c.y;
-//}
-//
-//void GLvector2::operator/= (const float& c)
-//{
-//  x /= c;
-//  y /= c;
-//}
 
 bool GLvector2::operator== (const GLvector2& c) const
 {

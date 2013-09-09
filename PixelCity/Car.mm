@@ -2,6 +2,8 @@
 
   Car.cpp
   2009 Shamus Young
+  Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+  Released under the GNU GPL v3. See file COPYING for details.
 
 -------------------------------------------------------------------------------
   This creates the little two-triangle cars and moves them around the map.

@@ -3,11 +3,13 @@
   Ini.cpp
 
   2009 Shamus Young
-
+  Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+  Released under the GNU GPL v3. See file COPYING for details.
 
 -------------------------------------------------------------------------------
   
   This takes various types of data and dumps them into a predefined ini file.
+  PAW: On the Mac, it stores the data in an NSUserDefaults object.
 
 -----------------------------------------------------------------------------*/
 

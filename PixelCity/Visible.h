@@ -1,3 +1,6 @@
+// 2009 Shamus Young
+// Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+// Released under the GNU GPL v3. See file COPYING for details.
 
     //Controls the ammount of space available for buildings.  Other code is wrtten assuming this will be a power of two.
 static const int WORLD_SIZE = 1024;

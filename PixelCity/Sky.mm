@@ -3,13 +3,16 @@
   Sky.cpp
 
   2009 Shamus Young
-
+  Modifications 2013 by Pat Wallace. If you find any bugs, assume they are mine.
+  Released under the GNU General Public License, version 3
 -------------------------------------------------------------------------------
 
   Did this need to be written as a class? It did not. There will never be 
   more than one sky in play, so the whole class structure here is superflous,
   but harmless.
   
+  PAW: Not true on the Mac. Screensavers can have multiple views active at the same time.
+  Each will need it's own sky. So we need the class structure and can't use global variables anywhere.
 -----------------------------------------------------------------------------*/
 
 

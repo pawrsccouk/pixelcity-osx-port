@@ -17,4 +17,4 @@ extern "C" {
 #endif
 
     // Returns TRUE or FALSE decided randomly.
-    inline bool COIN_FLIP(void) { return (RandomIntR(2) == 0); }
+inline bool COIN_FLIP(void) { return (RandomIntR(2) == 0); }

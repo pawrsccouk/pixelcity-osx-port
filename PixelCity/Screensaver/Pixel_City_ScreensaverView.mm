@@ -4,7 +4,7 @@
 //
 //  Created by Patrick Wallace on 20/02/2013.
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
-//
+//  Released under the GNU GPL v3. See the file COPYING for details.
 
 #import "Pixel_City_ScreensaverView.h"
 #import "Model.h"

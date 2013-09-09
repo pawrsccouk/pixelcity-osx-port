@@ -1,3 +1,7 @@
+// 2009 Shamus Young
+// Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+// Released under the GNU GPL v3. See file COPYING for details.
+
 @class World, Light;
 
 struct HSL

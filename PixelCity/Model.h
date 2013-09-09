@@ -4,9 +4,7 @@
 //
 //  Created by Patrick Wallace on 15/02/2013.
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
-//
-
-
+//  Released under the GNU GPL v3. See file COPYING for details.
 
 // Standard header for including stock stuff that shouldn't change very often.
 

@@ -2,9 +2,9 @@
 //  glVertex.h
 //  PixelCity
 //
-//  Created by Patrick Wallace on 10/02/2013.
-//  Copyright (c) 2013 Patrick Wallace. All rights reserved.
-//
+//  2009 Shamus Young
+//  Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+//  Released under the GNU GPL v3. See file COPYING for details.
 
 
 struct GLvertex

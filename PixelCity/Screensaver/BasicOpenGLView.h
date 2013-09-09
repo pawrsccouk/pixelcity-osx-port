@@ -1,3 +1,8 @@
+/*
+Created 2013 by Pat Wallace
+Released under the GNU General Public License, version 3
+*/
+
 #import <OpenGL/gl.h>
 #import <OpenGL/glext.h>
 #import <OpenGL/glu.h>

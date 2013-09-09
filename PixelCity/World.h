@@ -1,3 +1,6 @@
+// 2009 Shamus Young
+// Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+// Released under the GNU GPL v3. See file COPYING for details.
 
 @class Cars, Entities, Lights, Textures, Sky, Camera, VisibilityGrid, Renderer;
 
@@ -48,29 +51,7 @@
 
 @end
 
-#pragma mark - Helper classes for display-list rendering & primitive creation. 
 
-// Avoid stack overflows by using RAII.
-//struct MakePrimitive
-//{
-//	static int nestCount;	// debug variable used to check we are not nesting.
-//	MakePrimitive(GLenum type);
-//	~MakePrimitive();
-//};
-//
-//struct MakeDisplayList
-//{
-//	static int nestCount;	// debug variable used to check we are not nesting.
-//	MakeDisplayList(GLint name, GLenum mode, const char *location);
-//	~MakeDisplayList();
-//};	
-
-//
-//struct PWMatrixStacker
-//{
-//    PWMatrixStacker();
-//    ~PWMatrixStacker();
-//};
 
 
 

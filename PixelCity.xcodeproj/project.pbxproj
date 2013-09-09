@@ -19,7 +19,6 @@
 		5771095016C6E08B007D32DA /* Deco.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094716C6E08B007D32DA /* Deco.mm */; };
 		5771096516C6E0AF007D32DA /* Entity.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095216C6E0AF007D32DA /* Entity.mm */; };
 		5771096616C6E0AF007D32DA /* glBbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095416C6E0AF007D32DA /* glBbox.cpp */; };
-		5771096716C6E0AF007D32DA /* GLCheck.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095516C6E0AF007D32DA /* GLCheck.mm */; };
 		5771096A16C6E0AF007D32DA /* glRgba.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095916C6E0AF007D32DA /* glRgba.cpp */; };
 		5771096B16C6E0AF007D32DA /* GLString.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771095B16C6E0AF007D32DA /* GLString.m */; };
 		5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095C16C6E0AF007D32DA /* glVertex.cpp */; };
@@ -65,7 +64,6 @@
 		57A537F717DD3A7D00D6008C /* Camera.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771094316C6E08B007D32DA /* Camera.mm */; };
 		57A537F817DD3A8F00D6008C /* PWGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771099816C73791007D32DA /* PWGL.cpp */; };
 		57A537F917DD3A8F00D6008C /* glBbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095416C6E0AF007D32DA /* glBbox.cpp */; };
-		57A537FA17DD3A8F00D6008C /* GLCheck.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5771095516C6E0AF007D32DA /* GLCheck.mm */; };
 		57A537FB17DD3A8F00D6008C /* glRgba.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095916C6E0AF007D32DA /* glRgba.cpp */; };
 		57A537FC17DD3A8F00D6008C /* GLString.m in Sources */ = {isa = PBXBuildFile; fileRef = 5771095B16C6E0AF007D32DA /* GLString.m */; };
 		57A537FD17DD3A8F00D6008C /* glVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5771095C16C6E0AF007D32DA /* glVertex.cpp */; };
@@ -106,8 +104,6 @@
 		5771095216C6E0AF007D32DA /* Entity.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Entity.mm; sourceTree = "<group>"; };
 		5771095316C6E0AF007D32DA /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
 		5771095416C6E0AF007D32DA /* glBbox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glBbox.cpp; sourceTree = "<group>"; };
-		5771095516C6E0AF007D32DA /* GLCheck.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GLCheck.mm; sourceTree = "<group>"; };
-		5771095616C6E0AF007D32DA /* GLCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLCheck.h; sourceTree = "<group>"; };
 		5771095916C6E0AF007D32DA /* glRgba.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; path = glRgba.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		5771095A16C6E0AF007D32DA /* GLString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLString.h; sourceTree = "<group>"; };
 		5771095B16C6E0AF007D32DA /* GLString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLString.m; sourceTree = "<group>"; };
@@ -158,6 +154,7 @@
 		57A537D017DD286900D6008C /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
 		57A537E717DD39F800D6008C /* BasicOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasicOpenGLView.h; sourceTree = "<group>"; };
 		57A537E817DD39F800D6008C /* BasicOpenGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BasicOpenGLView.mm; sourceTree = "<group>"; };
+		57A5380417DE922A00D6008C /* COPYING */ = {isa = PBXFileReference; lastKnownFileType = text; path = COPYING; sourceTree = SOURCE_ROOT; };
 		57DE77DF16E1235600C18DB5 /* Fog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fog.h; sourceTree = "<group>"; };
 		57DE77E016E1235600C18DB5 /* Fog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Fog.mm; sourceTree = "<group>"; };
 		57DE77E216E1347C00C18DB5 /* FogSettingsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FogSettingsWindowController.h; sourceTree = "<group>"; };
@@ -250,7 +247,7 @@
 		5771092516C6DFB1007D32DA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				57A537C717DD270900D6008C /* Mac App */,
+				57A5380417DE922A00D6008C /* COPYING */,
 				57EDA60516E2792E00C6711B /* Pixel City.iconset */,
 				5771092616C6DFB1007D32DA /* PixelCity-Info.plist */,
 				5771092716C6DFB1007D32DA /* InfoPlist.strings */,
@@ -293,8 +290,6 @@
 				5771099716C73734007D32DA /* PWGL.h */,
 				5771099816C73791007D32DA /* PWGL.cpp */,
 				5771095416C6E0AF007D32DA /* glBbox.cpp */,
-				5771095516C6E0AF007D32DA /* GLCheck.mm */,
-				5771095616C6E0AF007D32DA /* GLCheck.h */,
 				5771095916C6E0AF007D32DA /* glRgba.cpp */,
 				5771099A16C73E01007D32DA /* glRgba.h */,
 				5771099B16C74178007D32DA /* glVertex.h */,
@@ -356,13 +351,6 @@
 				57A537C017DD26B100D6008C /* thumbnail@2x.png */,
 			);
 			path = Screensaver;
-			sourceTree = "<group>";
-		};
-		57A537C717DD270900D6008C /* Mac App */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "Mac App";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -495,7 +483,6 @@
 				5771095016C6E08B007D32DA /* Deco.mm in Sources */,
 				5771096516C6E0AF007D32DA /* Entity.mm in Sources */,
 				5771096616C6E0AF007D32DA /* glBbox.cpp in Sources */,
-				5771096716C6E0AF007D32DA /* GLCheck.mm in Sources */,
 				5771096A16C6E0AF007D32DA /* glRgba.cpp in Sources */,
 				5771096B16C6E0AF007D32DA /* GLString.m in Sources */,
 				5771096C16C6E0AF007D32DA /* glVertex.cpp in Sources */,
@@ -539,7 +526,6 @@
 				57A537F717DD3A7D00D6008C /* Camera.mm in Sources */,
 				57A537F817DD3A8F00D6008C /* PWGL.cpp in Sources */,
 				57A537F917DD3A8F00D6008C /* glBbox.cpp in Sources */,
-				57A537FA17DD3A8F00D6008C /* GLCheck.mm in Sources */,
 				57A537FB17DD3A8F00D6008C /* glRgba.cpp in Sources */,
 				57A537FC17DD3A8F00D6008C /* GLString.m in Sources */,
 				57A537FD17DD3A8F00D6008C /* glVertex.cpp in Sources */,

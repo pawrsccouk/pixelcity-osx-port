@@ -4,12 +4,12 @@
 //
 //  Created by Patrick Wallace on 24/02/2013.
 //  Copyright (c) 2013 Patrick Wallace. All rights reserved.
-//
+//  Released under the GNU GPL v3. See the file COPYING for details.
 
+#import "PWGL.h"
 #import "PixelCityViewController.h"
 #import "FogSettingsWindowController.h"
 #import "BasicOpenGLView.h"
-#import "GLCheck.h"
 #import "win.h"
 #import "ini.h"
 #import "Render.h"

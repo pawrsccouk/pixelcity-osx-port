@@ -1,3 +1,6 @@
+ // 2009 Shamus Young
+ // Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+ // Released under the GNU GPL v3. See file COPYING for details.
 
 static const float DEGREES_TO_RADIANS   =    0.017453292F;
 static const float RADIANS_TO_DEGREES   =    57.29577951F;

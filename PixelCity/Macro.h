@@ -1,3 +1,6 @@
+// 2009 Shamus Young
+// Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
+// Released under the GNU GPL v3. See file COPYING for details.
 
 inline GLuint WRAP(GLuint x, GLuint y) { return GLuint(x) % y; }
 
@@ -14,8 +17,8 @@ template <class T> float POW(T& x, T& y) { return float(pow(x,y)); }
 template <class T> inline int SIGN(const T& x)
 {
     return (x > 0) ?  1
-         : (x < 0) ? -1
-         :            0;
+                   : (x < 0) ? -1
+                             :  0;
 }
 
 
