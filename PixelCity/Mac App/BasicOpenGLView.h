@@ -5,7 +5,7 @@
 #import <OpenGL/glext.h>
 #import <OpenGL/glu.h>
 
-#import "GLString.h"
+#import "../GLString.h"
 
 typedef void (^setupCallback_t)(void);
 

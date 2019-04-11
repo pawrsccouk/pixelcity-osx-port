@@ -19,10 +19,10 @@
 
 
 #import "Model.h"
-#import "camera.h"
-#import "visible.h"
-#import "world.h"
-#import "win.h"
+#import "Camera.h"
+#import "Visible.h"
+#import "World.h"
+#import "Win.h"
 
 @interface VisibilityGrid ()
 {

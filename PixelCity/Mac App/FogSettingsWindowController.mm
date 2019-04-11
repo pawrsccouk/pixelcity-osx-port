@@ -43,13 +43,13 @@ enum ModeTags { TAG_LINEAR = 1, TAG_EXP, TAG_EXP2 };
     loadAndSetup(endField    , ^(float value) { fog.end     = value; }, kFogEndDistance  );
     loadAndSetup(densityField, ^(float value) { fog.density = value; }, kFogDensity      );    
     
-    GLlong fogMode = IniInt(kFogMode);
+    GLuint fogMode = GLuint(IniInt(kFogMode));
     switch (fogMode) {
         case GL_LINEAR: [modeButton selectItemWithTag:TAG_LINEAR];   break;
         case GL_EXP   : [modeButton selectItemWithTag:TAG_EXP];      break;
         case GL_EXP2  : [modeButton selectItemWithTag:TAG_EXP2];     break;
         default       : [modeButton selectItemWithTag:TAG_LINEAR];
-                        NSLog(@"Unknown fog mode setting %ld, defaulting to LINEAR", fogMode);
+			NSLog(@"Unknown fog mode setting %u, defaulting to LINEAR", fogMode);
                         fogMode = GL_LINEAR;
             break;
     }
@@ -109,7 +109,7 @@ enum ModeTags { TAG_LINEAR = 1, TAG_EXP, TAG_EXP2 };
 {
     [self assertParam:sender ofClass:NSPopUpButton.class];
     NSPopUpButton *button = sender;
-    NSMenuItem *menuItem = button.selectedCell;
+    NSCell *menuItem = button.selectedCell;
     NSAssert((menuItem.tag == TAG_LINEAR || menuItem.tag == TAG_EXP || menuItem.tag == TAG_EXP2),
              @"menuItem %@ from button %@ has invalid tag %ld", menuItem, button, (GLlong)menuItem.tag);
     GLenum mode = GL_LINEAR;

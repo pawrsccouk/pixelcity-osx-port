@@ -15,7 +15,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "Model.h"
-#import "ini.h"
+#import "Ini.h"
 
 NSString *const kFogStartDistance = @"FogStartDistance",
          *const kFogEndDistance   = @"FogEndDistance"  ,
@@ -31,7 +31,7 @@ NSString *const kFogStartDistance = @"FogStartDistance",
          *const kAnimateFogColor = @"AnimateFogColor";
 
 
-static const GLint MAX_RESULT = 256;
+//static const GLint MAX_RESULT = 256;
 
 // Get the user defaults, creating and registering them if necessary.
 static NSUserDefaults* GetUserDefaults()

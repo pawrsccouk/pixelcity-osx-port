@@ -89,7 +89,7 @@ static  NSString * const moduleName = @"paw.PixelCity_Screensaver",
 - (NSWindow*)configureSheet
 {
     if (! self.optionsPanel) {
-        [NSBundle loadNibNamed:@"optionsPanel" owner:self];
+		[NSBundle loadNibNamed:@"optionsPanel" owner:self];
         NSAssert(self.optionsPanel, @"configureSheet: loaded nib but it didn't connect up the options panel.");
     }
     
@@ -112,22 +112,22 @@ static void toggleFlag(BasicOpenGLView *glView, NSButton *checkBox, void(^pbl)(b
 
 - (IBAction)showFog:(id)sender
 {
-    toggleFlag(_glView, toggleFogBtn, ^(bool b) { _glView.world.renderer.fog.enable = b; }, &_fFog);
+	toggleFlag(_glView, toggleFogBtn, ^(bool b) { self->_glView.world.renderer.fog.enable = b; }, &_fFog);
 }
 
 - (IBAction)showFlat:(id)sender
 {
-    toggleFlag(_glView, toggleFlatBtn, ^(bool b) { _glView.world.renderer.flat = b; }, &_fFlat);
+	toggleFlag(_glView, toggleFlatBtn, ^(bool b) { self->_glView.world.renderer.flat = b; }, &_fFlat);
 }
 
 - (IBAction)showWireframe:(id)sender
 {
-    toggleFlag(_glView, toggleWireframeBtn, ^(bool b) { _glView.world.renderer.wireframe = b; }, &_fWireframe);
+	toggleFlag(_glView, toggleWireframeBtn, ^(bool b) { self->_glView.world.renderer.wireframe = b; }, &_fWireframe);
 }
 
 - (IBAction)cycleEffects:(id)sender
 {
-    toggleFlag(_glView, toggleCycleEffectsBtn, ^(bool b) { _glView.world.renderer.wireframe = b; }, &_fCycleEffects);
+	toggleFlag(_glView, toggleCycleEffectsBtn, ^(bool b) { self->_glView.world.renderer.wireframe = b; }, &_fCycleEffects);
     [effectCycleTimeField setEditable:_fCycleEffects];
 }
     // Other controls.
@@ -225,7 +225,7 @@ static NSColor *colorFromString(NSString *colorString)
     [toggleWireframeBtn    setState:_fWireframe];
     
     [effectBtn selectItemAtIndex:_effect];
-    [effectCycleTimeField setStringValue:[NSNumber numberWithInt:_effectCycleTime].stringValue];
+    [effectCycleTimeField setStringValue:[NSNumber numberWithLong:_effectCycleTime].stringValue];
     
     Renderer *renderer  = _glView.world.renderer;
     renderer.flat       = _fFlat;
@@ -240,7 +240,7 @@ static NSColor *colorFromString(NSString *colorString)
     fog.end   = [defaults floatForKey:kFogEndDistance  ];
     
     fog.color = colorFromString([defaults stringForKey:kFogColor]);
-    fog.mode  = [defaults integerForKey:kFogMode];
+    fog.mode  = GLuint([defaults integerForKey:kFogMode]);
 }
 
 -(void) savePreferences

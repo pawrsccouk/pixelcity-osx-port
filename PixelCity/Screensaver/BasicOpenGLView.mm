@@ -52,7 +52,7 @@ void glReportError(const char* strLocation)
         NSOpenGLPFAWindow                                       // Windowed
       , NSOpenGLPFADoubleBuffer                                 // double buffered
       , NSOpenGLPFADepthSize, (NSOpenGLPixelFormatAttribute)16  // 16 bit depth buffer
-      , (NSOpenGLPixelFormatAttribute)nil
+      , 0
     };
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
@@ -63,6 +63,7 @@ void glReportError(const char* strLocation)
     // This is called automatically by NSOpenGLView when the OpenGL context has been created.
 - (void) prepareOpenGL
 {
+	[super prepareOpenGL];
     GLint swapInt = 1;
     [self.openGLContext setValues:&swapInt forParameter:NSOpenGLCPSwapInterval]; // set to vbl sync
     

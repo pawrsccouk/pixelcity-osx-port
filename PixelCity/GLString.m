@@ -207,24 +207,24 @@ static NSBitmapImageRep* makeBitmap(NSAttributedString *string, CGSize frameSize
     return bitmap;
 }
 
-static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBitmapImageRep *bitmap, GLuint textureId, BOOL isDecal)
-{
-    pwPushAttrib(GL_TEXTURE_BIT);
-    @try {
-		pwBindTexture(isDecal ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE_EXT, textureId);
-		if (NSEqualSizes(previousSize, texSize)) {
-			pwTexSubImage2D(isDecal ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE_EXT,
-                            0,x,y,texSize.width,texSize.height,
-                            [bitmap hasAlpha] ? GL_RGBA : GL_RGB,GL_UNSIGNED_BYTE,[bitmap bitmapData]);
-		} else {
-			pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			pwTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, texSize.width, texSize.height, 0,
-                         [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
-		}
-    }
-	@finally { pwPopAttrib(); }
-}
+//static void drawIntoTex(CGSize texSize, CGSize previousSize, int x, int y, NSBitmapImageRep *bitmap, GLuint textureId, BOOL isDecal)
+//{
+//    pwPushAttrib(GL_TEXTURE_BIT);
+//    @try {
+//		pwBindTexture(isDecal ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE_EXT, textureId);
+//		if (NSEqualSizes(previousSize, texSize)) {
+//			pwTexSubImage2D(isDecal ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE_EXT,
+//                            0,x,y,texSize.width,texSize.height,
+//                            [bitmap hasAlpha] ? GL_RGBA : GL_RGB,GL_UNSIGNED_BYTE,[bitmap bitmapData]);
+//		} else {
+//			pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//			pwTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//			pwTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, texSize.width, texSize.height, 0,
+//                         [bitmap hasAlpha] ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, [bitmap bitmapData]);
+//		}
+//    }
+//	@finally { pwPopAttrib(); }
+//}
 
 - (void) genTexture:(GLuint) textureType ; // generates the texture without drawing texture to current context
 {

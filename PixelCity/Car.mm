@@ -10,15 +10,15 @@
 -----------------------------------------------------------------------------*/
 
 #import "Model.h"
-#import "car.h"
-#import "building.h"
-#import "mesh.h"
-#import "render.h"
+#import "Car.h"
+#import "Building.h"
+#import "Mesh.h"
+#import "Render.h"
 #import "texture.h"
-#import "visible.h"
-#import "win.h"
+#import "Visible.h"
+#import "Win.h"
 #import "World.h"
-#import "camera.h"
+#import "Camera.h"
 
 typedef BOOL CarMap[WORLD_SIZE][WORLD_SIZE];
 typedef GLvector2 AngleMap[360];

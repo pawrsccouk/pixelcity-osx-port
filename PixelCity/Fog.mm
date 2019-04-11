@@ -59,30 +59,32 @@ enum fogAnimationColor { fogRED, fogGREEN, fogBLUE };
     };
     
         // Start a new animation
-    auto newColorAnim = ^{
-        _animColor = (enum fogAnimationColor)RandomIntR(3);
-        switch (_animColor) {
-            case fogRED  : _growing = animForChannel(red  );  break;
-            case fogGREEN: _growing = animForChannel(green);  break;
-            case fogBLUE : _growing = animForChannel(blue );  break;
-        }
-    };
+	auto newColorAnim = ^(__weak Fog *weakself){
+		if (Fog *s = weakself) {
+			s->_animColor = (enum fogAnimationColor)RandomIntR(3);
+			switch (s->_animColor) {
+				case fogRED  : s->_growing = animForChannel(red  );  break;
+				case fogGREEN: s->_growing = animForChannel(green);  break;
+				case fogBLUE : s->_growing = animForChannel(blue );  break;
+			}
+		}
+	};
     
         // Bump the given channel up by an interval, and reschedule a new animation if the channel is full or empty.
-    auto updateColor = ^(CGFloat *channel) {
-        if(_growing) { *channel += INTERVAL; }
-        else         { *channel -= INTERVAL; }
-        
-        if(*channel >= MAX_CHANNEL || *channel <= MIN_CHANNEL) {
-            newColorAnim();
-        }
-    };
+	auto updateColor = ^(CGFloat *channel, bool growing) {
+		if(growing) { *channel += INTERVAL; }
+		else        { *channel -= INTERVAL; }
+
+		if(*channel >= MAX_CHANNEL || *channel <= MIN_CHANNEL) {
+			newColorAnim(self);
+		}
+	};
     
     NSAssert(_animColor == fogRED || _animColor == fogGREEN || _animColor == fogBLUE, @"_animColor was %d", _animColor);
     switch (_animColor) {
-        case fogRED:     updateColor(&red)  ; break;
-        case fogGREEN:   updateColor(&green); break;
-        case fogBLUE:    updateColor(&blue) ; break;
+        case fogRED:     updateColor(&red  , _growing); break;
+        case fogGREEN:   updateColor(&green, _growing); break;
+        case fogBLUE:    updateColor(&blue , _growing); break;
     }
     self.color = [NSColor colorWithDeviceRed:red green:green blue:blue alpha:alpha];
 }

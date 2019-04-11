@@ -17,8 +17,8 @@
 
 
 #import "Model.h"
-#import "camera.h"
-#import "sky.h"
+#import "Camera.h"
+#import "Sky.h"
 #import "texture.h"
 #import "World.h"
 
@@ -33,7 +33,7 @@ struct CSkyPoint
 };
 
 static const int SKY_GRID = 21;
-static const int SKY_HALF = (SKY_GRID / 2);
+//static const int SKY_HALF = (SKY_GRID / 2);
 
 #pragma mark - Sky
 

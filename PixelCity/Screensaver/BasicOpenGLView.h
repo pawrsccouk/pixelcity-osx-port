@@ -7,7 +7,7 @@ Released under the GNU General Public License, version 3
 #import <OpenGL/glext.h>
 #import <OpenGL/glu.h>
 
-#import "GLString.h"
+#import "../GLString.h"
 
 typedef void (^setupCallback_t)(void);
 
@@ -33,7 +33,7 @@ typedef void (^setupCallback_t)(void);
 
 - (void) drawRect:(NSRect)rect;
 
-- (void) update;		// moved or resized
+// - (void) update;		// moved or resized
 
 - (BOOL) acceptsFirstResponder;
 - (BOOL) becomeFirstResponder;

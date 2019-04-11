@@ -19,11 +19,11 @@
 
 #import "Model.h"
 #import "texture.h"
-#import "world.h"
-#import "render.h"
-#import "win.h"
-#import "car.h"
-#import "light.h"
+#import "World.h"
+#import "Render.h"
+#import "Win.h"
+#import "Car.h"
+#import "Light.h"
 #import "Entity.h"
 #import "GLString.h"
 #import "Visible.h"
@@ -636,7 +636,7 @@ static void doBloom(World *world, Texture *t, bool showFlat)
 
 -(GLuint)randomBuilding:(GLulong)index
 {
-	index = labs(index) % BUILDING_COUNT;
+	index = index % BUILDING_COUNT;
 	return [self textureId:(TextureType(TEXTURE_BUILDING1 + index))];
 }
 

@@ -2,8 +2,8 @@
 // Modified 2013 by Patrick A Wallace. If you find any bugs, assume they are mine.
 // Released under the GNU GPL v3. See file COPYING for details.
 
-#import "entity.h"
-#import "glRGBA.h"
+#import "Entity.h"
+#import "glRgba.h"
 
 @interface Deco : Entity
 

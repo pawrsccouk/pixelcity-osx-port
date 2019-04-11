@@ -17,17 +17,17 @@
 -----------------------------------------------------------------------------*/
 
 #import "Model.h"
-#import "light.h"
-#import "camera.h"
-#import "entity.h"
-#import "render.h"
+#import "Light.h"
+#import "Camera.h"
+#import "Entity.h"
+#import "Render.h"
 #import "texture.h"
-#import "visible.h"
-#import "win.h"
+#import "Visible.h"
+#import "Win.h"
 #import "World.h"
 #import "Fog.h"
 
-static void addLight(float x, float y, float z, float r, float g, float b, float a, int size, bool blinks);
+//static void addLight(float x, float y, float z, float r, float g, float b, float a, int size, bool blinks);
 
 @interface Light : NSObject
 {

@@ -15,13 +15,13 @@
 static const int MAX_VBUFFER = 256;
 
 #import "Model.h"
-#import "light.h"
-#import "building.h"
-#import "deco.h"
-#import "mesh.h"
+#import "Light.h"
+#import "Building.h"
+#import "Deco.h"
+#import "Mesh.h"
 #import "texture.h"
-#import "world.h"
-#import "win.h"
+#import "World.h"
+#import "Win.h"
 
 //This is used by the recursive roof builder to decide what items may be added.
 enum AddonType

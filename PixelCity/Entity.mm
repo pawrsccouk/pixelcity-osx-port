@@ -16,11 +16,11 @@
 -----------------------------------------------------------------------------*/
 
 #import "Model.h"
-#import "entity.h"
-#import "render.h"
+#import "Entity.h"
+#import "Render.h"
 #import "texture.h"
-#import "visible.h"
-#import "win.h"
+#import "Visible.h"
+#import "Win.h"
 #import "World.h"
 #import "assert.h"
 

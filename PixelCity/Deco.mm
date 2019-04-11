@@ -15,14 +15,14 @@
 
 
 #import "Model.h"
-#import "light.h"
-#import "deco.h"
-#import "mesh.h"
-#import "render.h"
+#import "Light.h"
+#import "Deco.h"
+#import "Mesh.h"
+#import "Render.h"
 #import "texture.h"
-#import "world.h"
-#import "visible.h"
-#import "win.h"
+#import "World.h"
+#import "Visible.h"
+#import "Win.h"
 
 
 static const float LOGO_OFFSET = 0.2f; //How far a logo sticks out from the given surface

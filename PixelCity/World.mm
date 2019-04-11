@@ -16,17 +16,17 @@
 
 
 #import "Model.h"
-#import "building.h"
-#import "car.h"
-#import "deco.h"
-#import "light.h"
-#import "mesh.h"
-#import "render.h"
-#import "sky.h"
+#import "Building.h"
+#import "Car.h"
+#import "Deco.h"
+#import "Light.h"
+#import "Mesh.h"
+#import "Render.h"
+#import "Sky.h"
 #import "texture.h"
-#import "visible.h"
-#import "win.h"
-#import "world.h"
+#import "Visible.h"
+#import "Win.h"
+#import "World.h"
 #import "Camera.h"
 #import <sys/time.h>
 

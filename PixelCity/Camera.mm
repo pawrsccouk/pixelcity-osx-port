@@ -15,8 +15,8 @@
 -----------------------------------------------------------------------------*/
 
 #import "Model.h"
-#import "ini.h"
-#import "world.h"
+#import "Ini.h"
+#import "World.h"
 #import "Visible.h"
 #import "Camera.h"
 #import "Win.h"
@@ -35,14 +35,14 @@ enum
   CAMERA_MODES
 };
 
-static const float EYE_HEIGHT  = 2.0f;
+//static const float EYE_HEIGHT  = 2.0f;
 static const int MAX_PITCH     = 85,
                  FLYCAM_CIRCUT = 60000,
                  FLYCAM_CIRCUT_HALF     = (FLYCAM_CIRCUT / 2),
                  FLYCAM_LEG             = (FLYCAM_CIRCUT / 4),
-                 ONE_SECOND = 1000,
-                 CAMERA_CHANGE_INTERVAL = 15,
-                 CAMERA_CYCLE_LENGTH    = (CAMERA_MODES * CAMERA_CHANGE_INTERVAL);
+				 ONE_SECOND = 1000;
+// static const int CAMERA_CHANGE_INTERVAL = 15,
+//                  CAMERA_CYCLE_LENGTH    = (CAMERA_MODES * CAMERA_CHANGE_INTERVAL);
 
 @interface Camera ()
 {
